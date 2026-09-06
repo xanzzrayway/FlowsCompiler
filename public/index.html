@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flows Compiler</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Green Glow Effects */
+        .btn-glow {
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+            transform: translateY(-2px);
+        }
+        .btn-glow:active {
+            transform: translateY(0);
+        }
+
+        .focus-glow:focus {
+            outline: none;
+            border-color: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Custom Scrollbar for Log Output */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #22c55e;
+        }
+
+        /* Permission Box Glow & Style when Checked */
+        .perm-box {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .perm-box:has(input:checked) {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.15);
+        }
+        .perm-box:has(input:checked) .perm-icon {
+            background-color: #22c55e;
+            color: #ffffff;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Screen transitions */
+        .screen {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .screen.hidden {
+            display: none;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-8">
+
+    <!-- ================= SCREEN 1: LOGIN ================= -->
+    <div id="screen-login" class="screen w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8 flex flex-col gap-6">
+        <div class="flex flex-col items-center text-center gap-2">
+            <div class="w-12 h-12 bg-green-500 rounded-2xl flex items-center justify-center text-white btn-glow mb-2">
+                <i class="fa-solid fa-cubes text-2xl"></i>
+            </div>
+            <h1 class="font-extrabold text-2xl text-slate-800 tracking-tight">Login Ke Flows Compiler</h1>
+            <p class="text-xs text-slate-500">Mulai kompilasi link dan file HTML lu jadi APK dengan mudah</p>
+        </div>
+
+        <div class="space-y-3">
+            <!-- Google Login Button -->
+            <button onclick="goToPlan('Google User')" class="w-full py-3 px-4 border border-slate-200 rounded-2xl font-bold text-sm text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-center gap-3">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.47 15 0 12 0 7.35 0 3.37 2.67 1.41 6.57l3.86 3C6.2 6.78 8.9 5.04 12 5.04z"/>
+                    <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.4 3.58l3.76 2.91c2.2-2.02 3.67-5 3.67-8.64z"/>
+                    <path fill="#FBBC05" d="M5.27 14.43c-.25-.74-.39-1.53-.39-2.35s.14-1.61.39-2.35L1.41 6.73C.51 8.52 0 10.5 0 12.5s.51 3.98 1.41 5.77l3.86-3.07z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.76-2.91c-1.04.7-2.38 1.12-4.2 1.12-3.1 0-5.8-1.74-6.73-4.53l-3.86 3c1.96 3.9 5.94 6.57 10.27 6.57z"/>
+                </svg>
+                Login Dengan Google
+            </button>
+
+            <div class="flex items-center gap-3 my-4">
+                <div class="h-[1px] bg-slate-200 flex-1"></div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Atau</span>
+                <div class="h-[1px] bg-slate-200 flex-1"></div>
+            </div>
+
+            <!-- Guest Login Button -->
+            <button onclick="goToPlan('Tamu')" class="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-user-secret"></i> Login Sebagai Tamu
+            </button>
+        </div>
+
+        <!-- Email Input Section -->
+        <div class="space-y-3 pt-2">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Email</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-solid fa-envelope"></i>
+                    </span>
+                    <input type="email" id="login-email" placeholder="nama@email.com" 
+                        class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus-glow transition-all text-slate-700 font-medium">
+                </div>
+            </div>
+            
+            <button onclick="handleEmailLogin()" class="w-full py-3 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-extrabold text-sm btn-glow tracking-wider flex items-center justify-center gap-2 uppercase">
+                Lanjut <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+
+    <!-- ================= SCREEN 2: CHOOSE PLAN ================= -->
+    <div id="screen-plan" class="screen hidden w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8 flex flex-col gap-6">
+        <div class="text-center">
+            <h1 class="font-extrabold text-2xl text-slate-800 tracking-tight mb-1">Pilih Plan Kamu</h1>
+            <p class="text-xs text-slate-500">Sesuaikan dengan kebutuhan kompilasi harianmu</p>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Newbie Plan Card -->
+            <label onclick="selectPlan('newbie')" class="relative flex flex-col p-5 bg-white border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-slate-300 transition-all group" id="card-newbie">
+                <input type="radio" name="plan" id="plan-newbie" class="sr-only" checked>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-extrabold text-slate-800 uppercase tracking-wide">Newbie</span>
+                    <div class="w-5 h-5 border-2 border-slate-200 rounded-full flex items-center justify-center transition-all group-hover:border-slate-400" id="radio-dot-newbie">
+                        <div class="w-2.5 h-2.5 bg-green-500 rounded-full hidden" id="dot-newbie"></div>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                        <i class="fa-solid fa-circle-check text-green-500"></i> Limit Harian : 1
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                        <i class="fa-solid fa-circle-check text-green-500"></i> Limit awal : 3
+                    </div>
+                </div>
+            </label>
+
+            <!-- Pro Plan Card -->
+            <label onclick="selectPlan('pro')" class="relative flex flex-col p-5 bg-white border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-slate-300 transition-all group" id="card-pro">
+                <input type="radio" name="plan" id="plan-pro" class="sr-only">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-extrabold text-slate-800 uppercase tracking-wide">Pro</span>
+                        <span class="bg-green-100 text-green-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Populer</span>
+                    </div>
+                    <div class="w-5 h-5 border-2 border-slate-200 rounded-full flex items-center justify-center transition-all group-hover:border-slate-400" id="radio-dot-pro">
+                        <div class="w-2.5 h-2.5 bg-green-500 rounded-full hidden" id="dot-pro"></div>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                        <i class="fa-solid fa-circle-check text-green-500"></i> Limit harian : 2
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                        <i class="fa-solid fa-circle-check text-green-500"></i> Limit awal : 5
+                    </div>
+                </div>
+            </label>
+        </div>
+
+        <button onclick="goToCompiler()" class="w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-extrabold text-sm btn-glow tracking-wider flex items-center justify-center gap-2 uppercase mt-2">
+            Mulai Sekarang <i class="fa-solid fa-rocket"></i>
+        </button>
+    </div>
+
+
+    <!-- ================= SCREEN 3: COMPILER APP ================= -->
+    <div id="screen-compiler" class="screen hidden w-full max-w-4xl bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden flex flex-col md:flex-row">
+        
+        <!-- Left Side: Main Form Configuration -->
+        <div class="flex-1 p-6 md:p-8 border-b md:border-b-0 md:border-r border-slate-100">
+            <!-- Header/Logo -->
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white btn-glow">
+                        <i class="fa-solid fa-cubes text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-xl text-slate-800 tracking-tight">Flows Compiler</h1>
+                        <p class="text-xs font-semibold text-green-600">Compile Link/file ke Apk</p>
+                    </div>
+                </div>
+                <!-- Logged In Badge -->
+                <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
+                    <i class="fa-solid fa-circle-user text-slate-500 text-sm"></i>
+                    <span id="user-display-name" class="text-[10px] font-bold text-slate-600">Guest</span>
+                </div>
+            </div>
+
+            <div class="space-y-5">
+                <!-- App Name Input -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Aplikasi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </span>
+                        <input type="text" id="input-app-name" placeholder="Contoh: Aplikasi Keren Gue" 
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus-glow transition-all text-slate-700 font-medium">
+                    </div>
+                </div>
+
+                <!-- Package Name Input -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Package</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </span>
+                        <input type="text" id="input-package-name" placeholder="com.bidzqwerty.myapp" 
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus-glow transition-all text-slate-700 font-medium">
+                    </div>
+                </div>
+
+                <!-- Version Input -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Versi Aplikasi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-code-branch"></i>
+                        </span>
+                        <input type="text" id="input-version" value="1.0.0" placeholder="Custom Versi (e.g. 1.0.0)" 
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus-glow transition-all text-slate-700 font-medium">
+                    </div>
+                </div>
+
+                <!-- Content Source Tabs -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Sumber Konten</label>
+                    <div class="grid grid-cols-3 gap-2 bg-slate-100 p-1 rounded-xl">
+                        <button onclick="switchTab('link')" id="tab-link" class="tab-btn py-2 text-xs font-bold rounded-lg text-green-600 bg-white shadow-sm transition-all">
+                            <i class="fa-solid fa-link mr-1"></i> Link
+                        </button>
+                        <button onclick="switchTab('html')" id="tab-html" class="tab-btn py-2 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-800 transition-all">
+                            <i class="fa-solid fa-code mr-1"></i> File Html
+                        </button>
+                        <button onclick="switchTab('zip')" id="tab-zip" class="tab-btn py-2 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-800 transition-all">
+                            <i class="fa-solid fa-file-zipper mr-1"></i> Zip
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Input based on tab -->
+                    <div class="mt-3">
+                        <!-- Link Input (Default) -->
+                        <div id="input-link" class="tab-content relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                <i class="fa-solid fa-globe"></i>
+                            </span>
+                            <input type="url" id="input-link-url" placeholder="https://example.com" 
+                                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus-glow transition-all text-slate-700">
+                        </div>
+
+                        <!-- HTML File Input (Hidden) -->
+                        <div id="input-html" class="tab-content hidden">
+                            <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <i class="fa-solid fa-file-code text-slate-400 text-lg mb-1"></i>
+                                    <p class="text-xs text-slate-500 font-medium">Klik untuk upload file <span class="font-bold text-green-500">index.html</span></p>
+                                </div>
+                                <input type="file" id="input-html-file" accept=".html" class="hidden" />
+                            </label>
+                        </div>
+
+                        <!-- Zip File Input (Hidden) -->
+                        <div id="input-zip" class="tab-content hidden">
+                            <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <i class="fa-solid fa-file-archive text-slate-400 text-lg mb-1"></i>
+                                    <p class="text-xs text-slate-500 font-medium">Klik untuk upload file <span class="font-bold text-green-500">project.zip</span></p>
+                                </div>
+                                <input type="file" id="input-zip-file" accept=".zip" class="hidden" />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- App Permissions (Sequential Boxes with Icons) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">Perizinan Aplikasi</label>
+                    <div class="space-y-2.5">
+                        
+                        <!-- Box 1 -->
+                        <label class="perm-box flex items-center justify-between p-3 bg-white border border-slate-200 rounded-2xl cursor-pointer hover:border-slate-300">
+                            <div class="flex items-center gap-3">
+                                <span class="perm-icon w-8 h-8 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center text-sm transition-all">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                </span>
+                                <span class="text-xs font-bold text-slate-700">Di Atas Aplikasi Lain</span>
+                            </div>
+                            <div class="relative">
+                                <input type="checkbox" class="peer sr-only" id="perm-1">
+                                <div class="w-5 h-5 border-2 border-slate-200 rounded-md transition-all flex items-center justify-center peer-checked:bg-green-500 peer-checked:border-green-500">
+                                    <!-- FIX: Menggunakan SVG murni agar centang dijamin muncul dengan presisi -->
+                                    <svg class="w-3.5 h-3.5 text-white hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <!-- Box 2 -->
+                        <label class="perm-box flex items-center justify-between p-3 bg-white border border-slate-200 rounded-2xl cursor-pointer hover:border-slate-300">
+                            <div class="flex items-center gap-3">
+                                <span class="perm-icon w-8 h-8 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center text-sm transition-all">
+                                    <i class="fa-solid fa-wifi"></i>
+                                </span>
+                                <span class="text-xs font-bold text-slate-700">Internet</span>
+                            </div>
+                            <div class="relative">
+                                <input type="checkbox" class="peer sr-only" id="perm-2" checked>
+                                <div class="w-5 h-5 border-2 border-slate-200 rounded-md transition-all flex items-center justify-center peer-checked:bg-green-500 peer-checked:border-green-500">
+                                    <svg class="w-3.5 h-3.5 text-white hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Box 3 -->
+                        <label class="perm-box flex items-center justify-between p-3 bg-white border border-slate-200 rounded-2xl cursor-pointer hover:border-slate-300">
+                            <div class="flex items-center gap-3">
+                                <span class="perm-icon w-8 h-8 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center text-sm transition-all">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                </span>
+                                <span class="text-xs font-bold text-slate-700">Akses File</span>
+                            </div>
+                            <div class="relative">
+                                <input type="checkbox" class="peer sr-only" id="perm-3">
+                                <div class="w-5 h-5 border-2 border-slate-200 rounded-md transition-all flex items-center justify-center peer-checked:bg-green-500 peer-checked:border-green-500">
+                                    <svg class="w-3.5 h-3.5 text-white hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Box 4 -->
+                        <label class="perm-box flex items-center justify-between p-3 bg-white border border-slate-200 rounded-2xl cursor-pointer hover:border-slate-300">
+                            <div class="flex items-center gap-3">
+                                <span class="perm-icon w-8 h-8 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center text-sm transition-all">
+                                    <i class="fa-solid fa-arrows-spin"></i>
+                                </span>
+                                <span class="text-xs font-bold text-slate-700">ForeGround</span>
+                            </div>
+                            <div class="relative">
+                                <input type="checkbox" class="peer sr-only" id="perm-4">
+                                <div class="w-5 h-5 border-2 border-slate-200 rounded-md transition-all flex items-center justify-center peer-checked:bg-green-500 peer-checked:border-green-500">
+                                    <svg class="w-3.5 h-3.5 text-white hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </label>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Status, Icon & Action -->
+        <div class="w-full md:w-80 bg-slate-50/50 p-6 md:p-8 flex flex-col justify-between gap-6">
+            
+            <!-- Daily Limit Section -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Limit Harian</p>
+                    <!-- Dinamis Diubah Sesuai Plan Terpilih -->
+                    <p id="display-limit" class="text-base font-extrabold text-slate-800">0/1 Compile</p>
+                    <p id="display-initial" class="text-[9px] text-green-600 font-bold mt-0.5">Sisa Limit Awal: 3</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+            </div>
+
+            <!-- Icon Upload Section -->
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Ikon Aplikasi</label>
+                <div class="relative group">
+                    <input type="file" id="icon-input" accept="image/*" class="hidden" onchange="previewIcon(event)">
+                    <label for="icon-input" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:border-green-400 bg-white hover:bg-green-50/10 transition-all p-4">
+                        <div id="upload-prompt" class="flex flex-col items-center text-center">
+                            <i class="fa-solid fa-image text-2xl text-green-500 mb-2"></i>
+                            <span class="text-xs font-bold text-slate-700">Upload Gambar</span>
+                            <span class="text-[10px] text-slate-400 mt-1">Format PNG/JPG (1:1)</span>
+                        </div>
+                        <div id="icon-preview-container" class="hidden flex flex-col items-center justify-center">
+                            <img id="icon-preview" src="#" alt="Preview" class="w-14 h-14 rounded-xl object-cover shadow-md border border-slate-100">
+                            <span class="text-[10px] text-green-600 font-bold mt-2"><i class="fa-solid fa-circle-check"></i> Ikon Terpilih</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Log Output Console -->
+            <div class="space-y-2 flex-1 flex flex-col min-h-[120px]">
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Log Output</label>
+                <div id="log-output" class="flex-1 bg-slate-900 rounded-2xl p-3 text-[10px] font-mono text-green-400 overflow-y-auto h-28 custom-scrollbar border border-slate-800">
+                    <div>[System] Ready to compile...</div>
+                    <div class="text-slate-500">[System] Menunggu aksi Build Aplikasi.</div>
+                </div>
+            </div>
+
+            <!-- Build Button -->
+            <div id="build-button-container" class="space-y-2">
+                <button id="build-btn" onclick="startBuild()" class="w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-extrabold text-sm btn-glow tracking-wider flex items-center justify-center gap-2 uppercase">
+                    <i class="fa-solid fa-hammer"></i> Build Aplikasi
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        // Global User State
+        let userProfile = {
+            name: "Guest",
+            plan: "newbie",
+            dailyLimit: 1,
+            initialLimit: 3
+        };
+
+        // --- NAVIGATION LOGIC ---
+
+        function handleEmailLogin() {
+            const emailInput = document.getElementById('login-email').value.trim();
+            if (emailInput === "") {
+                alert("Wajib masukin email lu dulu ya!");
+                return;
+            }
+            goToPlan(emailInput.split('@')[0]); // Ambil nama depan email sebagai nama
+        }
+
+        function goToPlan(name) {
+            userProfile.name = name;
+            
+            // Transisi dari login ke pilih plan
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-plan').classList.remove('hidden');
+            
+            // Inisialisasi visual plan aktif pertama kali
+            selectPlan('newbie');
+        }
+
+        function selectPlan(planType) {
+            userProfile.plan = planType;
+            
+            const cardNewbie = document.getElementById('card-newbie');
+            const cardPro = document.getElementById('card-pro');
+            const dotNewbie = document.getElementById('dot-newbie');
+            const dotPro = document.getElementById('dot-pro');
+            const radioNewbie = document.getElementById('radio-dot-newbie');
+            const radioPro = document.getElementById('radio-dot-pro');
+
+            if (planType === 'newbie') {
+                userProfile.dailyLimit = 1;
+                userProfile.initialLimit = 3;
+                
+                // Style Active Card
+                cardNewbie.className = "relative flex flex-col p-5 bg-white border-2 border-green-500 rounded-2xl cursor-pointer shadow-[0_0_12px_rgba(34,197,94,0.15)] transition-all group";
+                radioNewbie.className = "w-5 h-5 border-2 border-green-500 rounded-full flex items-center justify-center transition-all";
+                dotNewbie.classList.remove('hidden');
+
+                // Reset Pro Card
+                cardPro.className = "relative flex flex-col p-5 bg-white border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-slate-300 transition-all group";
+                radioPro.className = "w-5 h-5 border-2 border-slate-200 rounded-full flex items-center justify-center transition-all";
+                dotPro.classList.add('hidden');
+            } else {
+                userProfile.dailyLimit = 2;
+                userProfile.initialLimit = 5;
+
+                // Style Active Card
+                cardPro.className = "relative flex flex-col p-5 bg-white border-2 border-green-500 rounded-2xl cursor-pointer shadow-[0_0_12px_rgba(34,197,94,0.15)] transition-all group";
+                radioPro.className = "w-5 h-5 border-2 border-green-500 rounded-full flex items-center justify-center transition-all";
+                dotPro.classList.remove('hidden');
+
+                // Reset Newbie Card
+                cardNewbie.className = "relative flex flex-col p-5 bg-white border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-slate-300 transition-all group";
+                radioNewbie.className = "w-5 h-5 border-2 border-slate-200 rounded-full flex items-center justify-center transition-all";
+                dotNewbie.classList.add('hidden');
+            }
+        }
+
+        function goToCompiler() {
+            // Update UI utama berdasarkan data pilihan
+            document.getElementById('user-display-name').innerText = userProfile.name;
+            document.getElementById('display-limit').innerText = `0/${userProfile.dailyLimit} Compile`;
+            document.getElementById('display-initial').innerText = `Sisa Limit Awal: ${userProfile.initialLimit}`;
+
+            // Transisi ke compiler
+            document.getElementById('screen-plan').classList.add('hidden');
+            document.getElementById('screen-compiler').classList.remove('hidden');
+        }
+
+
+        // --- COMPILER SCREEN LOGIC ---
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-green-600', 'bg-white', 'shadow-sm');
+                btn.classList.add('text-slate-500');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            activeBtn.classList.remove('text-slate-500');
+            activeBtn.classList.add('text-green-600', 'bg-white', 'shadow-sm');
+
+            document.getElementById(`input-${tab}`).classList.remove('hidden');
+        }
+
+        function previewIcon(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('upload-prompt').classList.add('hidden');
+                    const previewImg = document.getElementById('icon-preview');
+                    previewImg.src = e.target.result;
+                    document.getElementById('icon-preview-container').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // --- INTEGRASI BUILD SUNGGUHAN (GitHub Actions) ---
+
+        let statusInterval = null;
+
+        function appendLog(text, className) {
+            const consoleBox = document.getElementById('log-output');
+            const line = document.createElement('div');
+            line.className = className || 'text-green-400';
+            line.innerText = text;
+            consoleBox.appendChild(line);
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result); // data URL, backend akan buang prefix-nya
+                reader.onerror = () => reject(new Error('Gagal membaca file ' + file.name));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function getActiveSourceTab() {
+            const activeBtn = document.querySelector('.tab-btn.text-green-600');
+            return activeBtn ? activeBtn.id.replace('tab-', '') : 'link';
+        }
+
+        function setBuildingState(isBuilding) {
+            const btn = document.getElementById('build-btn');
+            btn.disabled = isBuilding;
+            btn.classList.toggle('opacity-60', isBuilding);
+            btn.classList.toggle('cursor-not-allowed', isBuilding);
+            btn.innerHTML = isBuilding
+                ? '<i class="fa-solid fa-spinner fa-spin"></i> Sedang Build...'
+                : '<i class="fa-solid fa-hammer"></i> Build Aplikasi';
+        }
+
+        async function startBuild() {
+            if (statusInterval) clearInterval(statusInterval);
+            const oldBtn = document.getElementById('download-apk-btn');
+            if (oldBtn) oldBtn.remove();
+
+            const consoleBox = document.getElementById('log-output');
+            consoleBox.innerHTML = '';
+            appendLog('[System] Menyiapkan data build...', 'text-green-400');
+
+            const appName = document.getElementById('input-app-name').value.trim();
+            const appId = document.getElementById('input-package-name').value.trim();
+            const versionName = document.getElementById('input-version').value.trim() || '1.0.0';
+
+            if (!appName || !appId) {
+                appendLog('[Error] Nama aplikasi dan Nama Package wajib diisi.', 'text-red-400');
+                return;
+            }
+            if (!/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/i.test(appId)) {
+                appendLog('[Error] Format package name salah. Contoh benar: com.namakamu.aplikasi', 'text-red-400');
+                return;
+            }
+
+            const sourceType = getActiveSourceTab();
+            let sourceValue = '';
+
+            try {
+                if (sourceType === 'link') {
+                    sourceValue = document.getElementById('input-link-url').value.trim();
+                    if (!sourceValue) throw new Error('URL wajib diisi untuk mode Link.');
+                } else if (sourceType === 'html') {
+                    const file = document.getElementById('input-html-file').files[0];
+                    if (!file) throw new Error('File index.html wajib diupload untuk mode File Html.');
+                    appendLog('[System] Membaca file HTML...', 'text-green-400');
+                    sourceValue = await fileToBase64(file);
+                } else if (sourceType === 'zip') {
+                    const file = document.getElementById('input-zip-file').files[0];
+                    if (!file) throw new Error('File project.zip wajib diupload untuk mode Zip.');
+                    appendLog('[System] Membaca file Zip...', 'text-green-400');
+                    sourceValue = await fileToBase64(file);
+                }
+            } catch (err) {
+                appendLog(`[Error] ${err.message}`, 'text-red-400');
+                return;
+            }
+
+            let iconBase64 = null;
+            const iconFile = document.getElementById('icon-input').files[0];
+            if (iconFile) {
+                appendLog('[System] Membaca ikon aplikasi...', 'text-green-400');
+                iconBase64 = await fileToBase64(iconFile);
+            }
+
+            const permMap = {
+                'perm-1': 'SYSTEM_ALERT_WINDOW',
+                'perm-2': 'INTERNET',
+                'perm-3': 'READ_EXTERNAL_STORAGE',
+                'perm-4': 'FOREGROUND_SERVICE',
+            };
+            const permissions = Object.keys(permMap)
+                .filter(id => document.getElementById(id).checked)
+                .map(id => permMap[id]);
+
+            setBuildingState(true);
+            appendLog('[System] Mengirim data ke server build (Cloudflare -> GitHub Actions)...', 'text-green-400');
+
+            let buildId;
+            try {
+                const res = await fetch('/api/build', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ appName, appId, versionName, sourceType, sourceValue, iconBase64, permissions }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Gagal memicu build.');
+                buildId = data.buildId;
+                appendLog(`[System] Build dipicu di GitHub Actions. ID: ${buildId}`, 'text-emerald-300');
+            } catch (err) {
+                appendLog(`[Error] ${err.message}`, 'text-red-400');
+                setBuildingState(false);
+                return;
+            }
+
+            pollStatus(buildId);
+        }
+
+        function pollStatus(buildId) {
+            let lastStep = '';
+            statusInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/status?buildId=${buildId}`);
+                    const data = await res.json();
+
+                    if (data.currentStep && data.currentStep !== lastStep) {
+                        appendLog(`[Actions] ${data.currentStep}`, 'text-yellow-400');
+                        lastStep = data.currentStep;
+                    }
+
+                    if (data.status === 'completed') {
+                        clearInterval(statusInterval);
+                        setBuildingState(false);
+                        if (data.conclusion === 'success' && data.downloadUrl) {
+                            appendLog('[Success] APK berhasil dibuat!', 'text-emerald-300 font-bold');
+                            showDownloadButton(data.downloadUrl);
+                        } else {
+                            appendLog(`[Error] Build gagal (${data.conclusion || 'unknown'}). Cek log lengkap: ${data.runUrl || '-'}`, 'text-red-400');
+                        }
+                    }
+                } catch (err) {
+                    appendLog(`[Error] Gagal cek status: ${err.message}`, 'text-red-400');
+                }
+            }, 4000);
+        }
+
+        function showDownloadButton(url) {
+            let btn = document.getElementById('download-apk-btn');
+            if (!btn) {
+                btn = document.createElement('a');
+                btn.id = 'download-apk-btn';
+                btn.target = '_blank';
+                btn.rel = 'noopener';
+                btn.className = 'w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-extrabold text-sm btn-glow tracking-wider flex items-center justify-center gap-2 uppercase';
+                btn.innerHTML = '<i class="fa-solid fa-download"></i> Download APK';
+                document.getElementById('build-button-container').appendChild(btn);
+            }
+            btn.href = url;
+        }
+    </script>
+</body>
+</html>
