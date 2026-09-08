@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Cheat Panel Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Gaya Animasi Umum */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
+        /* Card Utama */
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #818cf8;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        /* Form Input */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Tombol */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #6366f1, #4f46e5);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .switch-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .switch-text span {
+            color: #818cf8;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Fitur Row (Toggle) */
+        .feature-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .feature-info p {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .feature-info span {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        /* Switch Toggle CSS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #334155;
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: #10b981; }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* JENDELA MENGAMBANG (FLOATING WINDOW) */
+        .floating-window {
+            position: fixed;
+            top: 100px;
+            left: 50px;
+            width: 280px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(16px);
+            border: 2px solid #6366f1;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+            z-index: 9999;
+            cursor: move;
+            user-select: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .floating-header {
+            padding: 10px;
+            background: #6366f1;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            background: rgba(0,0,0,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .floating-body {
+            padding: 15px;
+        }
+
+        .floating-body .feature-row {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- HALAMAN LOGIN -->
+        <div id="login-page" class="card">
+            <h2>PANEL LOGIN</h2>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="login-user" required placeholder="Masukkan username">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" required placeholder="Masukkan password">
+                </div>
+                <button type="submit" class="btn">MASUK</button>
+            </form>
+            <p class="switch-text">Belum punya akun? <span onclick="switchPage('register-page')">Daftar</span></p>
+        </div>
+
+        <!-- HALAMAN REGISTER -->
+        <div id="register-page" class="card hidden">
+            <h2>DAFTAR AKUN</h2>
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <label>Username Baru</label>
+                    <input type="text" id="reg-user" required placeholder="Buat username">
+                </div>
+                <div class="input-group">
+                    <label>Password Baru</label>
+                    <input type="password" id="reg-pass" required placeholder="Buat password">
+                </div>
+                <button type="submit" class="btn">DAFTAR SEKARANG</button>
+            </form>
+            <p class="switch-text">Sudah punya akun? <span onclick="switchPage('login-page')">Login</span></p>
+        </div>
+
+        <!-- HALAMAN UTAMA PANEL -->
+        <div id="main-panel" class="card hidden">
+            <h2>MENU UTAMA PANEL</h2>
+            
+            <!-- Tombol Aktifkan Jendela Mengambang -->
+            <button class="btn" style="background: linear-gradient(90deg, #ec4899, #d946ef); margin-bottom: 20px;" onclick="toggleFloatingWindow()">
+                ✨ AKTIFKAN JENDELA MENGAMBANG
+            </button>
+
+            <!-- Daftar Fitur Utama -->
+            <div class="feature-row">
+                <div class="feature-info">
+                    <p>Anti-Delay System</p>
+                    <span>Optimasi respons data</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="main-anti-delay" onchange="syncFeature('anti-delay', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="feature-row">
+                <div class="feature-info">
+                    <p>Auto Headshot (Sim)</p>
+                    <span>Targeting kursor otomatis</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="main-headshot" onchange="syncFeature('headshot', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="feature-row">
+                <div class="feature-info">
+                    <p>Ultra Framerate</p>
+                    <span>Bypass batasan grafis animasi</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="main-fps" onchange="syncFeature('fps', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <button class="btn" style="background: #ef4444; margin-top: 20px;" onclick="logout()">LOGOUT</button>
+        </div>
+    </div>
+
+    <!-- JENDELA MENGAMBANG (FLOATING WINDOW) -->
+    <div id="floating-win" class="floating-window hidden">
+        <div class="floating-header" id="floating-header">
+            <span>⚡ MINI PANEL MENU</span>
+            <span class="close-btn" onclick="toggleFloatingWindow()">X</span>
+        </div>
+        <div class="floating-body">
+            <div class="feature-row">
+                <div class="feature-info"><p style="font-size: 13px;">Anti-Delay</p></div>
+                <label class="switch">
+                    <input type="checkbox" id="float-anti-delay" onchange="syncFeature('anti-delay', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="feature-row">
+                <div class="feature-info"><p style="font-size: 13px;">Auto Headshot</p></div>
+                <label class="switch">
+                    <input type="checkbox" id="float-headshot" onchange="syncFeature('headshot', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="feature-row">
+                <div class="feature-info"><p style="font-size: 13px;">Ultra FPS</p></div>
+                <label class="switch">
+                    <input type="checkbox" id="float-fps" onchange="syncFeature('fps', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigasi Halaman
+        function switchPage(pageId) {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('main-panel').classList.add('hidden');
+            
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        // Simulasi Login & Register
+        function handleRegister(e) {
+            e.preventDefault();
+            alert('Registrasi Berhasil! Silakan masuk.');
+            switchPage('login-page');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            alert('Login Berhasil! Selamat datang di Panel.');
+            switchPage('main-panel');
+        }
+
+        function logout() {
+            switchPage('login-page');
+            document.getElementById('floating-win').classList.add('hidden');
+        }
+
+        // Kontrol Jendela Mengambang (Show/Hide)
+        function toggleFloatingWindow() {
+            const win = document.getElementById('floating-win');
+            win.classList.toggle('hidden');
+        }
+
+        // Sinkronisasi status saklar/toggle antara menu utama dan jendela mengambang
+        function syncFeature(featureKey, isChecked) {
+            if (featureKey === 'anti-delay') {
+                document.getElementById('main-anti-delay').checked = isChecked;
+                document.getElementById('float-anti-delay').checked = isChecked;
+            } else if (featureKey === 'headshot') {
+                document.getElementById('main-headshot').checked = isChecked;
+                document.getElementById('float-headshot').checked = isChecked;
+            } else if (featureKey === 'fps') {
+                document.getElementById('main-fps').checked = isChecked;
+                document.getElementById('float-fps').checked = isChecked;
+            }
+        }
+
+        // Logika Drag & Drop untuk menggeser Jendela Mengambang
+        const dragItem = document.getElementById("floating-win");
+        const dragHeader = document.getElementById("floating-header");
+
+        let active = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+
+        dragHeader.addEventListener("touchstart", dragStart, false);
+        document.addEventListener("touchend", dragEnd, false);
+        document.addEventListener("touchmove", drag, false);
+
+        dragHeader.addEventListener("mousedown", dragStart, false);
+        document.addEventListener("mouseup", dragEnd, false);
+        document.addEventListener("mousemove", drag, false);
+
+        function dragStart(e) {
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+            active = true;
+        }
+
+        function dragEnd() {
+            initialX = currentX;
+            initialY = currentY;
+            active = false;
+        }
+
+        function drag(e) {
+            if (active) {
+                e.preventDefault();
+                if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                }
+                xOffset = currentX;
+                yOffset = currentY;
+                setTranslate(currentX, currentY, dragItem);
+            }
+        }
+
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+        }
+    </script>
+</body>
+</html>
