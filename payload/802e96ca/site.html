@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aplikasi Serbaguna (PWA)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for textarea */
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        
+        /* Toast animation */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .toast-enter { animation: slideInRight 0.3s ease-out forwards; }
+        .toast-exit { animation: fadeOut 0.3s ease-out forwards; }
+    </style>
+    <!-- Elemen link ini akan diisi secara dinamis oleh JavaScript agar bisa diinstal seperti APK -->
+    <link rel="manifest" id="dynamic-manifest">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5968/5968292.png">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white shadow-md p-4 sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                <h1 class="text-xl font-bold">App Multi-Fungsi</h1>
+            </div>
+            <button id="btnInstall" class="hidden bg-white text-blue-600 px-4 py-2 rounded-full font-semibold text-sm hover:bg-blue-50 transition-colors shadow-sm flex items-center space-x-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span>Instal App</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 flex flex-col md:flex-row gap-6">
+        
+        <!-- Kolom Kiri: Editor File System -->
+        <section class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
+            <h2 class="text-lg font-bold mb-1 flex items-center space-x-2">
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span>Editor Teks & File</span>
+            </h2>
+            <p class="text-xs text-slate-500 mb-4">Buka, edit, dan simpan file di penyimpanan perangkat Anda.</p>
+            
+            <div class="flex space-x-2 mb-3">
+                <button onclick="openFile()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium transition-colors border border-slate-300">
+                    Buka File
+                </button>
+                <button onclick="saveFile()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                    Simpan
+                </button>
+                <button onclick="saveFileAs()" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                    Simpan Sbg...
+                </button>
+            </div>
+            
+            <div class="text-xs font-mono text-slate-400 mb-1" id="fileNameDisplay">Belum ada file yang dibuka</div>
+            <textarea id="textEditor" class="flex-grow w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none" placeholder="Ketik sesuatu di sini atau buka file..."></textarea>
+            
+            <!-- Fallback input file hidden -->
+            <input type="file" id="fileFallbackInput" class="hidden" accept=".txt,.json,.html,.css,.js,.csv">
+        </section>
+
+        <!-- Kolom Kanan: Kamera -->
+        <section class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
+            <h2 class="text-lg font-bold mb-1 flex items-center space-x-2">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>Kamera & Sensor</span>
+            </h2>
+            <p class="text-xs text-slate-500 mb-4">Akses kamera perangkat. Akan meminta izin akses.</p>
+            
+            <div class="flex space-x-2 mb-4">
+                <button id="btnStartCamera" onclick="startCamera()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                    Buka Kamera
+                </button>
+                <button id="btnStopCamera" onclick="stopCamera()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors shadow-sm opacity-50 cursor-not-allowed" disabled>
+                    Tutup Kamera
+                </button>
+            </div>
+            
+            <div class="relative flex-grow bg-slate-900 rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center min-h-[250px]">
+                <!-- Placeholder when camera is off -->
+                <div id="cameraPlaceholder" class="text-slate-500 text-center flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                    <span class="text-sm">Kamera nonaktif</span>
+                </div>
+                <!-- Video Element -->
+                <video id="videoElement" autoplay playsinline class="hidden w-full h-full object-cover absolute top-0 left-0"></video>
+            </div>
+        </section>
+    </main>
+
+    <!-- Custom Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col space-y-2"></div>
+
+    <script>
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            // Tentukan warna berdasarkan tipe (sukses, error, info)
+            let bgColor = 'bg-slate-800';
+            let icon = `<svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            
+            if (type === 'success') {
+                bgColor = 'bg-green-800';
+                icon = `<svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            } else if (type === 'error') {
+                bgColor = 'bg-red-800';
+                icon = `<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            }
+
+            toast.className = `flex items-center space-x-3 text-white px-4 py-3 rounded-lg shadow-lg text-sm font-medium ${bgColor} toast-enter`;
+            toast.innerHTML = `
+                ${icon}
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Hilangkan toast setelah 3.5 detik
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-exit');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // 1. Setup Dynamic PWA Manifest agar bisa jadi "APK" (Add to Home Screen)
+        const setupPWA = () => {
+            const manifest = {
+                "name": "Aplikasi Serbaguna",
+                "short_name": "AppSerba",
+                "start_url": location.href,
+                "display": "standalone",
+                "background_color": "#f8fafc",
+                "theme_color": "#2563eb",
+                "description": "Aplikasi yang bisa akses file dan kamera",
+                "icons": [
+                    {
+                        "src": "https://cdn-icons-png.flaticon.com/512/5968/5968292.png",
+                        "sizes": "512x512",
+                        "type": "image/png",
+                        "purpose": "any maskable"
+                    }
+                ]
+            };
+            
+            const manifestString = JSON.stringify(manifest);
+            const blob = new Blob([manifestString], {type: 'application/json'});
+            const manifestUrl = URL.createObjectURL(blob);
+            document.getElementById('dynamic-manifest').setAttribute('href', manifestUrl);
+
+            // Setup Dummy Service Worker for PWA installability
+            const swCode = `
+                self.addEventListener('install', (e) => { self.skipWaiting(); });
+                self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
+                self.addEventListener('fetch', (e) => {
+                    // Hanya numpang lewat agar terdeteksi PWA
+                });
+            `;
+            const swBlob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(swBlob);
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register(swUrl)
+                    .then(() => console.log("Service Worker registered (PWA Ready)"))
+                    .catch(err => console.log("Service Worker error:", err));
+            }
+        };
+        setupPWA();
+
+        // 2. Logic Pemasangan "APK" (Install Prompt)
+        let deferredPrompt;
+        const btnInstall = document.getElementById('btnInstall');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Cegah browser menampilkan prompt bawaan secara otomatis
+            e.preventDefault();
+            // Simpan event sehingga dapat dipicu nanti.
+            deferredPrompt = e;
+            // Tampilkan tombol instal
+            btnInstall.classList.remove('hidden');
+        });
+
+        btnInstall.addEventListener('click', async () => {
+            if (deferredPrompt !== null) {
+                // Tampilkan prompt instal
+                deferredPrompt.prompt();
+                // Tunggu respons pengguna
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    showNotification('Aplikasi mulai diinstal ke layar utama', 'success');
+                } else {
+                    showNotification('Instalasi dibatalkan', 'info');
+                }
+                deferredPrompt = null;
+                btnInstall.classList.add('hidden');
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            btnInstall.classList.add('hidden');
+            showNotification('Aplikasi berhasil diinstal!', 'success');
+        });
+
+        // 3. Logic File System API (Penyimpanan)
+        let fileHandle = null;
+        const textArea = document.getElementById('textEditor');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const fallbackInput = document.getElementById('fileFallbackInput');
+
+        // Buka File
+        async function openFile() {
+            try {
+                // Cek dukungan File System Access API modern
+                if (window.showOpenFilePicker) {
+                    const [handle] = await window.showOpenFilePicker({
+                        types: [
+                            {
+                                description: 'Text Files',
+                                accept: {
+                                    'text/plain': ['.txt', '.html', '.js', '.css', '.json']
+                                }
+                            }
+                        ],
+                        multiple: false
+                    });
+                    fileHandle = handle;
+                    const file = await fileHandle.getFile();
+                    const text = await file.text();
+                    
+                    textArea.value = text;
+                    fileNameDisplay.textContent = `File saat ini: ${file.name}`;
+                    showNotification('File berhasil dibuka', 'success');
+                } else {
+                    // Fallback untuk mobile browser lama
+                    fallbackInput.click();
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    showNotification('Gagal membuka file: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Logic Fallback jika API modern tidak didukung
+        fallbackInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                textArea.value = e.target.result;
+                fileNameDisplay.textContent = `File dibuka (Mode Web): ${file.name}`;
+                fileHandle = { name: file.name, isFallback: true };
+                showNotification('File dimuat (Mode Terbatas)', 'success');
+            };
+            reader.readAsText(file);
+        });
+
+        // Simpan File
+        async function saveFile() {
+            if (!fileHandle) {
+                // Jika belum ada file dibuka, arahkan ke Save As
+                return saveFileAs();
+            }
+
+            try {
+                if (window.showSaveFilePicker && !fileHandle.isFallback) {
+                    // Minta izin tulis ulang
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(textArea.value);
+                    await writable.close();
+                    showNotification('Perubahan berhasil disimpan!', 'success');
+                } else {
+                    // Mode Fallback (Download File baru)
+                    downloadFallback(textArea.value, fileHandle.name || 'document.txt');
+                }
+            } catch (error) {
+                showNotification('Gagal menyimpan: ' + error.message, 'error');
+            }
+        }
+
+        // Simpan Sebagai (Save As)
+        async function saveFileAs() {
+            try {
+                if (window.showSaveFilePicker) {
+                    const handle = await window.showSaveFilePicker({
+                        types: [{
+                            description: 'Text Files',
+                            accept: {'text/plain': ['.txt']},
+                        }],
+                    });
+                    fileHandle = handle;
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(textArea.value);
+                    await writable.close();
+                    
+                    fileNameDisplay.textContent = `File saat ini: ${fileHandle.name}`;
+                    showNotification('File berhasil disimpan sebagai baru!', 'success');
+                } else {
+                    // Mode Fallback
+                    downloadFallback(textArea.value, 'file-baru.txt');
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    showNotification('Gagal menyimpan: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function downloadFallback(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showNotification('File diunduh ke penyimpanan internal HP Anda', 'info');
+        }
+
+        // 4. Logic Kamera (MediaDevices)
+        const videoElement = document.getElementById('videoElement');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const btnStartCamera = document.getElementById('btnStartCamera');
+        const btnStopCamera = document.getElementById('btnStopCamera');
+        let currentStream = null;
+
+        async function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showNotification('Kamera tidak didukung pada peramban ini.', 'error');
+                return;
+            }
+
+            try {
+                showNotification('Meminta izin akses kamera...', 'info');
+                // Meminta akses ke kamera belakang jika di HP, atau default di PC
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' },
+                    audio: false 
+                });
+                
+                currentStream = stream;
+                videoElement.srcObject = stream;
+                
+                // Ubah Tampilan UI
+                videoElement.classList.remove('hidden');
+                cameraPlaceholder.classList.add('hidden');
+                
+                // Toggle Buttons
+                btnStartCamera.classList.add('opacity-50', 'cursor-not-allowed');
+                btnStartCamera.disabled = true;
+                
+                btnStopCamera.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnStopCamera.disabled = false;
+
+                showNotification('Kamera aktif', 'success');
+            } catch (error) {
+                showNotification('Gagal mengakses kamera: Izin ditolak atau error.', 'error');
+                console.error("Camera Error:", error);
+            }
+        }
+
+        function stopCamera() {
+            if (currentStream) {
+                // Hentikan semua track dari stream
+                currentStream.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+                currentStream = null;
+
+                // Kembalikan Tampilan UI
+                videoElement.classList.add('hidden');
+                cameraPlaceholder.classList.remove('hidden');
+                
+                // Toggle Buttons
+                btnStartCamera.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnStartCamera.disabled = false;
+                
+                btnStopCamera.classList.add('opacity-50', 'cursor-not-allowed');
+                btnStopCamera.disabled = true;
+
+                showNotification('Kamera ditutup', 'info');
+            }
+        }
+    </script>
+</body>
+</html>
