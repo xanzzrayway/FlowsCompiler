@@ -10,6 +10,135 @@
 
         const DAILY_LIMIT = 2;
 
+        // --- BAHASA / TERJEMAHAN (i18n) ---
+        // Catatan: terjemahan lengkap cuma disiapkan untuk Indonesia (id) dan English (en).
+        // Negara lain di popup pilihan bahasa dipetakan ke English, bukan bahasa aslinya masing-masing,
+        // karena menerjemahkan akurat ke puluhan bahasa sekaligus nggak realistis dilakukan otomatis.
+        const LANG_KEY = 'flows_compiler_lang';
+
+        const translations = {
+            id: {
+                login_title: 'Login Ke Flows Compiler',
+                login_subtitle: 'Mulai kompilasi link dan file HTML lu jadi APK dengan mudah',
+                login_google_btn: 'Login Dengan Google',
+                tagline: 'Compile Link/file ke Apk',
+                label_app_name: 'Nama Aplikasi',
+                ph_app_name: 'Contoh: Aplikasi Keren Gue',
+                label_package_name: 'Nama Package',
+                label_version: 'Versi Aplikasi',
+                label_source: 'Sumber Konten',
+                label_daily_limit: 'Limit Harian',
+                limit_saved_note: 'Tersimpan di akun Google kamu',
+                label_icon: 'Ikon Aplikasi',
+                label_log: 'Log Output',
+                history_title: 'Riwayat Compile',
+                build_btn_idle: 'Build Aplikasi',
+                build_btn_loading: 'Sedang Build...',
+                history_empty: 'Belum ada riwayat compile.',
+                status_success: 'Sukses',
+                status_failed: 'Gagal',
+                status_progress: 'Proses...',
+                action_download: 'Unduh',
+                action_recheck: 'Cek Ulang',
+                action_check_status: 'Cek Status',
+                err_not_logged_in: 'Kamu belum login.',
+                err_usage_not_ready: 'Data limit belum siap, coba lagi sebentar.',
+                err_daily_limit_reached: 'Limit compile harian kamu sudah habis. Coba lagi besok.',
+                err_name_package_required: 'Nama aplikasi dan Nama Package wajib diisi.',
+                err_package_format: 'Format package name salah. Contoh benar: com.namakamu.aplikasi',
+                err_url_required: 'URL wajib diisi untuk mode Link.',
+                err_html_required: 'File index.html wajib diupload untuk mode File Html.',
+                err_zip_required: 'File project.zip wajib diupload untuk mode Zip.',
+            },
+            en: {
+                login_title: 'Login to Flows Compiler',
+                login_subtitle: 'Start compiling your link or HTML file into an APK easily',
+                login_google_btn: 'Sign in with Google',
+                tagline: 'Compile Link/file to APK',
+                label_app_name: 'App Name',
+                ph_app_name: 'Example: My Cool App',
+                label_package_name: 'Package Name',
+                label_version: 'App Version',
+                label_source: 'Content Source',
+                label_daily_limit: 'Daily Limit',
+                limit_saved_note: 'Saved to your Google account',
+                label_icon: 'App Icon',
+                label_log: 'Log Output',
+                history_title: 'Build History',
+                build_btn_idle: 'Build App',
+                build_btn_loading: 'Building...',
+                history_empty: 'No build history yet.',
+                status_success: 'Success',
+                status_failed: 'Failed',
+                status_progress: 'In progress...',
+                action_download: 'Download',
+                action_recheck: 'Recheck',
+                action_check_status: 'Check Status',
+                err_not_logged_in: 'You are not logged in.',
+                err_usage_not_ready: 'Usage data is not ready yet, please try again shortly.',
+                err_daily_limit_reached: 'Your daily compile limit is used up. Try again tomorrow.',
+                err_name_package_required: 'App Name and Package Name are required.',
+                err_package_format: 'Invalid package name format. Correct example: com.yourname.app',
+                err_url_required: 'URL is required for Link mode.',
+                err_html_required: 'An index.html file is required for File Html mode.',
+                err_zip_required: 'A project.zip file is required for Zip mode.',
+            },
+        };
+
+        let currentLang = localStorage.getItem(LANG_KEY) || 'id';
+
+        function t(key) {
+            return (translations[currentLang] && translations[currentLang][key])
+                || translations.id[key]
+                || key;
+        }
+
+        function applyLanguage() {
+            document.documentElement.lang = currentLang;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = t(key);
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                el.setAttribute('placeholder', t(key));
+            });
+
+            // Elemen yang isinya di-generate JS (bukan data-i18n statis) perlu di-refresh manual
+            const buildBtn = document.getElementById('build-btn');
+            if (buildBtn && !buildBtn.disabled) {
+                buildBtn.innerHTML = `<i class="fa-solid fa-hammer"></i> ${t('build_btn_idle')}`;
+            }
+            renderHistory();
+        }
+
+        function setLanguage(code, flag) {
+            currentLang = code;
+            localStorage.setItem(LANG_KEY, code);
+            document.getElementById('lang-current-flag').innerText = flag;
+            localStorage.setItem('flows_compiler_lang_flag', flag);
+            applyLanguage();
+            closeLangModal();
+        }
+
+        function toggleLangModal() {
+            document.getElementById('lang-modal').classList.toggle('hidden');
+        }
+
+        function closeLangModal() {
+            document.getElementById('lang-modal').classList.add('hidden');
+        }
+
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('lang-modal');
+            const trigger = document.getElementById('lang-trigger-btn');
+            if (!modal || modal.classList.contains('hidden')) return;
+            if (!modal.contains(e.target) && !trigger.contains(e.target)) {
+                closeLangModal();
+            }
+        });
+
         let currentUser = null;   // { id, email, name }
         let currentUsage = null;  // row tabel usage: { today_count, usage_date, daily_limit }
 
@@ -135,10 +264,10 @@
         }
 
         function canBuildNow() {
-            if (!currentUser) return { ok: false, reason: 'Kamu belum login.' };
-            if (!currentUsage) return { ok: false, reason: 'Data limit belum siap, coba lagi sebentar.' };
+            if (!currentUser) return { ok: false, reason: t('err_not_logged_in') };
+            if (!currentUsage) return { ok: false, reason: t('err_usage_not_ready') };
             if (currentUsage.today_count >= currentUsage.daily_limit) {
-                return { ok: false, reason: 'Limit compile harian kamu sudah habis. Coba lagi besok.' };
+                return { ok: false, reason: t('err_daily_limit_reached') };
             }
             return { ok: true };
         }
@@ -230,6 +359,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            const savedFlag = localStorage.getItem('flows_compiler_lang_flag') || '🇮🇩';
+            const flagEl = document.getElementById('lang-current-flag');
+            if (flagEl) flagEl.innerText = savedFlag;
+            applyLanguage();
+
             initAuth();
             document.querySelectorAll('#permissions-box .perm-checkbox').forEach(cb => {
                 cb.addEventListener('change', updatePermCount);
@@ -281,12 +415,12 @@
 
         function statusBadge(entry) {
             if (entry.status === 'completed' && entry.conclusion === 'success') {
-                return '<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Sukses</span>';
+                return `<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">${t('status_success')}</span>`;
             }
             if (entry.status === 'completed') {
-                return '<span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Gagal</span>';
+                return `<span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">${t('status_failed')}</span>`;
             }
-            return '<span class="text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">Proses...</span>';
+            return `<span class="text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">${t('status_progress')}</span>`;
         }
 
         function renderHistory() {
@@ -295,19 +429,19 @@
             const list = getHistory();
 
             if (list.length === 0) {
-                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-8">Belum ada riwayat compile.</p>';
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">${t('history_empty')}</p>`;
                 return;
             }
 
             container.innerHTML = list.map(entry => {
-                const time = new Date(entry.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+                const time = new Date(entry.createdAt).toLocaleString(currentLang === 'id' ? 'id-ID' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' });
                 let actionBtn = '';
                 if (entry.status === 'completed' && entry.conclusion === 'success') {
-                    actionBtn = `<a href="/api/download?buildId=${entry.buildId}" class="text-[10px] font-bold text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 rounded-lg flex items-center gap-1"><i class="fa-solid fa-download"></i> Unduh</a>`;
+                    actionBtn = `<a href="/api/download?buildId=${entry.buildId}" class="text-[10px] font-bold text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 rounded-lg flex items-center gap-1"><i class="fa-solid fa-download"></i> ${t('action_download')}</a>`;
                 } else if (entry.status === 'completed') {
-                    actionBtn = `<button onclick="recheckHistory('${entry.buildId}')" class="text-[10px] font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg">Cek Ulang</button>`;
+                    actionBtn = `<button onclick="recheckHistory('${entry.buildId}')" class="text-[10px] font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg">${t('action_recheck')}</button>`;
                 } else {
-                    actionBtn = `<button onclick="recheckHistory('${entry.buildId}')" class="text-[10px] font-bold text-yellow-700 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-lg">Cek Status</button>`;
+                    actionBtn = `<button onclick="recheckHistory('${entry.buildId}')" class="text-[10px] font-bold text-yellow-700 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-lg">${t('action_check_status')}</button>`;
                 }
                 return `
                 <div class="border border-slate-100 rounded-2xl p-3">
@@ -367,8 +501,8 @@
             btn.classList.toggle('opacity-60', isBuilding);
             btn.classList.toggle('cursor-not-allowed', isBuilding);
             btn.innerHTML = isBuilding
-                ? '<i class="fa-solid fa-spinner fa-spin"></i> Sedang Build...'
-                : '<i class="fa-solid fa-hammer"></i> Build Aplikasi';
+                ? `<i class="fa-solid fa-spinner fa-spin"></i> ${t('build_btn_loading')}`
+                : `<i class="fa-solid fa-hammer"></i> ${t('build_btn_idle')}`;
         }
 
         async function startBuild() {
@@ -391,11 +525,11 @@
             }
 
             if (!appName || !appId) {
-                appendLog('[Error] Nama aplikasi dan Nama Package wajib diisi.', 'text-red-400');
+                appendLog(`[Error] ${t('err_name_package_required')}`, 'text-red-400');
                 return;
             }
             if (!/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/i.test(appId)) {
-                appendLog('[Error] Format package name salah. Contoh benar: com.namakamu.aplikasi', 'text-red-400');
+                appendLog(`[Error] ${t('err_package_format')}`, 'text-red-400');
                 return;
             }
 
@@ -405,15 +539,15 @@
             try {
                 if (sourceType === 'link') {
                     sourceValue = document.getElementById('input-link-url').value.trim();
-                    if (!sourceValue) throw new Error('URL wajib diisi untuk mode Link.');
+                    if (!sourceValue) throw new Error(t('err_url_required'));
                 } else if (sourceType === 'html') {
                     const file = document.getElementById('input-html-file').files[0];
-                    if (!file) throw new Error('File index.html wajib diupload untuk mode File Html.');
+                    if (!file) throw new Error(t('err_html_required'));
                     appendLog('[System] Membaca file HTML...', 'text-green-400');
                     sourceValue = await fileToBase64(file);
                 } else if (sourceType === 'zip') {
                     const file = document.getElementById('input-zip-file').files[0];
-                    if (!file) throw new Error('File project.zip wajib diupload untuk mode Zip.');
+                    if (!file) throw new Error(t('err_zip_required'));
                     appendLog('[System] Membaca file Zip...', 'text-green-400');
                     sourceValue = await fileToBase64(file);
                 }
