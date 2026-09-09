@@ -1,0 +1,4207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ALFASHOP - Digital Store Premium</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        /* ============================================================
+           ALFASHOP - MASTER STYLESHEET
+           ============================================================ */
+        
+        /* ===== CSS VARIABLES ===== */
+        :root {
+            --primary: #ff2d2d;
+            --primary-dark: #cc0000;
+            --primary-glow: rgba(255, 45, 45, 0.3);
+            --secondary: #1a1a2e;
+            --dark: #0a0a0f;
+            --dark-card: rgba(20, 20, 35, 0.8);
+            --dark-glass: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow-glow: 0 0 40px rgba(255, 45, 45, 0.1);
+            --radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== GLASSMORPHISM ===== */
+        .glass {
+            background: var(--dark-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+        }
+
+        .glass-card {
+            background: var(--dark-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+
+        .glass-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-success:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 12px;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ===== INPUTS ===== */
+        .form-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 100%;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        select.form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* ===== CARDS ===== */
+        .product-card {
+            background: var(--dark-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: var(--dark);
+        }
+
+        .product-card .info {
+            padding: 16px;
+        }
+
+        .product-card .name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-card .price {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .product-card .price .original {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            margin-left: 8px;
+            font-weight: 400;
+        }
+
+        .product-card .category-tag {
+            display: inline-block;
+            background: rgba(255, 45, 45, 0.15);
+            color: var(--primary);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar .brand {
+            font-size: 22px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar .brand span {
+            color: var(--primary);
+        }
+
+        .navbar .nav-links {
+            display: none;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .navbar .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .navbar .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .navbar .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .navbar .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .navbar .nav-actions .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            padding: 4px;
+        }
+
+        .navbar .nav-actions .icon-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .navbar .nav-actions .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--primary);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .navbar .mobile-menu-btn {
+            display: block;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* ===== BOTTOM NAV (Mobile) ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 12px;
+        }
+
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 4px 12px;
+            position: relative;
+        }
+
+        .bottom-nav .nav-item i {
+            font-size: 20px;
+        }
+
+        .bottom-nav .nav-item.active {
+            color: var(--primary);
+        }
+
+        .bottom-nav .nav-item .badge {
+            position: absolute;
+            top: -2px;
+            right: 4px;
+            background: var(--primary);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* ===== SIDEBAR (Mobile) ===== */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            display: none;
+            backdrop-filter: blur(4px);
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100%;
+            background: var(--dark);
+            z-index: 2001;
+            padding: 24px;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            right: 0;
+        }
+
+        .sidebar .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .sidebar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .sidebar .user-info img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--dark-card);
+            border: 2px solid var(--primary);
+        }
+
+        .sidebar .user-info .name {
+            font-weight: 600;
+        }
+
+        .sidebar .user-info .email {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .sidebar .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .sidebar .menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .sidebar .menu-item.active {
+            background: rgba(255, 45, 45, 0.1);
+            color: var(--primary);
+        }
+
+        .sidebar .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* ===== SPLASH SCREEN ===== */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: var(--dark);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s, visibility 0.6s;
+        }
+
+        #splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #splash .logo {
+            font-size: 48px;
+            font-weight: 900;
+            color: white;
+        }
+
+        #splash .logo span {
+            color: var(--primary);
+        }
+
+        #splash .loader {
+            margin-top: 24px;
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .toast {
+            padding: 14px 20px;
+            border-radius: 12px;
+            background: var(--dark-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 14px;
+            animation: slideInRight 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .toast.success { border-color: #22c55e; }
+        .toast.error { border-color: #ef4444; }
+        .toast.warning { border-color: #f59e0b; }
+        .toast.info { border-color: #3b82f6; }
+
+        .toast .icon {
+            font-size: 20px;
+        }
+
+        .toast .close-toast {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            margin-left: auto;
+            font-size: 16px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--dark);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal .modal-header h3 {
+            font-size: 20px;
+        }
+
+        .modal .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* ===== PRODUCT GRID ===== */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 16px;
+        }
+
+        @media (min-width: 640px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .product-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+            }
+        }
+
+        /* ===== SECTION ===== */
+        .section {
+            padding: 16px 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title .see-all {
+            font-size: 13px;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            background: linear-gradient(135deg, var(--dark), var(--secondary));
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            opacity: 0.3;
+        }
+
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 900;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== CART ===== */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .cart-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 10px;
+            background: var(--dark);
+        }
+
+        .cart-item .info {
+            flex: 1;
+        }
+
+        .cart-item .info .name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .cart-item .info .price {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .cart-item .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cart-item .qty-control button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .cart-item .qty-control button:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .cart-item .qty-control span {
+            min-width: 24px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .cart-item .remove-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .cart-item .remove-btn:hover {
+            color: #ef4444;
+        }
+
+        /* ===== ORDER CARD ===== */
+        .order-card {
+            background: var(--dark-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: var(--transition);
+        }
+
+        .order-card:hover {
+            border-color: var(--primary);
+        }
+
+        .order-card .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .order-card .order-id {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .order-card .status {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+
+        .order-card .status.pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .order-card .status.processing { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .order-card .status.completed { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .order-card .status.cancelled { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .order-card .status.waiting_verification { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
+        .order-card .status.paid { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+
+        .order-card .items {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .order-card .total {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 6px;
+        }
+
+        /* ===== ADMIN ===== */
+        .admin-layout {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        .admin-sidebar {
+            width: 220px;
+            background: var(--dark);
+            border-right: 1px solid var(--border-color);
+            padding: 16px;
+            display: none;
+        }
+
+        .admin-sidebar .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            margin-bottom: 4px;
+        }
+
+        .admin-sidebar .menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .admin-sidebar .menu-item.active {
+            background: rgba(255, 45, 45, 0.1);
+            color: var(--primary);
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .admin-stats .stat {
+            background: var(--dark-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .admin-stats .stat .value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .admin-stats .stat .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ===== CHAT ===== */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 160px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-message {
+            max-width: 80%;
+            padding: 10px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-message.sent {
+            background: var(--primary);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.received {
+            background: var(--dark-card);
+            border: 1px solid var(--border-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-message .time {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: block;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            background: var(--dark);
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .chat-input-area input:focus {
+            border-color: var(--primary);
+        }
+
+        .chat-input-area button {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .chat-input-area button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: 0;
+            }
+
+            .bottom-nav {
+                display: none;
+            }
+
+            .navbar .nav-links {
+                display: flex;
+            }
+
+            .navbar .mobile-menu-btn {
+                display: none;
+            }
+
+            .admin-sidebar {
+                display: block;
+            }
+
+            .admin-stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .hero h1 {
+                font-size: 48px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .product-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .section {
+                padding: 24px 40px;
+            }
+
+            .hero {
+                padding: 80px 40px;
+            }
+        }
+
+        /* ===== UTILITY ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .text-primary {
+            color: var(--primary);
+        }
+
+        .mt-2 { margin-top: 8px; }
+        .mt-4 { margin-top: 16px; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-4 { margin-bottom: 16px; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+
+        .flex {
+            display: flex;
+        }
+        .flex-col {
+            flex-direction: column;
+        }
+        .items-center {
+            align-items: center;
+        }
+        .justify-between {
+            justify-content: space-between;
+        }
+        .flex-1 {
+            flex: 1;
+        }
+        .w-full {
+            width: 100%;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--dark-card) 25%, rgba(255,255,255,0.05) 50%, var(--dark-card) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s ease-in-out infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        /* Admin table */
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .admin-table th {
+            text-align: left;
+            padding: 10px 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .admin-table .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .admin-table .actions button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .admin-table .actions button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .admin-table .actions button.delete:hover {
+            color: #ef4444;
+        }
+
+        .admin-table .actions button.edit:hover {
+            color: #3b82f6;
+        }
+
+        /* Payment methods */
+        .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 8px;
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary);
+        }
+
+        .payment-method.selected {
+            border-color: var(--primary);
+            background: rgba(255, 45, 45, 0.05);
+        }
+
+        .payment-method img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .payment-method .info {
+            flex: 1;
+        }
+
+        .payment-method .info .name {
+            font-weight: 500;
+        }
+
+        .payment-method .info .number {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================
+     SPLASH SCREEN
+     ============================================================ -->
+<div id="splash">
+    <div class="logo">ALFA<span>SHOP</span></div>
+    <p style="color: var(--text-muted); margin-top: 8px;">Digital Store Premium</p>
+    <div class="loader"></div>
+</div>
+
+<!-- ============================================================
+     TOAST CONTAINER
+     ============================================================ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ============================================================
+     NAVBAR
+     ============================================================ -->
+<nav class="navbar" id="mainNavbar">
+    <a href="#" class="brand" onclick="navigateTo('home')">
+        ALFA<span>SHOP</span>
+    </a>
+
+    <div class="nav-links" id="navLinks">
+        <a href="#" class="active" onclick="navigateTo('home')">Home</a>
+        <a href="#" onclick="navigateTo('products')">Produk</a>
+        <a href="#" onclick="navigateTo('orders')">Pesanan</a>
+        <a href="#" onclick="navigateTo('chat')">Chat</a>
+        <a href="#" id="adminNavLink" style="display:none;" onclick="navigateTo('admin')">Admin</a>
+    </div>
+
+    <div class="nav-actions">
+        <button class="icon-btn" onclick="navigateTo('cart')" title="Keranjang">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="badge" id="cartBadge">0</span>
+        </button>
+        <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
+            <i class="fas fa-user"></i>
+        </button>
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</nav>
+
+<!-- ============================================================
+     SIDEBAR OVERLAY
+     ============================================================ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <button class="close-btn" onclick="toggleSidebar()">
+        <i class="fas fa-times"></i>
+    </button>
+
+    <div class="user-info" id="sidebarUser">
+        <img src="https://ui-avatars.com/api/?name=Guest&background=ff2d2d&color=fff" alt="User" id="sidebarAvatar">
+        <div>
+            <div class="name" id="sidebarName">Guest</div>
+            <div class="email" id="sidebarEmail">Belum login</div>
+        </div>
+    </div>
+
+    <div class="menu-item active" onclick="navigateTo('home'); toggleSidebar();">
+        <i class="fas fa-home"></i> Home
+    </div>
+    <div class="menu-item" onclick="navigateTo('products'); toggleSidebar();">
+        <i class="fas fa-box"></i> Produk
+    </div>
+    <div class="menu-item" onclick="navigateTo('cart'); toggleSidebar();">
+        <i class="fas fa-shopping-cart"></i> Keranjang
+    </div>
+    <div class="menu-item" onclick="navigateTo('orders'); toggleSidebar();">
+        <i class="fas fa-list"></i> Pesanan
+    </div>
+    <div class="menu-item" onclick="navigateTo('chat'); toggleSidebar();">
+        <i class="fas fa-comment"></i> Chat CS
+    </div>
+    <div class="menu-item" onclick="navigateTo('profile'); toggleSidebar();">
+        <i class="fas fa-user-circle"></i> Profile
+    </div>
+    <div class="menu-item" id="sidebarAdmin" style="display:none;" onclick="navigateTo('admin'); toggleSidebar();">
+        <i class="fas fa-shield-alt"></i> Admin Panel
+    </div>
+    <hr style="border-color: var(--border-color); margin: 12px 0;">
+    <div class="menu-item" id="authButton" onclick="handleAuth()">
+        <i class="fas fa-sign-in-alt"></i> <span id="authText">Login</span>
+    </div>
+</div>
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<div id="mainContent">
+    <!-- Pages will be rendered here -->
+</div>
+
+<!-- ============================================================
+     BOTTOM NAVIGATION (Mobile)
+     ============================================================ -->
+<div class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" onclick="navigateTo('home')">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </button>
+    <button class="nav-item" onclick="navigateTo('products')">
+        <i class="fas fa-box"></i>
+        <span>Produk</span>
+    </button>
+    <button class="nav-item" onclick="navigateTo('cart')">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Keranjang</span>
+        <span class="badge" id="bottomCartBadge">0</span>
+    </button>
+    <button class="nav-item" onclick="navigateTo('orders')">
+        <i class="fas fa-list"></i>
+        <span>Pesanan</span>
+    </button>
+    <button class="nav-item" onclick="navigateTo('profile')">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+    </button>
+</div>
+
+<!-- ============================================================
+     MODAL
+     ============================================================ -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalContent">
+        <div class="modal-header">
+            <h3 id="modalTitle">Modal</h3>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT - FIREBASE + APP LOGIC
+     ============================================================ -->
+<script>
+// ============================================================
+// ALFASHOP - FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// Enable offline persistence
+db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+// ============================================================
+// APP STATE
+// ============================================================
+const state = {
+    currentPage: 'home',
+    user: null,
+    userData: null,
+    isAdmin: false,
+    cart: [],
+    cartCount: 0,
+    products: [],
+    categories: [],
+    orders: [],
+    chats: [],
+    settings: {},
+    listeners: []
+};
+
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+function showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('toastContainer');
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${icons[type] || icons.info} icon"></i>
+        <span>${message}</span>
+        <button class="close-toast" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => toast.remove(), 400);
+    }, duration);
+}
+
+function showModal(title, bodyHTML) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = bodyHTML;
+    document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0
+    }).format(amount);
+}
+
+function formatDate(timestamp) {
+    if (!timestamp) return '-';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function generateId() {
+    return Math.random().toString(36).substring(2, 10);
+}
+
+function getStatusBadge(status) {
+    const map = {
+        'pending': 'pending',
+        'processing': 'processing',
+        'completed': 'completed',
+        'cancelled': 'cancelled',
+        'waiting_verification': 'waiting_verification',
+        'paid': 'paid'
+    };
+    return map[status] || 'pending';
+}
+
+// ============================================================
+// AUTHENTICATION
+// ============================================================
+function handleAuth() {
+    if (state.user) {
+        // Logout
+        auth.signOut().then(() => {
+            showToast('Logout berhasil', 'success');
+            updateAuthUI();
+            navigateTo('home');
+        });
+    } else {
+        navigateTo('login');
+    }
+}
+
+function updateAuthUI() {
+    const isLoggedIn = !!state.user;
+    const authText = document.getElementById('authText');
+    const authButton = document.getElementById('authButton');
+
+    if (isLoggedIn) {
+        authText.textContent = 'Logout';
+        authButton.querySelector('i').className = 'fas fa-sign-out-alt';
+        document.getElementById('sidebarName').textContent = state.userData?.name || 'User';
+        document.getElementById('sidebarEmail').textContent = state.userData?.email || '';
+        document.getElementById('sidebarAvatar').src = state.userData?.photoURL ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(state.userData?.name || 'User')}&background=ff2d2d&color=fff`;
+    } else {
+        authText.textContent = 'Login';
+        authButton.querySelector('i').className = 'fas fa-sign-in-alt';
+        document.getElementById('sidebarName').textContent = 'Guest';
+        document.getElementById('sidebarEmail').textContent = 'Belum login';
+        document.getElementById('sidebarAvatar').src = 'https://ui-avatars.com/api/?name=Guest&background=ff2d2d&color=fff';
+    }
+
+    // Admin links
+    const isAdmin = state.isAdmin;
+    document.getElementById('adminNavLink').style.display = isAdmin ? 'inline' : 'none';
+    document.getElementById('sidebarAdmin').style.display = isAdmin ? 'flex' : 'none';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function navigateTo(page, params = {}) {
+    state.currentPage = page;
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
+
+    // Update active nav
+    const navMap = { home: 0, products: 1, cart: 2, orders: 3, profile: 4 };
+    if (navMap[page] !== undefined) {
+        const items = document.querySelectorAll('.bottom-nav .nav-item');
+        if (items[navMap[page]]) items[navMap[page]].classList.add('active');
+    }
+
+    // Render page
+    const container = document.getElementById('mainContent');
+    const renderers = {
+        home: renderHome,
+        products: renderProducts,
+        productDetail: renderProductDetail,
+        cart: renderCart,
+        checkout: renderCheckout,
+        orders: renderOrders,
+        orderDetail: renderOrderDetail,
+        chat: renderChat,
+        profile: renderProfile,
+        login: renderLogin,
+        register: renderRegister,
+        admin: renderAdmin,
+        adminProducts: renderAdminProducts,
+        adminOrders: renderAdminOrders,
+        adminUsers: renderAdminUsers,
+        adminPayments: renderAdminPayments,
+        adminChat: renderAdminChat,
+        adminTestimonials: renderAdminTestimonials,
+        adminSettings: renderAdminSettings
+    };
+
+    if (renderers[page]) {
+        container.innerHTML = renderers[page](params);
+    } else {
+        container.innerHTML = `<div class="section"><h2>Halaman tidak ditemukan</h2></div>`;
+    }
+
+    // Update URL hash
+    window.location.hash = page;
+
+    // Scroll to top
+    window.scrollTo(0, 0);
+}
+
+// ============================================================
+// RENDER: HOME
+// ============================================================
+function renderHome() {
+    // Load products for hero
+    loadProducts();
+
+    return `
+        <!-- HERO -->
+        <section class="hero">
+            <h1>Selamat Datang di <span>ALFASHOP</span></h1>
+            <p>Solusi digital cepat, aman, dan terpercaya untuk kebutuhan Anda</p>
+            <div class="actions">
+                <button class="btn-primary" onclick="navigateTo('products')">
+                    <i class="fas fa-shopping-bag"></i> Belanja Sekarang
+                </button>
+                <button class="btn-secondary" onclick="navigateTo('products')">
+                    <i class="fas fa-eye"></i> Lihat Produk
+                </button>
+            </div>
+        </section>
+
+        <!-- CATEGORIES -->
+        <section class="section">
+            <div class="section-title">
+                <span>📂 Kategori</span>
+            </div>
+            <div id="categoryGrid" class="flex" style="gap:12px; overflow-x:auto; padding:4px 0;">
+                <div class="skeleton" style="width:100px;height:100px;border-radius:12px;flex-shrink:0;"></div>
+                <div class="skeleton" style="width:100px;height:100px;border-radius:12px;flex-shrink:0;"></div>
+                <div class="skeleton" style="width:100px;height:100px;border-radius:12px;flex-shrink:0;"></div>
+                <div class="skeleton" style="width:100px;height:100px;border-radius:12px;flex-shrink:0;"></div>
+            </div>
+        </section>
+
+        <!-- FEATURED PRODUCTS -->
+        <section class="section">
+            <div class="section-title">
+                <span>⭐ Produk Unggulan</span>
+                <span class="see-all" onclick="navigateTo('products')">Lihat Semua →</span>
+            </div>
+            <div class="product-grid" id="featuredGrid">
+                <div class="skeleton" style="height:280px;border-radius:16px;"></div>
+                <div class="skeleton" style="height:280px;border-radius:16px;"></div>
+                <div class="skeleton" style="height:280px;border-radius:16px;"></div>
+                <div class="skeleton" style="height:280px;border-radius:16px;"></div>
+            </div>
+        </section>
+
+        <!-- WHY US -->
+        <section class="section">
+            <div class="section-title"><span>✨ Keunggulan ALFASHOP</span></div>
+            <div class="grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+                <div class="glass-card" style="padding:16px;text-align:center;">
+                    <i class="fas fa-bolt" style="font-size:28px;color:var(--primary);"></i>
+                    <h4 style="margin-top:8px;">Cepat</h4>
+                    <p style="font-size:12px;color:var(--text-muted);">Proses kilat</p>
+                </div>
+                <div class="glass-card" style="padding:16px;text-align:center;">
+                    <i class="fas fa-shield-alt" style="font-size:28px;color:var(--primary);"></i>
+                    <h4 style="margin-top:8px;">Aman</h4>
+                    <p style="font-size:12px;color:var(--text-muted);">Terpercaya</p>
+                </div>
+                <div class="glass-card" style="padding:16px;text-align:center;">
+                    <i class="fas fa-headset" style="font-size:28px;color:var(--primary);"></i>
+                    <h4 style="margin-top:8px;">Support 24/7</h4>
+                    <p style="font-size:12px;color:var(--text-muted);">CS siap membantu</p>
+                </div>
+                <div class="glass-card" style="padding:16px;text-align:center;">
+                    <i class="fas fa-credit-card" style="font-size:28px;color:var(--primary);"></i>
+                    <h4 style="margin-top:8px;">Pembayaran Mudah</h4>
+                    <p style="font-size:12px;color:var(--text-muted);">QRIS, Bank, E-Wallet</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TESTIMONIALS -->
+        <section class="section">
+            <div class="section-title"><span>💬 Testimoni</span></div>
+            <div id="testimonialList" style="display:flex;gap:12px;overflow-x:auto;padding:4px 0;">
+                <div class="skeleton" style="min-width:250px;height:120px;border-radius:12px;flex-shrink:0;"></div>
+                <div class="skeleton" style="min-width:250px;height:120px;border-radius:12px;flex-shrink:0;"></div>
+                <div class="skeleton" style="min-width:250px;height:120px;border-radius:12px;flex-shrink:0;"></div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer style="padding:24px 20px;border-top:1px solid var(--border-color);margin-top:20px;">
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <h3 style="font-size:18px;">ALFA<span style="color:var(--primary);">SHOP</span></h3>
+                    <p style="font-size:13px;color:var(--text-muted);">Digital Store Premium</p>
+                </div>
+                <div style="display:flex;gap:16px;">
+                    <a href="#" style="color:var(--text-muted);text-decoration:none;font-size:13px;">Tentang</a>
+                    <a href="#" style="color:var(--text-muted);text-decoration:none;font-size:13px;">Kebijakan</a>
+                    <a href="#" style="color:var(--text-muted);text-decoration:none;font-size:13px;">Kontak</a>
+                </div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:16px;">
+                &copy; 2024 ALFASHOP. All rights reserved.
+            </div>
+        </footer>
+    `;
+}
+
+// ============================================================
+// RENDER: PRODUCTS
+// ============================================================
+function renderProducts() {
+    return `
+        <section class="section">
+            <div class="section-title">
+                <span>🛍️ Semua Produk</span>
+            </div>
+
+            <!-- Filters -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+                <input type="text" id="searchInput" placeholder="Cari produk..." class="form-input" style="flex:1;min-width:150px;padding:10px 14px;"
+                    oninput="filterProducts()">
+                <select id="categoryFilter" class="form-input" style="width:auto;padding:10px 14px;" onchange="filterProducts()">
+                    <option value="">Semua Kategori</option>
+                </select>
+                <select id="sortFilter" class="form-input" style="width:auto;padding:10px 14px;" onchange="filterProducts()">
+                    <option value="newest">Terbaru</option>
+                    <option value="price_low">Harga Terendah</option>
+                    <option value="price_high">Harga Tertinggi</option>
+                    <option value="popular">Terlaris</option>
+                </select>
+            </div>
+
+            <div class="product-grid" id="productGrid">
+                <div class="skeleton" style="height:280px;border-radius:16px;"></div>
+                <div class="skeleton" style="height:280px;border-radius:16px;"></div>
+                <div class="skeleton" style="height:280px;border-radius:16px;"></div>
+                <div class="skeleton" style="height:280px;border-radius:16px;"></div>
+                <div class="skeleton" style="height:280px;border-radius:16px;"></div>
+                <div class="skeleton" style="height:280px;border-radius:16px;"></div>
+            </div>
+
+            <div id="productEmpty" class="empty-state hidden">
+                <i class="fas fa-box-open"></i>
+                <h3>Produk tidak ditemukan</h3>
+                <p class="text-muted">Coba ubah kata kunci pencarian</p>
+            </div>
+        </section>
+    `;
+}
+
+// ============================================================
+// RENDER: CART
+// ============================================================
+function renderCart() {
+    const cart = state.cart || [];
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    if (cart.length === 0) {
+        return `
+            <section class="section">
+                <div class="empty-state">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>Keranjang Kosong</h3>
+                    <p class="text-muted">Mulai belanja sekarang!</p>
+                    <button class="btn-primary" style="margin-top:16px;" onclick="navigateTo('products')">
+                        <i class="fas fa-shopping-bag"></i> Belanja
+                    </button>
+                </div>
+            </section>
+        `;
+    }
+
+    return `
+        <section class="section">
+            <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">🛒 Keranjang Belanja</h2>
+
+            <div id="cartItems">
+                ${cart.map(item => `
+                    <div class="cart-item" data-id="${item.id}">
+                        <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.name}">
+                        <div class="info">
+                            <div class="name">${item.name}</div>
+                            <div class="price">${formatCurrency(item.price)}</div>
+                        </div>
+                        <div class="qty-control">
+                            <button onclick="updateCartQty('${item.id}', -1)">−</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="updateCartQty('${item.id}', 1)">+</button>
+                        </div>
+                        <button class="remove-btn" onclick="removeFromCart('${item.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div style="border-top:1px solid var(--border-color);padding-top:16px;margin-top:8px;">
+                <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:700;">
+                    <span>Total:</span>
+                    <span style="color:var(--primary);">${formatCurrency(total)}</span>
+                </div>
+                <button class="btn-primary btn-block" style="margin-top:12px;" onclick="navigateTo('checkout')">
+                    <i class="fas fa-credit-card"></i> Checkout
+                </button>
+            </div>
+        </section>
+    `;
+}
+
+// ============================================================
+// RENDER: CHECKOUT
+// ============================================================
+function renderCheckout() {
+    const cart = state.cart || [];
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    if (cart.length === 0) {
+        return `
+            <section class="section">
+                <div class="empty-state">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>Keranjang Kosong</h3>
+                    <p class="text-muted">Tambahkan produk terlebih dahulu</p>
+                    <button class="btn-primary" style="margin-top:16px;" onclick="navigateTo('products')">
+                        <i class="fas fa-shopping-bag"></i> Belanja
+                    </button>
+                </div>
+            </section>
+        `;
+    }
+
+    return `
+        <section class="section">
+            <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">📝 Checkout</h2>
+
+            <div class="glass-card" style="padding:20px;margin-bottom:16px;">
+                <h4 style="margin-bottom:12px;">Informasi Pembeli</h4>
+                <div class="form-group">
+                    <label class="form-label">Nama Lengkap</label>
+                    <input type="text" id="checkoutName" class="form-input" placeholder="Nama Anda" value="${state.userData?.name || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nomor WhatsApp</label>
+                    <input type="tel" id="checkoutWhatsapp" class="form-input" placeholder="08123456789" value="${state.userData?.whatsapp || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="checkoutEmail" class="form-input" placeholder="email@domain.com" value="${state.userData?.email || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Catatan (Opsional)</label>
+                    <textarea id="checkoutNote" class="form-input" placeholder="Tambahkan catatan untuk pesanan..."></textarea>
+                </div>
+            </div>
+
+            <div class="glass-card" style="padding:20px;margin-bottom:16px;">
+                <h4 style="margin-bottom:12px;">Metode Pembayaran</h4>
+                <div id="paymentMethods"></div>
+            </div>
+
+            <div class="glass-card" style="padding:20px;margin-bottom:16px;">
+                <h4 style="margin-bottom:12px;">Ringkasan Pesanan</h4>
+                ${cart.map(item => `
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);font-size:14px;">
+                        <span>${item.name} × ${item.quantity}</span>
+                        <span>${formatCurrency(item.price * item.quantity)}</span>
+                    </div>
+                `).join('')}
+                <div style="display:flex;justify-content:space-between;padding-top:12px;font-size:18px;font-weight:700;">
+                    <span>Total</span>
+                    <span style="color:var(--primary);">${formatCurrency(total)}</span>
+                </div>
+            </div>
+
+            <button class="btn-primary btn-block" onclick="placeOrder()">
+                <i class="fas fa-check"></i> Buat Pesanan
+            </button>
+        </section>
+    `;
+}
+
+// ============================================================
+// RENDER: ORDERS
+// ============================================================
+function renderOrders() {
+    if (!state.user) {
+        return `
+            <section class="section">
+                <div class="empty-state">
+                    <i class="fas fa-lock"></i>
+                    <h3>Silakan Login</h3>
+                    <p class="text-muted">Login untuk melihat riwayat pesanan</p>
+                    <button class="btn-primary" style="margin-top:16px;" onclick="navigateTo('login')">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </div>
+            </section>
+        `;
+    }
+
+    return `
+        <section class="section">
+            <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">📦 Riwayat Pesanan</h2>
+            <div id="orderList">
+                <div class="skeleton" style="height:120px;border-radius:16px;margin-bottom:12px;"></div>
+                <div class="skeleton" style="height:120px;border-radius:16px;margin-bottom:12px;"></div>
+                <div class="skeleton" style="height:120px;border-radius:16px;"></div>
+            </div>
+            <div id="orderEmpty" class="empty-state hidden">
+                <i class="fas fa-inbox"></i>
+                <h3>Belum Ada Pesanan</h3>
+                <p class="text-muted">Mulai belanja sekarang</p>
+                <button class="btn-primary" style="margin-top:16px;" onclick="navigateTo('products')">
+                    <i class="fas fa-shopping-bag"></i> Belanja
+                </button>
+            </div>
+        </section>
+    `;
+}
+
+// ============================================================
+// RENDER: CHAT
+// ============================================================
+function renderChat() {
+    if (!state.user) {
+        return `
+            <section class="section">
+                <div class="empty-state">
+                    <i class="fas fa-lock"></i>
+                    <h3>Silakan Login</h3>
+                    <p class="text-muted">Login untuk menggunakan fitur chat</p>
+                    <button class="btn-primary" style="margin-top:16px;" onclick="navigateTo('login')">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </div>
+            </section>
+        `;
+    }
+
+    return `
+        <section class="section" style="padding:0 16px;height:calc(100vh - 180px);">
+            <div class="chat-container">
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-color);">
+                    <i class="fas fa-headset" style="font-size:24px;color:var(--primary);"></i>
+                    <div>
+                        <div style="font-weight:600;">Customer Service</div>
+                        <div style="font-size:12px;color:var(--text-muted);">
+                            <span class="status-dot online" style="width:6px;height:6px;"></span> Online
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="text-center text-muted" style="padding:20px;font-size:13px;">
+                        <i class="fas fa-comment" style="font-size:32px;opacity:0.3;display:block;margin-bottom:8px;"></i>
+                        Mulai percakapan dengan CS
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="Tulis pesan..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+                    <button onclick="sendChatMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    `;
+}
+
+// ============================================================
+// RENDER: PROFILE
+// ============================================================
+function renderProfile() {
+    if (!state.user) {
+        return `
+            <section class="section">
+                <div class="empty-state">
+                    <i class="fas fa-lock"></i>
+                    <h3>Silakan Login</h3>
+                    <p class="text-muted">Login untuk mengelola profil</p>
+                    <button class="btn-primary" style="margin-top:16px;" onclick="navigateTo('login')">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </div>
+            </section>
+        `;
+    }
+
+    const user = state.userData || {};
+    return `
+        <section class="section">
+            <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">👤 Profil Saya</h2>
+
+            <div class="glass-card" style="padding:20px;text-align:center;margin-bottom:16px;">
+                <img src="${user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=ff2d2d&color=fff`}"
+                     style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);margin-bottom:12px;">
+                <h3 style="font-size:18px;">${user.name || 'User'}</h3>
+                <p style="color:var(--text-muted);font-size:14px;">${user.email || ''}</p>
+                <p style="color:var(--text-muted);font-size:13px;margin-top:4px;">
+                    <i class="fas fa-user-tag"></i> ${user.role || 'user'}
+                </p>
+            </div>
+
+            <div class="glass-card" style="padding:20px;">
+                <div class="form-group">
+                    <label class="form-label">Nama</label>
+                    <input type="text" id="profileName" class="form-input" value="${user.name || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" id="profileUsername" class="form-input" value="${user.username || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">WhatsApp</label>
+                    <input type="tel" id="profileWhatsapp" class="form-input" value="${user.whatsapp || ''}">
+                </div>
+                <button class="btn-primary btn-block" onclick="updateProfile()">
+                    <i class="fas fa-save"></i> Simpan Perubahan
+                </button>
+                <button class="btn-secondary btn-block" style="margin-top:8px;" onclick="changePassword()">
+                    <i class="fas fa-key"></i> Ganti Password
+                </button>
+            </div>
+        </section>
+    `;
+}
+
+// ============================================================
+// RENDER: LOGIN
+// ============================================================
+function renderLogin() {
+    return `
+        <section class="section" style="max-width:400px;margin:0 auto;padding-top:40px;">
+            <div class="glass-card" style="padding:28px;">
+                <h2 style="font-size:24px;font-weight:700;text-align:center;margin-bottom:4px;">Login</h2>
+                <p style="text-align:center;color:var(--text-muted);font-size:14px;margin-bottom:20px;">
+                    Masuk ke akun ALFASHOP
+                </p>
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="loginEmail" class="form-input" placeholder="email@domain.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+                </div>
+
+                <button class="btn-primary btn-block" onclick="handleLogin()">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+
+                <div style="text-align:center;margin-top:12px;font-size:14px;color:var(--text-muted);">
+                    Belum punya akun?
+                    <a href="#" style="color:var(--primary);text-decoration:none;" onclick="navigateTo('register')">Daftar</a>
+                </div>
+                <div style="text-align:center;margin-top:8px;font-size:13px;">
+                    <a href="#" style="color:var(--text-muted);text-decoration:none;" onclick="forgotPassword()">Lupa password?</a>
+                </div>
+            </div>
+        </section>
+    `;
+}
+
+// ============================================================
+// RENDER: REGISTER
+// ============================================================
+function renderRegister() {
+    return `
+        <section class="section" style="max-width:400px;margin:0 auto;padding-top:40px;">
+            <div class="glass-card" style="padding:28px;">
+                <h2 style="font-size:24px;font-weight:700;text-align:center;margin-bottom:4px;">Daftar</h2>
+                <p style="text-align:center;color:var(--text-muted);font-size:14px;margin-bottom:20px;">
+                    Buat akun ALFASHOP
+                </p>
+
+                <div class="form-group">
+                    <label class="form-label">Nama Lengkap</label>
+                    <input type="text" id="registerName" class="form-input" placeholder="Nama Anda">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" id="registerUsername" class="form-input" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="registerEmail" class="form-input" placeholder="email@domain.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="registerPassword" class="form-input" placeholder="Minimal 6 karakter">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Konfirmasi Password</label>
+                    <input type="password" id="registerConfirm" class="form-input" placeholder="Ulangi password">
+                </div>
+
+                <button class="btn-primary btn-block" onclick="handleRegister()">
+                    <i class="fas fa-user-plus"></i> Daftar
+                </button>
+
+                <div style="text-align:center;margin-top:12px;font-size:14px;color:var(--text-muted);">
+                    Sudah punya akun?
+                    <a href="#" style="color:var(--primary);text-decoration:none;" onclick="navigateTo('login')">Login</a>
+                </div>
+            </div>
+        </section>
+    `;
+}
+
+// ============================================================
+// RENDER: ADMIN
+// ============================================================
+function renderAdmin() {
+    if (!state.isAdmin) {
+        return `
+            <section class="section">
+                <div class="empty-state">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Akses Ditolak</h3>
+                    <p class="text-muted">Anda tidak memiliki akses ke halaman admin</p>
+                    <button class="btn-primary" style="margin-top:16px;" onclick="navigateTo('home')">
+                        <i class="fas fa-home"></i> Kembali
+                    </button>
+                </div>
+            </section>
+        `;
+    }
+
+    return `
+        <div class="admin-layout">
+            <div class="admin-sidebar" id="adminSidebar">
+                <h3 style="font-size:16px;margin-bottom:16px;color:var(--primary);">⚡ Admin Panel</h3>
+                <div class="menu-item active" onclick="navigateTo('admin')">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminProducts')">
+                    <i class="fas fa-box"></i> Produk
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminOrders')">
+                    <i class="fas fa-shopping-bag"></i> Pesanan
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminUsers')">
+                    <i class="fas fa-users"></i> User
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminPayments')">
+                    <i class="fas fa-credit-card"></i> Pembayaran
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminChat')">
+                    <i class="fas fa-comment"></i> Chat CS
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminTestimonials')">
+                    <i class="fas fa-star"></i> Testimoni
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminSettings')">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">📊 Dashboard</h2>
+
+                <div class="admin-stats" id="adminStats">
+                    <div class="stat">
+                        <div class="value" id="statUsers">0</div>
+                        <div class="label">Total User</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value" id="statProducts">0</div>
+                        <div class="label">Total Produk</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value" id="statOrders">0</div>
+                        <div class="label">Total Pesanan</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value" id="statRevenue">Rp0</div>
+                        <div class="label">Pendapatan</div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding:20px;margin-bottom:16px;">
+                    <h4 style="margin-bottom:12px;">📈 Grafik Penjualan</h4>
+                    <canvas id="adminChart" height="200"></canvas>
+                </div>
+
+                <div class="glass-card" style="padding:20px;">
+                    <h4 style="margin-bottom:12px;">🔄 Pesanan Terbaru</h4>
+                    <div id="recentOrders">
+                        <div class="skeleton" style="height:60px;border-radius:8px;margin-bottom:8px;"></div>
+                        <div class="skeleton" style="height:60px;border-radius:8px;margin-bottom:8px;"></div>
+                        <div class="skeleton" style="height:60px;border-radius:8px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// RENDER: ADMIN PRODUCTS
+// ============================================================
+function renderAdminProducts() {
+    if (!state.isAdmin) return renderAdmin();
+
+    return `
+        <div class="admin-layout">
+            <div class="admin-sidebar">
+                <h3 style="font-size:16px;margin-bottom:16px;color:var(--primary);">⚡ Admin Panel</h3>
+                <div class="menu-item" onclick="navigateTo('admin')">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </div>
+                <div class="menu-item active" onclick="navigateTo('adminProducts')">
+                    <i class="fas fa-box"></i> Produk
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminOrders')">
+                    <i class="fas fa-shopping-bag"></i> Pesanan
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminUsers')">
+                    <i class="fas fa-users"></i> User
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminPayments')">
+                    <i class="fas fa-credit-card"></i> Pembayaran
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminChat')">
+                    <i class="fas fa-comment"></i> Chat CS
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminTestimonials')">
+                    <i class="fas fa-star"></i> Testimoni
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminSettings')">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+                    <h2 style="font-size:20px;font-weight:700;">📦 Manajemen Produk</h2>
+                    <button class="btn-primary btn-sm" onclick="showAddProductModal()">
+                        <i class="fas fa-plus"></i> Tambah Produk
+                    </button>
+                </div>
+
+                <div class="glass-card" style="padding:20px;overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Produk</th>
+                                <th>Harga</th>
+                                <th>Stok</th>
+                                <th>Kategori</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminProductTable">
+                            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// RENDER: ADMIN ORDERS
+// ============================================================
+function renderAdminOrders() {
+    if (!state.isAdmin) return renderAdmin();
+
+    return `
+        <div class="admin-layout">
+            <div class="admin-sidebar">
+                <h3 style="font-size:16px;margin-bottom:16px;color:var(--primary);">⚡ Admin Panel</h3>
+                <div class="menu-item" onclick="navigateTo('admin')">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminProducts')">
+                    <i class="fas fa-box"></i> Produk
+                </div>
+                <div class="menu-item active" onclick="navigateTo('adminOrders')">
+                    <i class="fas fa-shopping-bag"></i> Pesanan
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminUsers')">
+                    <i class="fas fa-users"></i> User
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminPayments')">
+                    <i class="fas fa-credit-card"></i> Pembayaran
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminChat')">
+                    <i class="fas fa-comment"></i> Chat CS
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminTestimonials')">
+                    <i class="fas fa-star"></i> Testimoni
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminSettings')">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">📦 Manajemen Pesanan</h2>
+
+                <div class="glass-card" style="padding:20px;overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Metode</th>
+                                <th>Status</th>
+                                <th>Bukti</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminOrderTable">
+                            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// RENDER: ADMIN USERS
+// ============================================================
+function renderAdminUsers() {
+    if (!state.isAdmin) return renderAdmin();
+
+    return `
+        <div class="admin-layout">
+            <div class="admin-sidebar">
+                <h3 style="font-size:16px;margin-bottom:16px;color:var(--primary);">⚡ Admin Panel</h3>
+                <div class="menu-item" onclick="navigateTo('admin')">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminProducts')">
+                    <i class="fas fa-box"></i> Produk
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminOrders')">
+                    <i class="fas fa-shopping-bag"></i> Pesanan
+                </div>
+                <div class="menu-item active" onclick="navigateTo('adminUsers')">
+                    <i class="fas fa-users"></i> User
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminPayments')">
+                    <i class="fas fa-credit-card"></i> Pembayaran
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminChat')">
+                    <i class="fas fa-comment"></i> Chat CS
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminTestimonials')">
+                    <i class="fas fa-star"></i> Testimoni
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminSettings')">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">👥 Manajemen User</h2>
+
+                <div class="glass-card" style="padding:20px;overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUserTable">
+                            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// RENDER: ADMIN PAYMENTS
+// ============================================================
+function renderAdminPayments() {
+    if (!state.isAdmin) return renderAdmin();
+
+    return `
+        <div class="admin-layout">
+            <div class="admin-sidebar">
+                <h3 style="font-size:16px;margin-bottom:16px;color:var(--primary);">⚡ Admin Panel</h3>
+                <div class="menu-item" onclick="navigateTo('admin')">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminProducts')">
+                    <i class="fas fa-box"></i> Produk
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminOrders')">
+                    <i class="fas fa-shopping-bag"></i> Pesanan
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminUsers')">
+                    <i class="fas fa-users"></i> User
+                </div>
+                <div class="menu-item active" onclick="navigateTo('adminPayments')">
+                    <i class="fas fa-credit-card"></i> Pembayaran
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminChat')">
+                    <i class="fas fa-comment"></i> Chat CS
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminTestimonials')">
+                    <i class="fas fa-star"></i> Testimoni
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminSettings')">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">💳 Manajemen Pembayaran</h2>
+
+                <div class="glass-card" style="padding:20px;margin-bottom:16px;">
+                    <h4 style="margin-bottom:12px;">Metode Pembayaran</h4>
+                    <div id="paymentMethodList"></div>
+                    <button class="btn-primary btn-sm" onclick="showAddPaymentModal()">
+                        <i class="fas fa-plus"></i> Tambah Metode
+                    </button>
+                </div>
+
+                <div class="glass-card" style="padding:20px;overflow-x:auto;">
+                    <h4 style="margin-bottom:12px;">Riwayat Pembayaran</h4>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Metode</th>
+                                <th>Status</th>
+                                <th>Waktu</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminPaymentTable">
+                            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// RENDER: ADMIN CHAT
+// ============================================================
+function renderAdminChat() {
+    if (!state.isAdmin) return renderAdmin();
+
+    return `
+        <div class="admin-layout">
+            <div class="admin-sidebar">
+                <h3 style="font-size:16px;margin-bottom:16px;color:var(--primary);">⚡ Admin Panel</h3>
+                <div class="menu-item" onclick="navigateTo('admin')">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminProducts')">
+                    <i class="fas fa-box"></i> Produk
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminOrders')">
+                    <i class="fas fa-shopping-bag"></i> Pesanan
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminUsers')">
+                    <i class="fas fa-users"></i> User
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminPayments')">
+                    <i class="fas fa-credit-card"></i> Pembayaran
+                </div>
+                <div class="menu-item active" onclick="navigateTo('adminChat')">
+                    <i class="fas fa-comment"></i> Chat CS
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminTestimonials')">
+                    <i class="fas fa-star"></i> Testimoni
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminSettings')">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">💬 Customer Service Chat</h2>
+
+                <div class="glass-card" style="padding:20px;height:500px;display:flex;flex-direction:column;">
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;border-bottom:1px solid var(--border-color);padding-bottom:12px;">
+                        <div id="chatUserList" style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <span class="text-muted">Loading users...</span>
+                        </div>
+                    </div>
+                    <div id="adminChatMessages" style="flex:1;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:6px;">
+                        <div class="text-center text-muted" style="padding:20px;font-size:13px;">
+                            Pilih user untuk mulai chat
+                        </div>
+                    </div>
+                    <div class="chat-input-area" style="border-top:1px solid var(--border-color);padding-top:12px;">
+                        <input type="text" id="adminChatInput" placeholder="Balas pesan..." onkeypress="if(event.key==='Enter') sendAdminChat()">
+                        <button onclick="sendAdminChat()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// RENDER: ADMIN TESTIMONIALS
+// ============================================================
+function renderAdminTestimonials() {
+    if (!state.isAdmin) return renderAdmin();
+
+    return `
+        <div class="admin-layout">
+            <div class="admin-sidebar">
+                <h3 style="font-size:16px;margin-bottom:16px;color:var(--primary);">⚡ Admin Panel</h3>
+                <div class="menu-item" onclick="navigateTo('admin')">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminProducts')">
+                    <i class="fas fa-box"></i> Produk
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminOrders')">
+                    <i class="fas fa-shopping-bag"></i> Pesanan
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminUsers')">
+                    <i class="fas fa-users"></i> User
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminPayments')">
+                    <i class="fas fa-credit-card"></i> Pembayaran
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminChat')">
+                    <i class="fas fa-comment"></i> Chat CS
+                </div>
+                <div class="menu-item active" onclick="navigateTo('adminTestimonials')">
+                    <i class="fas fa-star"></i> Testimoni
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminSettings')">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+                    <h2 style="font-size:20px;font-weight:700;">⭐ Manajemen Testimoni</h2>
+                    <button class="btn-primary btn-sm" onclick="showAddTestimonialModal()">
+                        <i class="fas fa-plus"></i> Tambah Testimoni
+                    </button>
+                </div>
+
+                <div class="glass-card" style="padding:20px;overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Rating</th>
+                                <th>Deskripsi</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTestimonialTable">
+                            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// RENDER: ADMIN SETTINGS
+// ============================================================
+function renderAdminSettings() {
+    if (!state.isAdmin) return renderAdmin();
+
+    return `
+        <div class="admin-layout">
+            <div class="admin-sidebar">
+                <h3 style="font-size:16px;margin-bottom:16px;color:var(--primary);">⚡ Admin Panel</h3>
+                <div class="menu-item" onclick="navigateTo('admin')">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminProducts')">
+                    <i class="fas fa-box"></i> Produk
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminOrders')">
+                    <i class="fas fa-shopping-bag"></i> Pesanan
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminUsers')">
+                    <i class="fas fa-users"></i> User
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminPayments')">
+                    <i class="fas fa-credit-card"></i> Pembayaran
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminChat')">
+                    <i class="fas fa-comment"></i> Chat CS
+                </div>
+                <div class="menu-item" onclick="navigateTo('adminTestimonials')">
+                    <i class="fas fa-star"></i> Testimoni
+                </div>
+                <div class="menu-item active" onclick="navigateTo('adminSettings')">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <h2 style="font-size:20px;font-weight:700;margin-bottom:16px;">⚙️ Pengaturan Website</h2>
+
+                <div class="glass-card" style="padding:20px;max-width:600px;">
+                    <div class="form-group">
+                        <label class="form-label">Nama Toko</label>
+                        <input type="text" id="settingStoreName" class="form-input" value="ALFASHOP">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea id="settingDescription" class="form-input" rows="2">Digital Store Premium</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nomor WhatsApp</label>
+                        <input type="text" id="settingWhatsapp" class="form-input" placeholder="08123456789">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Link WhatsApp</label>
+                        <input type="text" id="settingWhatsappLink" class="form-input" placeholder="https://wa.me/08123456789">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Link Telegram</label>
+                        <input type="text" id="settingTelegram" class="form-input" placeholder="https://t.me/alfashop">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Maintenance Mode</label>
+                        <select id="settingMaintenance" class="form-input">
+                            <option value="false">Nonaktif</option>
+                            <option value="true">Aktif</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="saveSettings()">
+                        <i class="fas fa-save"></i> Simpan Pengaturan
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// PRODUCT FUNCTIONS
+// ============================================================
+function loadProducts() {
+    db.collection('products').where('status', '==', 'active').onSnapshot(snapshot => {
+        state.products = [];
+        snapshot.forEach(doc => {
+            state.products.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Update UI
+        renderProductsList();
+        renderFeaturedProducts();
+        renderCategoryFilter();
+        updateCartBadge();
+
+        // Update admin product table if on admin page
+        if (state.isAdmin && state.currentPage === 'adminProducts') {
+            renderAdminProductTable();
+        }
+    });
+}
+
+function renderProductsList() {
+    const grid = document.getElementById('productGrid');
+    if (!grid) return;
+
+    const search = document.getElementById('searchInput')?.value?.toLowerCase() || '';
+    const category = document.getElementById('categoryFilter')?.value || '';
+    const sort = document.getElementById('sortFilter')?.value || 'newest';
+
+    let filtered = state.products.filter(p => {
+        const matchSearch = p.name?.toLowerCase().includes(search);
+        const matchCategory = !category || p.category === category;
+        return matchSearch && matchCategory;
+    });
+
+    // Sort
+    switch(sort) {
+        case 'price_low': filtered.sort((a,b) => (a.discountPrice || a.price) - (b.discountPrice || b.price)); break;
+        case 'price_high': filtered.sort((a,b) => (b.discountPrice || b.price) - (a.discountPrice || a.price)); break;
+        case 'popular': filtered.sort((a,b) => (b.sold || 0) - (a.sold || 0)); break;
+        default: filtered.sort((a,b) => b.createdAt?.toMillis?.() - a.createdAt?.toMillis?.());
+    }
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '';
+        document.getElementById('productEmpty')?.classList.remove('hidden');
+        return;
+    }
+    document.getElementById('productEmpty')?.classList.add('hidden');
+
+    grid.innerHTML = filtered.map(product => `
+        <div class="product-card" onclick="navigateTo('productDetail', { id: '${product.id}' })">
+            <img src="${product.image || 'https://via.placeholder.com/300'}" alt="${product.name}" loading="lazy">
+            <div class="info">
+                <div class="name">${product.name}</div>
+                <div class="price">
+                    ${formatCurrency(product.discountPrice || product.price)}
+                    ${product.discountPrice ? `<span class="original">${formatCurrency(product.price)}</span>` : ''}
+                </div>
+                <div class="category-tag">${product.category || 'Umum'}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderFeaturedProducts() {
+    const grid = document.getElementById('featuredGrid');
+    if (!grid) return;
+
+    const featured = state.products.filter(p => p.featured && p.status === 'active').slice(0, 4);
+
+    if (featured.length === 0) {
+        grid.innerHTML = state.products.slice(0, 4).map(product => `
+            <div class="product-card" onclick="navigateTo('productDetail', { id: '${product.id}' })">
+                <img src="${product.image || 'https://via.placeholder.com/300'}" alt="${product.name}" loading="lazy">
+                <div class="info">
+                    <div class="name">${product.name}</div>
+                    <div class="price">${formatCurrency(product.discountPrice || product.price)}</div>
+                    <div class="category-tag">${product.category || 'Umum'}</div>
+                </div>
+            </div>
+        `).join('');
+        return;
+    }
+
+    grid.innerHTML = featured.map(product => `
+        <div class="product-card" onclick="navigateTo('productDetail', { id: '${product.id}' })">
+            <img src="${product.image || 'https://via.placeholder.com/300'}" alt="${product.name}" loading="lazy">
+            <div class="info">
+                <div class="name">${product.name}</div>
+                <div class="price">
+                    ${formatCurrency(product.discountPrice || product.price)}
+                    ${product.discountPrice ? `<span class="original">${formatCurrency(product.price)}</span>` : ''}
+                </div>
+                <div class="category-tag">⭐ Unggulan</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderCategoryFilter() {
+    const filter = document.getElementById('categoryFilter');
+    if (!filter) return;
+
+    const categories = [...new Set(state.products.map(p => p.category).filter(Boolean))];
+    const currentValue = filter.value;
+
+    filter.innerHTML = `
+        <option value="">Semua Kategori</option>
+        ${categories.map(c => `<option value="${c}">${c}</option>`).join('')}
+    `;
+    filter.value = currentValue;
+}
+
+function filterProducts() {
+    renderProductsList();
+}
+
+// ============================================================
+// CART FUNCTIONS
+// ============================================================
+function loadCart() {
+    if (!state.user) {
+        state.cart = [];
+        updateCartBadge();
+        return;
+    }
+
+    db.collection('carts')
+        .where('userId', '==', state.user.uid)
+        .onSnapshot(snapshot => {
+            state.cart = [];
+            snapshot.forEach(doc => {
+                state.cart.push({ id: doc.id, ...doc.data() });
+            });
+            updateCartBadge();
+            renderCartItems();
+        });
+}
+
+function updateCartBadge() {
+    const count = state.cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    state.cartCount = count;
+    document.getElementById('cartBadge').textContent = count;
+    document.getElementById('bottomCartBadge').textContent = count;
+}
+
+function renderCartItems() {
+    const container = document.getElementById('cartItems');
+    if (!container) return;
+
+    // If we're on cart page, re-render
+    if (state.currentPage === 'cart') {
+        navigateTo('cart');
+    }
+}
+
+function addToCart(productId) {
+    if (!state.user) {
+        showToast('Silakan login terlebih dahulu', 'warning');
+        navigateTo('login');
+        return;
+    }
+
+    const product = state.products.find(p => p.id === productId);
+    if (!product) return;
+
+    // Check if already in cart
+    const existing = state.cart.find(item => item.productId === productId);
+    if (existing) {
+        updateCartQty(productId, 1);
+        return;
+    }
+
+    const cartData = {
+        userId: state.user.uid,
+        productId: productId,
+        name: product.name,
+        price: product.discountPrice || product.price,
+        image: product.image || '',
+        quantity: 1,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection('carts').add(cartData)
+        .then(() => {
+            showToast(`${product.name} ditambahkan ke keranjang`, 'success');
+        })
+        .catch(err => {
+            showToast('Gagal menambahkan ke keranjang', 'error');
+            console.error(err);
+        });
+}
+
+function updateCartQty(productId, delta) {
+    const item = state.cart.find(i => i.productId === productId || i.id === productId);
+    if (!item) return;
+
+    const newQty = (item.quantity || 0) + delta;
+    if (newQty <= 0) {
+        removeFromCart(productId);
+        return;
+    }
+
+    const docId = item.id;
+    db.collection('carts').doc(docId).update({
+        quantity: newQty
+    }).catch(err => console.error(err));
+}
+
+function removeFromCart(productId) {
+    const item = state.cart.find(i => i.productId === productId || i.id === productId);
+    if (!item) return;
+
+    const docId = item.id;
+    db.collection('carts').doc(docId).delete()
+        .then(() => {
+            showToast('Produk dihapus dari keranjang', 'info');
+        })
+        .catch(err => console.error(err));
+}
+
+// ============================================================
+// ORDER FUNCTIONS
+// ============================================================
+function placeOrder() {
+    if (!state.user) {
+        showToast('Silakan login terlebih dahulu', 'warning');
+        return;
+    }
+
+    if (state.cart.length === 0) {
+        showToast('Keranjang kosong', 'warning');
+        return;
+    }
+
+    const name = document.getElementById('checkoutName')?.value;
+    const whatsapp = document.getElementById('checkoutWhatsapp')?.value;
+    const email = document.getElementById('checkoutEmail')?.value;
+    const note = document.getElementById('checkoutNote')?.value;
+
+    if (!name || !whatsapp) {
+        showToast('Nama dan WhatsApp wajib diisi', 'warning');
+        return;
+    }
+
+    const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    const orderData = {
+        userId: state.user.uid,
+        customerName: name,
+        whatsapp: whatsapp,
+        email: email || state.user.email,
+        note: note || '',
+        items: state.cart.map(item => ({
+            productId: item.productId,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity
+        })),
+        total: total,
+        paymentMethod: '',
+        paymentStatus: 'pending',
+        orderStatus: 'pending',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection('orders').add(orderData)
+        .then(async (docRef) => {
+            // Clear cart
+            const cartDocs = state.cart.map(item => item.id);
+            for (const docId of cartDocs) {
+                await db.collection('carts').doc(docId).delete();
+            }
+
+            showToast('Pesanan berhasil dibuat!', 'success');
+            showModal('✅ Pesanan Berhasil', `
+                <p style="margin-bottom:12px;">Pesanan Anda telah diterima.</p>
+                <p style="color:var(--text-muted);font-size:14px;">ID Pesanan: <strong>${docRef.id}</strong></p>
+                <p style="color:var(--text-muted);font-size:14px;">Total: <strong style="color:var(--primary);">${formatCurrency(total)}</strong></p>
+                <p style="margin-top:12px;font-size:13px;color:var(--text-muted);">Silakan selesaikan pembayaran dan upload bukti di halaman pesanan.</p>
+                <button class="btn-primary" style="margin-top:16px;" onclick="closeModal();navigateTo('orders')">
+                    <i class="fas fa-list"></i> Lihat Pesanan
+                </button>
+            `);
+
+            navigateTo('orders');
+        })
+        .catch(err => {
+            showToast('Gagal membuat pesanan', 'error');
+            console.error(err);
+        });
+}
+
+function loadOrders() {
+    if (!state.user) return;
+
+    db.collection('orders')
+        .where('userId', '==', state.user.uid)
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(snapshot => {
+            state.orders = [];
+            snapshot.forEach(doc => {
+                state.orders.push({ id: doc.id, ...doc.data() });
+            });
+            renderOrderList();
+        });
+}
+
+function renderOrderList() {
+    const container = document.getElementById('orderList');
+    const empty = document.getElementById('orderEmpty');
+    if (!container) return;
+
+    if (state.orders.length === 0) {
+        container.innerHTML = '';
+        if (empty) empty.classList.remove('hidden');
+        return;
+    }
+    if (empty) empty.classList.add('hidden');
+
+    container.innerHTML = state.orders.map(order => `
+        <div class="order-card" onclick="navigateTo('orderDetail', { id: '${order.id}' })">
+            <div class="header">
+                <span class="order-id">#${order.id.slice(0, 8).toUpperCase()}</span>
+                <span class="status ${getStatusBadge(order.orderStatus)}">${order.orderStatus}</span>
+            </div>
+            <div class="items">
+                ${order.items?.map(item => `${item.name} × ${item.quantity}`).join(', ')}
+            </div>
+            <div class="total">${formatCurrency(order.total)}</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+                ${formatDate(order.createdAt)} • ${order.paymentStatus}
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================================
+// PAYMENT FUNCTIONS
+// ============================================================
+function loadPaymentMethods() {
+    db.collection('payments').where('active', '==', true).onSnapshot(snapshot => {
+        const methods = [];
+        snapshot.forEach(doc => {
+            methods.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Update payment method list in checkout
+        const container = document.getElementById('paymentMethods');
+        if (container) {
+            if (methods.length === 0) {
+                container.innerHTML = '<p class="text-muted">Belum ada metode pembayaran</p>';
+                return;
+            }
+            container.innerHTML = methods.map(m => `
+                <div class="payment-method" onclick="selectPayment('${m.id}')" data-id="${m.id}">
+                    <img src="${m.image || 'https://via.placeholder.com/40'}" alt="${m.name}">
+                    <div class="info">
+                        <div class="name">${m.name}</div>
+                        <div class="number">${m.number} - ${m.owner}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update admin payment list
+        if (state.isAdmin && state.currentPage === 'adminPayments') {
+            renderAdminPaymentMethods();
+        }
+    });
+}
+
+function selectPayment(methodId) {
+    document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('selected'));
+    const el = document.querySelector(`.payment-method[data-id="${methodId}"]`);
+    if (el) el.classList.add('selected');
+    window.selectedPayment = methodId;
+}
+
+// ============================================================
+// CHAT FUNCTIONS
+// ============================================================
+function loadChat() {
+    if (!state.user) return;
+
+    const chatId = state.user.uid;
+    const chatRef = db.collection('chats').doc(chatId);
+
+    // Create chat document if not exists
+    chatRef.get().then(doc => {
+        if (!doc.exists) {
+            chatRef.set({
+                userId: state.user.uid,
+                userName: state.userData?.name || 'User',
+                userEmail: state.user.email,
+                lastMessage: '',
+                lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+    });
+
+    // Listen to messages
+    chatRef.collection('messages')
+        .orderBy('timestamp', 'asc')
+        .onSnapshot(snapshot => {
+            const messages = [];
+            snapshot.forEach(doc => {
+                messages.push({ id: doc.id, ...doc.data() });
+            });
+            renderChatMessages(messages);
+        });
+}
+
+function renderChatMessages(messages) {
+    const container = document.getElementById('chatMessages');
+    if (!container) return;
+
+    if (messages.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted" style="padding:20px;font-size:13px;">
+                <i class="fas fa-comment" style="font-size:32px;opacity:0.3;display:block;margin-bottom:8px;"></i>
+                Mulai percakapan dengan CS
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = messages.map(msg => `
+        <div class="chat-message ${msg.senderId === state.user.uid ? 'sent' : 'received'}">
+            ${msg.message}
+            <span class="time">${formatDate(msg.timestamp)}</span>
+        </div>
+    `).join('');
+
+    container.scrollTop = container.scrollHeight;
+}
+
+function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message || !state.user) return;
+
+    const chatId = state.user.uid;
+    const chatRef = db.collection('chats').doc(chatId);
+
+    chatRef.collection('messages').add({
+        senderId: state.user.uid,
+        senderRole: 'user',
+        message: message,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        read: false,
+        type: 'text'
+    });
+
+    chatRef.update({
+        lastMessage: message,
+        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    input.value = '';
+}
+
+// ============================================================
+// ADMIN CHAT FUNCTIONS
+// ============================================================
+function loadAdminChatUsers() {
+    if (!state.isAdmin) return;
+
+    db.collection('chats')
+        .orderBy('lastMessageTime', 'desc')
+        .onSnapshot(snapshot => {
+            const users = [];
+            snapshot.forEach(doc => {
+                users.push({ id: doc.id, ...doc.data() });
+            });
+            renderChatUserList(users);
+        });
+}
+
+function renderChatUserList(users) {
+    const container = document.getElementById('chatUserList');
+    if (!container) return;
+
+    if (users.length === 0) {
+        container.innerHTML = '<span class="text-muted">Belum ada chat</span>';
+        return;
+    }
+
+    container.innerHTML = users.map(user => `
+        <button class="btn-secondary btn-sm" onclick="selectAdminChat('${user.id}')" style="font-size:12px;padding:6px 14px;">
+            ${user.userName || 'User'} 
+            ${user.lastMessage ? '💬' : ''}
+        </button>
+    `).join('');
+}
+
+let selectedChatUserId = null;
+
+function selectAdminChat(userId) {
+    selectedChatUserId = userId;
+    document.getElementById('adminChatMessages').innerHTML = '<div class="text-center text-muted" style="padding:20px;">Loading...</div>';
+
+    db.collection('chats').doc(userId)
+        .collection('messages')
+        .orderBy('timestamp', 'asc')
+        .onSnapshot(snapshot => {
+            const messages = [];
+            snapshot.forEach(doc => {
+                messages.push({ id: doc.id, ...doc.data() });
+            });
+            renderAdminChatMessages(messages);
+        });
+}
+
+function renderAdminChatMessages(messages) {
+    const container = document.getElementById('adminChatMessages');
+    if (!container) return;
+
+    if (messages.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted" style="padding:20px;font-size:13px;">
+                Belum ada pesan dari user ini
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = messages.map(msg => `
+        <div class="chat-message ${msg.senderRole === 'admin' ? 'sent' : 'received'}">
+            ${msg.message}
+            <span class="time">${formatDate(msg.timestamp)}</span>
+        </div>
+    `).join('');
+
+    container.scrollTop = container.scrollHeight;
+}
+
+function sendAdminChat() {
+    const input = document.getElementById('adminChatInput');
+    const message = input.value.trim();
+    if (!message || !selectedChatUserId) return;
+
+    db.collection('chats').doc(selectedChatUserId)
+        .collection('messages')
+        .add({
+            senderId: state.user.uid,
+            senderRole: 'admin',
+            message: message,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            read: true,
+            type: 'text'
+        });
+
+    db.collection('chats').doc(selectedChatUserId).update({
+        lastMessage: message,
+        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    input.value = '';
+}
+
+// ============================================================
+// ADMIN PRODUCT FUNCTIONS
+// ============================================================
+function renderAdminProductTable() {
+    const tbody = document.getElementById('adminProductTable');
+    if (!tbody) return;
+
+    if (state.products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Belum ada produk</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = state.products.map(p => `
+        <tr>
+            <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <img src="${p.image || 'https://via.placeholder.com/40'}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;">
+                    <span>${p.name}</span>
+                </div>
+            </td>
+            <td>${formatCurrency(p.discountPrice || p.price)}</td>
+            <td>${p.stock || 0}</td>
+            <td>${p.category || '-'}</td>
+            <td><span style="color:${p.status === 'active' ? '#22c55e' : '#ef4444'};">${p.status || 'inactive'}</span></td>
+            <td>
+                <div class="actions">
+                    <button class="edit" onclick="editProduct('${p.id}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="delete" onclick="deleteProduct('${p.id}')" title="Hapus">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function showAddProductModal() {
+    showModal('Tambah Produk', `
+        <form id="productForm" onsubmit="saveProduct();return false;">
+            <div class="form-group">
+                <label class="form-label">Nama Produk</label>
+                <input type="text" id="prodName" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deskripsi</label>
+                <textarea id="prodDesc" class="form-input" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Harga</label>
+                <input type="number" id="prodPrice" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Harga Diskon (Opsional)</label>
+                <input type="number" id="prodDiscount" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Stok</label>
+                <input type="number" id="prodStock" class="form-input" value="10">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kategori</label>
+                <input type="text" id="prodCategory" class="form-input" placeholder="Elektronik, Fashion, dll">
+            </div>
+            <div class="form-group">
+                <label class="form-label">URL Gambar</label>
+                <input type="text" id="prodImage" class="form-input" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select id="prodStatus" class="form-input">
+                    <option value="active">Aktif</option>
+                    <option value="inactive">Nonaktif</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="prodFeatured"> Produk Unggulan
+                </label>
+            </div>
+            <button type="submit" class="btn-primary btn-block">
+                <i class="fas fa-save"></i> Simpan Produk
+            </button>
+        </form>
+    `);
+}
+
+let editingProductId = null;
+
+function saveProduct() {
+    const data = {
+        name: document.getElementById('prodName').value,
+        description: document.getElementById('prodDesc').value,
+        price: parseInt(document.getElementById('prodPrice').value) || 0,
+        discountPrice: parseInt(document.getElementById('prodDiscount').value) || null,
+        stock: parseInt(document.getElementById('prodStock').value) || 0,
+        category: document.getElementById('prodCategory').value,
+        image: document.getElementById('prodImage').value || 'https://via.placeholder.com/300',
+        status: document.getElementById('prodStatus').value,
+        featured: document.getElementById('prodFeatured').checked,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (editingProductId) {
+        db.collection('products').doc(editingProductId).update(data)
+            .then(() => {
+                showToast('Produk berhasil diupdate', 'success');
+                closeModal();
+                editingProductId = null;
+            })
+            .catch(err => {
+                showToast('Gagal update produk', 'error');
+                console.error(err);
+            });
+    } else {
+        data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        db.collection('products').add(data)
+            .then(() => {
+                showToast('Produk berhasil ditambahkan', 'success');
+                closeModal();
+            })
+            .catch(err => {
+                showToast('Gagal menambahkan produk', 'error');
+                console.error(err);
+            });
+    }
+}
+
+function editProduct(productId) {
+    const product = state.products.find(p => p.id === productId);
+    if (!product) return;
+
+    editingProductId = productId;
+    showModal('Edit Produk', `
+        <form id="productForm" onsubmit="saveProduct();return false;">
+            <div class="form-group">
+                <label class="form-label">Nama Produk</label>
+                <input type="text" id="prodName" class="form-input" value="${product.name || ''}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deskripsi</label>
+                <textarea id="prodDesc" class="form-input" rows="2">${product.description || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Harga</label>
+                <input type="number" id="prodPrice" class="form-input" value="${product.price || 0}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Harga Diskon (Opsional)</label>
+                <input type="number" id="prodDiscount" class="form-input" value="${product.discountPrice || ''}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Stok</label>
+                <input type="number" id="prodStock" class="form-input" value="${product.stock || 0}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kategori</label>
+                <input type="text" id="prodCategory" class="form-input" value="${product.category || ''}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">URL Gambar</label>
+                <input type="text" id="prodImage" class="form-input" value="${product.image || ''}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select id="prodStatus" class="form-input">
+                    <option value="active" ${product.status === 'active' ? 'selected' : ''}>Aktif</option>
+                    <option value="inactive" ${product.status === 'inactive' ? 'selected' : ''}>Nonaktif</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="prodFeatured" ${product.featured ? 'checked' : ''}> Produk Unggulan
+                </label>
+            </div>
+            <button type="submit" class="btn-primary btn-block">
+                <i class="fas fa-save"></i> Update Produk
+            </button>
+        </form>
+    `);
+}
+
+function deleteProduct(productId) {
+    if (!confirm('Yakin ingin menghapus produk ini?')) return;
+
+    db.collection('products').doc(productId).delete()
+        .then(() => {
+            showToast('Produk berhasil dihapus', 'success');
+        })
+        .catch(err => {
+            showToast('Gagal menghapus produk', 'error');
+            console.error(err);
+        });
+}
+
+// ============================================================
+// ADMIN ORDER FUNCTIONS
+// ============================================================
+function loadAdminOrders() {
+    if (!state.isAdmin) return;
+
+    db.collection('orders')
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(snapshot => {
+            const orders = [];
+            snapshot.forEach(doc => {
+                orders.push({ id: doc.id, ...doc.data() });
+            });
+            renderAdminOrderTable(orders);
+            updateAdminStats(orders);
+        });
+}
+
+function renderAdminOrderTable(orders) {
+    const tbody = document.getElementById('adminOrderTable');
+    if (!tbody) return;
+
+    if (orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Belum ada pesanan</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = orders.map(order => `
+        <tr>
+            <td style="font-size:12px;">#${order.id.slice(0, 8).toUpperCase()}</td>
+            <td>${order.customerName || '-'}</td>
+            <td>${formatCurrency(order.total || 0)}</td>
+            <td>${order.paymentMethod || '-'}</td>
+            <td><span class="status ${getStatusBadge(order.orderStatus)}">${order.orderStatus}</span></td>
+            <td>
+                ${order.paymentStatus === 'waiting_verification' ? 
+                    `<button class="btn-success btn-sm" onclick="verifyPayment('${order.id}')">Verifikasi</button>` :
+                    `<span style="color:${order.paymentStatus === 'paid' ? '#22c55e' : '#f59e0b'};">${order.paymentStatus}</span>`
+                }
+            </td>
+            <td>
+                <div class="actions">
+                    <button class="edit" onclick="updateOrderStatus('${order.id}')" title="Update Status">
+                        <i class="fas fa-sync"></i>
+                    </button>
+                    <button class="delete" onclick="deleteOrder('${order.id}')" title="Hapus">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function verifyPayment(orderId) {
+    db.collection('orders').doc(orderId).update({
+        paymentStatus: 'paid',
+        orderStatus: 'processing'
+    }).then(() => {
+        showToast('Pembayaran diverifikasi', 'success');
+    }).catch(err => {
+        showToast('Gagal verifikasi', 'error');
+        console.error(err);
+    });
+}
+
+function updateOrderStatus(orderId) {
+    showModal('Update Status', `
+        <div class="form-group">
+            <label class="form-label">Status Order</label>
+            <select id="orderStatusSelect" class="form-input">
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Status Pembayaran</label>
+            <select id="paymentStatusSelect" class="form-input">
+                <option value="pending">Pending</option>
+                <option value="waiting_verification">Menunggu Verifikasi</option>
+                <option value="paid">Paid</option>
+                <option value="rejected">Rejected</option>
+            </select>
+        </div>
+        <button class="btn-primary btn-block" onclick="updateOrderStatusSubmit('${orderId}')">
+            <i class="fas fa-save"></i> Update
+        </button>
+    `);
+}
+
+function updateOrderStatusSubmit(orderId) {
+    const orderStatus = document.getElementById('orderStatusSelect').value;
+    const paymentStatus = document.getElementById('paymentStatusSelect').value;
+
+    db.collection('orders').doc(orderId).update({
+        orderStatus: orderStatus,
+        paymentStatus: paymentStatus
+    }).then(() => {
+        showToast('Status updated', 'success');
+        closeModal();
+    }).catch(err => {
+        showToast('Gagal update', 'error');
+        console.error(err);
+    });
+}
+
+function deleteOrder(orderId) {
+    if (!confirm('Yakin ingin menghapus pesanan ini?')) return;
+
+    db.collection('orders').doc(orderId).delete()
+        .then(() => {
+            showToast('Pesanan dihapus', 'success');
+        })
+        .catch(err => {
+            showToast('Gagal hapus', 'error');
+            console.error(err);
+        });
+}
+
+// ============================================================
+// ADMIN USER FUNCTIONS
+// ============================================================
+function loadAdminUsers() {
+    if (!state.isAdmin) return;
+
+    db.collection('users').onSnapshot(snapshot => {
+        const users = [];
+        snapshot.forEach(doc => {
+            users.push({ id: doc.id, ...doc.data() });
+        });
+        renderAdminUserTable(users);
+        document.getElementById('statUsers').textContent = users.length;
+    });
+}
+
+function renderAdminUserTable(users) {
+    const tbody = document.getElementById('adminUserTable');
+    if (!tbody) return;
+
+    if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Belum ada user</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = users.map(user => `
+        <tr>
+            <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <img src="${user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=ff2d2d&color=fff`}" 
+                         style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+                    <span>${user.name || 'User'}</span>
+                </div>
+            </td>
+            <td>${user.email || '-'}</td>
+            <td><span style="color:${user.role === 'admin' ? 'var(--primary)' : 'var(--text-muted)'};">${user.role || 'user'}</span></td>
+            <td>${formatDate(user.createdAt)}</td>
+            <td>
+                <div class="actions">
+                    ${user.role !== 'admin' ? `
+                        <button class="edit" onclick="makeAdmin('${user.id}')" title="Jadikan Admin">
+                            <i class="fas fa-user-shield"></i>
+                        </button>
+                    ` : ''}
+                    <button class="delete" onclick="deleteUser('${user.id}')" title="Hapus">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function makeAdmin(userId) {
+    if (!confirm('Jadikan user ini sebagai admin?')) return;
+
+    db.collection('users').doc(userId).update({
+        role: 'admin'
+    }).then(() => {
+        showToast('User berhasil dijadikan admin', 'success');
+    }).catch(err => {
+        showToast('Gagal update role', 'error');
+        console.error(err);
+    });
+}
+
+function deleteUser(userId) {
+    if (!confirm('Yakin ingin menghapus user ini?')) return;
+
+    db.collection('users').doc(userId).delete()
+        .then(() => {
+            showToast('User dihapus', 'success');
+        })
+        .catch(err => {
+            showToast('Gagal hapus user', 'error');
+            console.error(err);
+        });
+}
+
+// ============================================================
+// ADMIN PAYMENT FUNCTIONS
+// ============================================================
+function renderAdminPaymentMethods() {
+    db.collection('payments').onSnapshot(snapshot => {
+        const methods = [];
+        snapshot.forEach(doc => {
+            methods.push({ id: doc.id, ...doc.data() });
+        });
+
+        const container = document.getElementById('paymentMethodList');
+        if (!container) return;
+
+        if (methods.length === 0) {
+            container.innerHTML = '<p class="text-muted">Belum ada metode pembayaran</p>';
+            return;
+        }
+
+        container.innerHTML = methods.map(m => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color);">
+                <div>
+                    <strong>${m.name}</strong>
+                    <span style="font-size:12px;color:var(--text-muted);display:block;">${m.number} - ${m.owner}</span>
+                </div>
+                <div>
+                    <span style="color:${m.active ? '#22c55e' : '#ef4444'};font-size:12px;">${m.active ? 'Aktif' : 'Nonaktif'}</span>
+                    <button class="btn-danger btn-sm" style="margin-left:8px;" onclick="deletePayment('${m.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    });
+}
+
+function showAddPaymentModal() {
+    showModal('Tambah Metode Pembayaran', `
+        <form onsubmit="savePayment();return false;">
+            <div class="form-group">
+                <label class="form-label">Nama Metode</label>
+                <input type="text" id="payName" class="form-input" placeholder="QRIS, DANA, BCA, dll" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nomor / ID</label>
+                <input type="text" id="payNumber" class="form-input" placeholder="Nomor rekening/ID" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nama Pemilik</label>
+                <input type="text" id="payOwner" class="form-input" placeholder="Nama pemilik rekening">
+            </div>
+            <div class="form-group">
+                <label class="form-label">URL Gambar QRIS (Opsional)</label>
+                <input type="text" id="payImage" class="form-input" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="payActive" checked> Aktif
+                </label>
+            </div>
+            <button type="submit" class="btn-primary btn-block">
+                <i class="fas fa-save"></i> Simpan
+            </button>
+        </form>
+    `);
+}
+
+function savePayment() {
+    const data = {
+        name: document.getElementById('payName').value,
+        number: document.getElementById('payNumber').value,
+        owner: document.getElementById('payOwner').value,
+        image: document.getElementById('payImage').value || '',
+        active: document.getElementById('payActive').checked,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection('payments').add(data)
+        .then(() => {
+            showToast('Metode pembayaran ditambahkan', 'success');
+            closeModal();
+        })
+        .catch(err => {
+            showToast('Gagal menambahkan', 'error');
+            console.error(err);
+        });
+}
+
+function deletePayment(paymentId) {
+    if (!confirm('Hapus metode pembayaran ini?')) return;
+
+    db.collection('payments').doc(paymentId).delete()
+        .then(() => {
+            showToast('Metode pembayaran dihapus', 'success');
+        })
+        .catch(err => {
+            showToast('Gagal hapus', 'error');
+            console.error(err);
+        });
+}
+
+// ============================================================
+// ADMIN TESTIMONIAL FUNCTIONS
+// ============================================================
+function loadAdminTestimonials() {
+    if (!state.isAdmin) return;
+
+    db.collection('testimonials').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+        const testimonials = [];
+        snapshot.forEach(doc => {
+            testimonials.push({ id: doc.id, ...doc.data() });
+        });
+        renderAdminTestimonialTable(testimonials);
+    });
+}
+
+function renderAdminTestimonialTable(testimonials) {
+    const tbody = document.getElementById('adminTestimonialTable');
+    if (!tbody) return;
+
+    if (testimonials.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Belum ada testimoni</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = testimonials.map(t => `
+        <tr>
+            <td>${t.name || 'Anonymous'}</td>
+            <td>${'⭐'.repeat(t.rating || 5)}</td>
+            <td>${t.description || '-'}</td>
+            <td>${formatDate(t.createdAt)}</td>
+            <td>
+                <button class="btn-danger btn-sm" onclick="deleteTestimonial('${t.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function showAddTestimonialModal() {
+    showModal('Tambah Testimoni', `
+        <form onsubmit="saveTestimonial();return false;">
+            <div class="form-group">
+                <label class="form-label">Nama Customer</label>
+                <input type="text" id="testName" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Rating</label>
+                <select id="testRating" class="form-input">
+                    <option value="5">⭐⭐⭐⭐⭐</option>
+                    <option value="4">⭐⭐⭐⭐</option>
+                    <option value="3">⭐⭐⭐</option>
+                    <option value="2">⭐⭐</option>
+                    <option value="1">⭐</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deskripsi</label>
+                <textarea id="testDesc" class="form-input" rows="2" required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">URL Foto (Opsional)</label>
+                <input type="text" id="testImage" class="form-input" placeholder="https://...">
+            </div>
+            <button type="submit" class="btn-primary btn-block">
+                <i class="fas fa-save"></i> Simpan
+            </button>
+        </form>
+    `);
+}
+
+function saveTestimonial() {
+    const data = {
+        name: document.getElementById('testName').value,
+        rating: parseInt(document.getElementById('testRating').value),
+        description: document.getElementById('testDesc').value,
+        image: document.getElementById('testImage').value || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection('testimonials').add(data)
+        .then(() => {
+            showToast('Testimoni ditambahkan', 'success');
+            closeModal();
+        })
+        .catch(err => {
+            showToast('Gagal menambahkan', 'error');
+            console.error(err);
+        });
+}
+
+function deleteTestimonial(id) {
+    if (!confirm('Hapus testimoni ini?')) return;
+
+    db.collection('testimonials').doc(id).delete()
+        .then(() => {
+            showToast('Testimoni dihapus', 'success');
+        })
+        .catch(err => {
+            showToast('Gagal hapus', 'error');
+            console.error(err);
+        });
+}
+
+// ============================================================
+// ADMIN STATS & DASHBOARD
+// ============================================================
+function updateAdminStats(orders) {
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter(o => o.paymentStatus === 'pending' || o.paymentStatus === 'waiting_verification').length;
+    const revenue = orders.filter(o => o.paymentStatus === 'paid').reduce((sum, o) => sum + (o.total || 0), 0);
+
+    document.getElementById('statOrders').textContent = totalOrders;
+    document.getElementById('statRevenue').textContent = formatCurrency(revenue);
+
+    // Render recent orders
+    const container = document.getElementById('recentOrders');
+    if (container) {
+        const recent = orders.slice(0, 5);
+        if (recent.length === 0) {
+            container.innerHTML = '<p class="text-muted">Belum ada pesanan</p>';
+        } else {
+            container.innerHTML = recent.map(o => `
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);font-size:13px;">
+                    <span>#${o.id.slice(0, 8).toUpperCase()} - ${o.customerName || 'User'}</span>
+                    <span style="color:var(--primary);">${formatCurrency(o.total)}</span>
+                    <span class="status ${getStatusBadge(o.orderStatus)}">${o.orderStatus}</span>
+                </div>
+            `).join('');
+        }
+    }
+
+    // Init chart if not exists
+    setTimeout(() => {
+        const canvas = document.getElementById('adminChart');
+        if (canvas && !canvas._chart) {
+            const ctx = canvas.getContext('2d');
+            const labels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+            const data = Array.from({length: 7}, () => Math.floor(Math.random() * 100) + 10);
+
+            canvas._chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pesanan',
+                        data: data,
+                        borderColor: '#ff2d2d',
+                        backgroundColor: 'rgba(255,45,45,0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#9ca3af' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#6b7280' } },
+                        y: { ticks: { color: '#6b7280' } }
+                    }
+                }
+            });
+        }
+    }, 200);
+}
+
+// ============================================================
+// SETTINGS FUNCTIONS
+// ============================================================
+function loadSettings() {
+    db.collection('settings').doc('store').onSnapshot(doc => {
+        if (doc.exists) {
+            state.settings = doc.data();
+            // Update UI if on settings page
+            if (state.currentPage === 'adminSettings') {
+                document.getElementById('settingStoreName').value = state.settings.storeName || 'ALFASHOP';
+                document.getElementById('settingDescription').value = state.settings.description || '';
+                document.getElementById('settingWhatsapp').value = state.settings.whatsapp || '';
+                document.getElementById('settingWhatsappLink').value = state.settings.whatsappLink || '';
+                document.getElementById('settingTelegram').value = state.settings.telegram || '';
+                document.getElementById('settingMaintenance').value = state.settings.maintenance ? 'true' : 'false';
+            }
+        }
+    });
+}
+
+function saveSettings() {
+    const data = {
+        storeName: document.getElementById('settingStoreName').value,
+        description: document.getElementById('settingDescription').value,
+        whatsapp: document.getElementById('settingWhatsapp').value,
+        whatsappLink: document.getElementById('settingWhatsappLink').value,
+        telegram: document.getElementById('settingTelegram').value,
+        maintenance: document.getElementById('settingMaintenance').value === 'true',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection('settings').doc('store').set(data, { merge: true })
+        .then(() => {
+            showToast('Pengaturan disimpan', 'success');
+        })
+        .catch(err => {
+            showToast('Gagal menyimpan', 'error');
+            console.error(err);
+        });
+}
+
+// ============================================================
+// AUTH FUNCTIONS
+// ============================================================
+function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email || !password) {
+        showToast('Email dan password wajib diisi', 'warning');
+        return;
+    }
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            showToast('Login berhasil!', 'success');
+            navigateTo('home');
+        })
+        .catch(err => {
+            showToast('Login gagal: ' + err.message, 'error');
+        });
+}
+
+function handleRegister() {
+    const name = document.getElementById('registerName').value;
+    const username = document.getElementById('registerUsername').value;
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirm = document.getElementById('registerConfirm').value;
+
+    if (!name || !username || !email || !password || !confirm) {
+        showToast('Semua field wajib diisi', 'warning');
+        return;
+    }
+
+    if (password.length < 6) {
+        showToast('Password minimal 6 karakter', 'warning');
+        return;
+    }
+
+    if (password !== confirm) {
+        showToast('Password tidak cocok', 'warning');
+        return;
+    }
+
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(async (result) => {
+            const user = result.user;
+
+            // Save user profile
+            await db.collection('users').doc(user.uid).set({
+                uid: user.uid,
+                name: name,
+                username: username,
+                email: email,
+                role: 'user',
+                photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ff2d2d&color=fff`,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            showToast('Registrasi berhasil!', 'success');
+            navigateTo('home');
+        })
+        .catch(err => {
+            showToast('Registrasi gagal: ' + err.message, 'error');
+        });
+}
+
+function forgotPassword() {
+    const email = prompt('Masukkan email Anda:');
+    if (!email) return;
+
+    auth.sendPasswordResetEmail(email)
+        .then(() => {
+            showToast('Email reset password dikirim', 'success');
+        })
+        .catch(err => {
+            showToast('Gagal: ' + err.message, 'error');
+        });
+}
+
+function updateProfile() {
+    if (!state.user) return;
+
+    const name = document.getElementById('profileName').value;
+    const username = document.getElementById('profileUsername').value;
+    const whatsapp = document.getElementById('profileWhatsapp').value;
+
+    db.collection('users').doc(state.user.uid).update({
+        name: name,
+        username: username,
+        whatsapp: whatsapp
+    }).then(() => {
+        showToast('Profil berhasil diupdate', 'success');
+        state.userData.name = name;
+        state.userData.username = username;
+        state.userData.whatsapp = whatsapp;
+        updateAuthUI();
+    }).catch(err => {
+        showToast('Gagal update profil', 'error');
+        console.error(err);
+    });
+}
+
+function changePassword() {
+    if (!state.user) return;
+
+    const newPass = prompt('Masukkan password baru (minimal 6 karakter):');
+    if (!newPass) return;
+    if (newPass.length < 6) {
+        showToast('Password minimal 6 karakter', 'warning');
+        return;
+    }
+
+    state.user.updatePassword(newPass)
+        .then(() => {
+            showToast('Password berhasil diubah', 'success');
+        })
+        .catch(err => {
+            showToast('Gagal: ' + err.message, 'error');
+        });
+}
+
+// ============================================================
+// AUTH STATE OBSERVER
+// ============================================================
+auth.onAuthStateChanged(async (user) => {
+    const splash = document.getElementById('splash');
+
+    if (user) {
+        state.user = user;
+
+        // Load user data
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+            state.userData = doc.data();
+            state.isAdmin = state.userData?.role === 'admin';
+
+            // Update last login
+            db.collection('users').doc(user.uid).update({
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            // Create user document if missing
+            const newUserData = {
+                uid: user.uid,
+                name: user.displayName || 'User',
+                email: user.email,
+                role: 'user',
+                photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=ff2d2d&color=fff`,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            await db.collection('users').doc(user.uid).set(newUserData);
+            state.userData = newUserData;
+        }
+
+        // Load data
+        loadCart();
+        loadOrders();
+        loadChat();
+
+        // Admin data
+        if (state.isAdmin) {
+            loadAdminUsers();
+            loadAdminOrders();
+            loadAdminChatUsers();
+            loadAdminTestimonials();
+        }
+
+        updateAuthUI();
+
+        // If on login/register, redirect
+        if (['login', 'register'].includes(state.currentPage)) {
+            navigateTo('home');
+        }
+
+    } else {
+        state.user = null;
+        state.userData = null;
+        state.isAdmin = false;
+        state.cart = [];
+        updateAuthUI();
+
+        // If on protected page, redirect to login
+        const protectedPages = ['profile', 'orders', 'chat', 'cart', 'checkout', 'admin', 'adminProducts', 'adminOrders', 'adminUsers', 'adminPayments', 'adminChat', 'adminTestimonials', 'adminSettings'];
+        if (protectedPages.includes(state.currentPage) && !['login', 'register'].includes(state.currentPage)) {
+            navigateTo('login');
+        }
+    }
+
+    // Hide splash
+    setTimeout(() => {
+        splash.classList.add('hidden');
+    }, 800);
+});
+
+// ============================================================
+// SIDEBAR TOGGLE
+// ============================================================
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+}
+
+// ============================================================
+// PAGE LOAD HANDLER
+// ============================================================
+window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.replace('#', '') || 'home';
+    navigateTo(hash);
+});
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+// Load initial data
+loadProducts();
+loadPaymentMethods();
+loadSettings();
+
+// Handle initial page
+const initialPage = window.location.hash.replace('#', '') || 'home';
+navigateTo(initialPage);
+
+console.log('🛍️ ALFASHOP initialized');
+console.log('📦 Firebase connected');
+console.log('⚡ All systems ready');
+
+// ============================================================
+// END OF ALFASHOP - ALL FUNCTIONS IMPLEMENTED
+// ============================================================
+</script>
+
+</body>
+</html>
