@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bug app ảo</title>
+  <style>
+    :root {
+      --primary: #00A2FF;
+      --primary-soft: #7EC8FF;
+      --bg: #050B14;
+      --panel: #0A1A2E;
+      --panel-2: #0D2A40;
+      --help-bg: #0B2030;
+      --text-soft: #B8E0FF;
+      --status-text: #88CCEE;
+      --value: #FFEE55;
+      --shadow: rgba(0,162,255,0.25);
+      --stop: #FF2244;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--primary);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      text-align: center;
+      padding: 20px 10px;
+      margin: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.rainbow {
+      background: linear-gradient(135deg, #1a0033, #001a33, #00331a, #331a00, #33001a);
+      background-size: 400% 400%;
+      animation: rainbowBg 8s ease infinite;
+    }
+    @keyframes rainbowBg {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--panel);
+      border: 3px solid var(--primary);
+      border-radius: 20px;
+      padding: 20px 18px;
+      box-shadow: 0 0 30px var(--shadow);
+      transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+    }
+    body.rainbow .container {
+      border-image: linear-gradient(90deg, #ff0040, #ff8000, #ffff00, #00ff40, #0080ff, #8000ff, #ff0040) 1;
+      border-width: 3px;
+      border-style: solid;
+      animation: rainbowBorder 3s linear infinite;
+      box-shadow: 0 0 25px rgba(255,0,128,0.35);
+    }
+    @keyframes rainbowBorder {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+    h1 {
+      color: var(--primary);
+      text-shadow: 0 0 15px var(--primary);
+      font-size: 28px;
+      margin: 0 0 5px;
+      letter-spacing: 2px;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+    body.rainbow h1 {
+      background: linear-gradient(90deg, #ff0040, #ff8000, #ffff00, #00ff40, #0080ff, #8000ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: none;
+      animation: rainbowText 3s linear infinite;
+      background-size: 200% auto;
+    }
+    @keyframes rainbowText {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+    .sub {
+      color: var(--primary-soft);
+      font-size: 13px;
+      margin-bottom: 16px;
+      opacity: 0.9;
+    }
+    .theme-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .theme-btn {
+      flex: 0 0 auto;
+      width: auto;
+      min-width: 72px;
+      padding: 8px 12px;
+      font-size: 12px;
+      border-radius: 20px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-weight: 700;
+      color: #000;
+    }
+    .theme-btn.active {
+      border-color: #fff;
+      box-shadow: 0 0 12px rgba(255,255,255,0.35);
+      transform: scale(1.05);
+    }
+    .theme-btn.blue { background: #00A2FF; }
+    .theme-btn.purple { background: #B44AFF; color: #fff; }
+    .theme-btn.red { background: #FF3355; color: #fff; }
+    .theme-btn.green { background: #22DD66; }
+    .theme-btn.rainbow {
+      background: linear-gradient(90deg, #ff0040, #ff8000, #ffff00, #00ff40, #0080ff, #8000ff);
+      color: #000;
+    }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin: 8px 0;
+    }
+    button {
+      background: var(--primary);
+      color: #000;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: 0.2s;
+      flex: 1;
+    }
+    button:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--primary); }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    #startBtn {
+      background: var(--primary);
+      color: #000;
+    }
+    body.rainbow #startBtn {
+      background: linear-gradient(90deg, #ff0040, #ff8000, #ffff00, #00ff40, #0080ff, #8000ff);
+      background-size: 200% auto;
+      animation: rainbowText 3s linear infinite;
+      color: #000;
+    }
+    #stopBtn {
+      background: var(--stop);
+      color: #fff;
+    }
+    #stopBtn:hover { box-shadow: 0 0 20px var(--stop); }
+    .live-active #startBtn {
+      animation: pulse 1s infinite;
+    }
+    body.rainbow.live-active #startBtn {
+      animation: rainbowText 3s linear infinite, pulse 1s infinite;
+    }
+    @keyframes pulse { 0%{opacity:1} 50%{opacity:0.6} }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      height: 6px;
+      background: var(--panel-2);
+      border-radius: 10px;
+      margin: 5px 0 10px;
+    }
+    .value {
+      color: var(--value);
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .row .label { flex: 1; text-align: left; }
+    .row .val { min-width: 60px; text-align: right; }
+    .help {
+      background: var(--help-bg);
+      border-left: 4px solid var(--primary);
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--text-soft);
+      text-align: left;
+      margin-top: 20px;
+      line-height: 1.5;
+    }
+    .help strong { color: var(--primary); }
+    .help a { color: var(--primary-soft); text-decoration: underline; }
+    .status {
+      background: var(--panel-2);
+      padding: 8px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin: 10px 0;
+      color: var(--status-text);
+    }
+    .file-label {
+      display: block;
+      margin: 10px 0 4px;
+      font-size: 14px;
+      color: var(--primary-soft);
+    }
+    .effect-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin: 8px 0;
+    }
+    .effect-row select {
+      flex: 1;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid var(--primary);
+      background: var(--panel-2);
+      color: var(--primary-soft);
+    }
+    .effect-row label {
+      font-size: 14px;
+      color: var(--primary-soft);
+      min-width: 60px;
+    }
+    .theme-label {
+      font-size: 13px;
+      color: var(--primary-soft);
+      margin-bottom: 6px;
+    }
+    .eq-box {
+      background: var(--panel-2);
+      border-radius: 12px;
+      padding: 12px 8px 10px;
+      margin: 12px 0;
+    }
+    .eq-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: var(--primary-soft);
+      font-weight: 700;
+    }
+    .eq-title button {
+      flex: 0;
+      width: auto;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 16px;
+    }
+    .eq-bars {
+      display: flex;
+      justify-content: space-between;
+      gap: 2px;
+      height: 150px;
+      padding: 0 2px;
+    }
+    .eq-band {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 0;
+    }
+    .eq-band input[type="range"] {
+      -webkit-appearance: slider-vertical;
+      appearance: slider-vertical;
+      writing-mode: vertical-lr;
+      direction: rtl;
+      width: 22px;
+      height: 110px;
+      margin: 0;
+      padding: 0;
+      flex: 1;
+      accent-color: var(--primary);
+      background: transparent;
+    }
+    .eq-band .eq-hz {
+      font-size: 9px;
+      color: var(--primary-soft);
+      margin-top: 4px;
+      opacity: 0.9;
+    }
+    .eq-band .eq-db {
+      font-size: 9px;
+      color: var(--value);
+      height: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>bug app ảo</h1>
+  <div class="sub">young bi</div>
+
+  <div class="theme-label">🎨 Màu giao diện</div>
+  <div class="theme-row">
+    <button type="button" class="theme-btn blue active" onclick="setTheme('blue')">Xanh dương</button>
+    <button type="button" class="theme-btn purple" onclick="setTheme('purple')">Tím</button>
+    <button type="button" class="theme-btn red" onclick="setTheme('red')">Đỏ</button>
+    <button type="button" class="theme-btn green" onclick="setTheme('green')">Xanh lá</button>
+    <button type="button" class="theme-btn rainbow" onclick="setTheme('rainbow')">Bảy màu</button>
+  </div>
+
+  <div class="btn-row" id="btnRow">
+    <button id="startBtn" onclick="startXa()">▶ BẮT ĐẦU XẢ</button>
+    <button id="stopBtn" onclick="stopXa()" disabled>⏹ DỪNG XẢ</button>
+  </div>
+  <div id="statusMsg" class="status">⏳ Chưa kết nối</div>
+
+  <!-- Pre Gain -->
+  <div style="margin:15px 0 5px;">
+    <div class="row">
+      <span class="label">PRE GAIN (100 TỶ X)</span>
+      <span class="val"><span class="value" id="pgVal">50000000000x</span></span>
+    </div>
+    <input type="range" min="100" max="100000000000" value="50000000000" id="preGain" oninput="updateGain()">
+  </div>
+
+  <!-- Equalizer mic -->
+  <div class="eq-box">
+    <div class="eq-title">
+      <span>🎚 Equalizer mic</span>
+      <button type="button" onclick="resetEQ()">Reset</button>
+    </div>
+    <div class="eq-bars" id="eqBars">
+      <!-- generated by JS -->
+    </div>
+  </div>
+
+  <!-- Hiệu ứng giọng -->
+  <div style="margin:12px 0;">
+    <div class="effect-row">
+      <label>🎭 Hiệu ứng</label>
+      <select id="effectSelect" onchange="onEffectChange()">
+        <option value="normal">Bình thường</option>
+        <option value="robot">Robot</option>
+        <option value="dark">Trầm ấm</option>
+        <option value="bright">Sáng</option>
+        <option value="telephone">Điện thoại</option>
+        <option value="echo">Echo</option>
+        <option value="reverb">Reverb</option>
+      </select>
+    </div>
+    <div class="row">
+      <span class="label">Cường độ (MAX)</span>
+      <span class="val"><span class="value" id="intensityVal">100%</span></span>
+    </div>
+    <input type="range" min="0" max="100" value="100" id="intensitySlider" oninput="onIntensityChange()">
+  </div>
+
+  <!-- Nhạc nền -->
+  <label class="file-label">🎵 Nhạc nền (MP3/WAV)</label>
+  <input type="file" id="musicFile" accept="audio/*">
+  <div style="margin:10px 0 5px;">
+    <div class="row">
+      <span class="label">Âm lượng nhạc (MAX)</span>
+      <span class="val"><span class="value" id="musicVolVal">100%</span></span>
+    </div>
+    <input type="range" min="0" max="100" value="100" id="musicVol" oninput="updateMusicVol()">
+  </div>
+
+  <!-- Hướng dẫn -->
+  <div class="help">
+    <strong>📌 Cách dùng bug app ảo:</strong><br>
+    <strong>Bước 1:</strong> Lưu file app bug app ảo và tải lên Google Drive, mở lên bấm vào dấu 3 chấm ở góc phải phía trên<br>
+    <strong>Bước 2:</strong> Bấm vào mở bằng Via Browser (nhớ phải tải Via Browser từ CH Play hoặc App Store)<br>
+    <strong>Bước 3:</strong> Bật app lên và điều chỉnh thông số<br>
+    <strong>Bước 4:</strong> Phải có soundcard (không phân biệt loại nào, tất cả dùng được hết)<br>
+    <strong>Bước 5:</strong> Cần 2 điện thoại<br>
+    <strong>Bước 6:</strong> Lấy điện thoại chính và cắm soundcard vô<br>
+    <strong>Bước 7:</strong> Lấy điện thoại phụ kết nối Bluetooth với soundcard đang cắm ở điện thoại chính<br><br>
+    <strong id="footerWish">CHÚC CÁC BẠN DÙNG BUG APP VUI VẺ</strong><br>
+    <span id="footerCre">CRE: YOUNG BI</span>
+  </div>
+</div>
+
+<script>
+// ---------- Theme ----------
+const themes = {
+  blue: {
+    primary: '#00A2FF',
+    soft: '#7EC8FF',
+    bg: '#050B14',
+    panel: '#0A1A2E',
+    panel2: '#0D2A40',
+    helpBg: '#0B2030',
+    textSoft: '#B8E0FF',
+    status: '#88CCEE',
+    value: '#FFEE55',
+    shadow: 'rgba(0,162,255,0.25)'
+  },
+  purple: {
+    primary: '#B44AFF',
+    soft: '#D9A8FF',
+    bg: '#0C0514',
+    panel: '#1A0A2E',
+    panel2: '#2A0D40',
+    helpBg: '#200B30',
+    textSoft: '#E8C8FF',
+    status: '#C8A0EE',
+    value: '#FFEE55',
+    shadow: 'rgba(180,74,255,0.3)'
+  },
+  red: {
+    primary: '#FF3355',
+    soft: '#FF99AA',
+    bg: '#140508',
+    panel: '#2E0A12',
+    panel2: '#40101A',
+    helpBg: '#300B14',
+    textSoft: '#FFC8D0',
+    status: '#EEA0B0',
+    value: '#FFEE55',
+    shadow: 'rgba(255,51,85,0.3)'
+  },
+  green: {
+    primary: '#22DD66',
+    soft: '#88EEAA',
+    bg: '#05140A',
+    panel: '#0A2E18',
+    panel2: '#0D4020',
+    helpBg: '#0B3018',
+    textSoft: '#C8FFD8',
+    status: '#A0EEC0',
+    value: '#FFEE55',
+    shadow: 'rgba(34,221,102,0.28)'
+  },
+  rainbow: {
+    primary: '#FF80FF',
+    soft: '#FFFFFF',
+    bg: '#0A0510',
+    panel: '#12081C',
+    panel2: '#1A0F28',
+    helpBg: '#160B22',
+    textSoft: '#FFE8FF',
+    status: '#FFD0FF',
+    value: '#FFFF66',
+    shadow: 'rgba(255,0,128,0.35)'
+  }
+};
+
+function setTheme(name) {
+  const t = themes[name] || themes.blue;
+  const root = document.documentElement;
+  root.style.setProperty('--primary', t.primary);
+  root.style.setProperty('--primary-soft', t.soft);
+  root.style.setProperty('--bg', t.bg);
+  root.style.setProperty('--panel', t.panel);
+  root.style.setProperty('--panel-2', t.panel2);
+  root.style.setProperty('--help-bg', t.helpBg);
+  root.style.setProperty('--text-soft', t.textSoft);
+  root.style.setProperty('--status-text', t.status);
+  root.style.setProperty('--value', t.value);
+  root.style.setProperty('--shadow', t.shadow);
+
+  document.body.classList.toggle('rainbow', name === 'rainbow');
+
+  document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+  const active = document.querySelector('.theme-btn.' + name);
+  if (active) active.classList.add('active');
+
+  try { localStorage.setItem('bugapp_theme', name); } catch(e) {}
+}
+
+// ---------- Biến toàn cục ----------
+let audioCtx, micSource, gainNode, stream;
+let musicAudio = null;
+let isLive = false;
+
+// Effect
+let currentEffect = 'normal';
+let currentIntensity = 100;
+let effectOutputNode = null;
+let effectNodes = [];
+let dryGainNode = null;
+
+// Equalizer
+const EQ_FREQS = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+const EQ_LABELS = ['31', '62', '125', '250', '500', '1k', '2k', '4k', '8k', '16k'];
+let eqFilters = [];
+let eqGains = EQ_FREQS.map(() => 0);
+let eqOutNode = null;
+
+function buildEQUI() {
+  const wrap = document.getElementById('eqBars');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  EQ_FREQS.forEach((f, i) => {
+    const band = document.createElement('div');
+    band.className = 'eq-band';
+    band.innerHTML =
+      '<span class="eq-db" id="eqdb' + i + '">0</span>' +
+      '<input type="range" min="-12" max="12" step="0.5" value="0" id="eq' + i + '" ' +
+      'oninput="updateEQBand(' + i + ')">' +
+      '<span class="eq-hz">' + EQ_LABELS[i] + '</span>';
+    wrap.appendChild(band);
+  });
+}
+
+function updateEQBand(i) {
+  const el = document.getElementById('eq' + i);
+  if (!el) return;
+  const v = parseFloat(el.value);
+  eqGains[i] = v;
+  const dbEl = document.getElementById('eqdb' + i);
+  if (dbEl) dbEl.textContent = (v > 0 ? '+' : '') + v;
+  if (eqFilters[i]) eqFilters[i].gain.value = v;
+}
+
+function resetEQ() {
+  EQ_FREQS.forEach((_, i) => {
+    eqGains[i] = 0;
+    const el = document.getElementById('eq' + i);
+    if (el) el.value = 0;
+    const dbEl = document.getElementById('eqdb' + i);
+    if (dbEl) dbEl.textContent = '0';
+    if (eqFilters[i]) eqFilters[i].gain.value = 0;
+  });
+}
+
+function createEQChain(ctx) {
+  eqFilters = [];
+  let prev = null;
+  EQ_FREQS.forEach((freq, i) => {
+    const f = ctx.createBiquadFilter();
+    f.type = 'peaking';
+    f.frequency.value = freq;
+    f.Q.value = 1.0;
+    f.gain.value = eqGains[i] || 0;
+    eqFilters.push(f);
+    if (prev) prev.connect(f);
+    prev = f;
+  });
+  eqOutNode = prev;
+  return { first: eqFilters[0], last: prev };
+}
+
+function getAudioInputNode() {
+  // Điểm nối sau EQ (hoặc mic nếu chưa có EQ)
+  return eqOutNode || micSource;
+}
+
+// ---------- Cập nhật trạng thái ----------
+function updateStatus(msg, color) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.style.color = color || '';
+}
+
+// ---------- Effect change ----------
+function onEffectChange() {
+  currentEffect = document.getElementById('effectSelect').value;
+  if (isLive) applyEffect(currentEffect, currentIntensity);
+}
+
+function onIntensityChange() {
+  currentIntensity = parseInt(document.getElementById('intensitySlider').value);
+  document.getElementById('intensityVal').textContent = currentIntensity + '%';
+  if (isLive) applyEffect(currentEffect, currentIntensity);
+}
+
+// ---------- Xây dựng hiệu ứng ----------
+function buildEffect(effect, intensity) {
+  effectNodes.forEach(node => {
+    try { node.disconnect(); } catch(e) {}
+  });
+  effectNodes = [];
+  if (effectOutputNode) {
+    try { effectOutputNode.disconnect(); } catch(e) {}
+    effectOutputNode = null;
+  }
+
+  if (effect === 'normal') return null;
+
+  const ctx = audioCtx;
+  let outputNode = ctx.createGain();
+  outputNode.gain.value = 1;
+
+  function addNode(node) {
+    effectNodes.push(node);
+    return node;
+  }
+
+  let dryGain = null, wetGain = null, delayNode = null;
+
+  switch (effect) {
+    case 'robot': {
+      const shaper = addNode(ctx.createWaveShaper());
+      const curve = new Float32Array(256);
+      const k = intensity / 30;
+      for (let i = 0; i < 256; i++) {
+        const x = (i - 128) / 128;
+        curve[i] = Math.tanh(k * x) / Math.tanh(k);
+      }
+      shaper.curve = curve;
+      shaper.oversample = '4x';
+
+      const filter = addNode(ctx.createBiquadFilter());
+      filter.type = 'lowpass';
+      const freq = 3000 - (intensity / 100) * 1500;
+      filter.frequency.value = Math.max(500, freq);
+      filter.Q.value = 1;
+
+      shaper.connect(filter);
+      filter.connect(outputNode);
+      return { firstNode: shaper, outputNode };
+    }
+
+    case 'dark': {
+      const filter = addNode(ctx.createBiquadFilter());
+      filter.type = 'lowpass';
+      const freq = 3000 - (intensity / 100) * 2500;
+      filter.frequency.value = Math.max(200, freq);
+      filter.Q.value = 1;
+      filter.connect(outputNode);
+      return { firstNode: filter, outputNode };
+    }
+
+    case 'bright': {
+      const hp = addNode(ctx.createBiquadFilter());
+      hp.type = 'highpass';
+      hp.frequency.value = 2000 + (intensity / 100) * 3000;
+      hp.Q.value = 1;
+
+      const peak = addNode(ctx.createBiquadFilter());
+      peak.type = 'peaking';
+      peak.frequency.value = 4000 + (intensity / 100) * 2000;
+      peak.gain.value = 6 + (intensity / 100) * 10;
+      peak.Q.value = 1;
+
+      hp.connect(peak);
+      peak.connect(outputNode);
+      return { firstNode: hp, outputNode };
+    }
+
+    case 'telephone': {
+      const bp = addNode(ctx.createBiquadFilter());
+      bp.type = 'bandpass';
+      const center = 800 + (intensity / 100) * 1200;
+      bp.frequency.value = center;
+      bp.Q.value = 0.5 + (intensity / 100) * 1.5;
+      bp.connect(outputNode);
+      return { firstNode: bp, outputNode };
+    }
+
+    case 'echo': {
+      dryGain = addNode(ctx.createGain());
+      wetGain = addNode(ctx.createGain());
+      delayNode = addNode(ctx.createDelay(1.0));
+      const wet = intensity / 100;
+      dryGain.gain.value = 1 - wet;
+      wetGain.gain.value = wet * 0.8;
+      delayNode.delayTime.value = 0.1 + (intensity / 100) * 0.4;
+      dryGain.connect(outputNode);
+      delayNode.connect(wetGain);
+      wetGain.connect(outputNode);
+      return { firstNode: null, outputNode, dryGain, delayNode, wetGain };
+    }
+
+    case 'reverb': {
+      const sampleRate = ctx.sampleRate;
+      const length = 0.3 + (intensity / 100) * 0.7;
+      const buffer = ctx.createBuffer(1, sampleRate * length, sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        const t = i / sampleRate;
+        const envelope = Math.exp(-t * 3) * (1 - t / length);
+        data[i] = (Math.random() * 2 - 1) * envelope * 0.3;
+      }
+      data[0] = 1;
+      const convolver = addNode(ctx.createConvolver());
+      convolver.buffer = buffer;
+      const filter = addNode(ctx.createBiquadFilter());
+      filter.type = 'lowpass';
+      filter.frequency.value = 4000 - (intensity / 100) * 2000;
+      filter.Q.value = 1;
+      convolver.connect(filter);
+      filter.connect(outputNode);
+      return { firstNode: convolver, outputNode };
+    }
+
+    default:
+      return null;
+  }
+}
+
+function applyEffect(effect, intensity) {
+  if (!audioCtx || !micSource || !gainNode) return;
+  const inputNode = getAudioInputNode();
+  if (!inputNode) return;
+
+  try {
+    if (effectOutputNode) {
+      inputNode.disconnect(effectOutputNode);
+      effectOutputNode.disconnect(gainNode);
+    } else {
+      inputNode.disconnect(gainNode);
+    }
+  } catch(e) {}
+
+  effectNodes.forEach(node => {
+    try { node.disconnect(); } catch(e) {}
+  });
+  effectNodes = [];
+  effectOutputNode = null;
+
+  const result = buildEffect(effect, intensity);
+  if (result === null) {
+    inputNode.connect(gainNode);
+    effectOutputNode = null;
+    updateStatus('🎤 Hiệu ứng: Bình thường');
+    return;
+  }
+
+  const { firstNode, outputNode, dryGain, delayNode, wetGain } = result;
+  effectOutputNode = outputNode;
+
+  if (firstNode) {
+    inputNode.connect(firstNode);
+  } else {
+    if (dryGain && delayNode && wetGain) {
+      inputNode.connect(dryGain);
+      inputNode.connect(delayNode);
+    } else {
+      inputNode.connect(outputNode);
+    }
+  }
+  outputNode.connect(gainNode);
+
+  const effectNames = {
+    normal: 'Bình thường',
+    robot: 'Robot',
+    dark: 'Trầm ấm',
+    bright: 'Sáng',
+    telephone: 'Điện thoại',
+    echo: 'Echo',
+    reverb: 'Reverb'
+  };
+  updateStatus(`🎤 Hiệu ứng: ${effectNames[effect] || effect} (cường độ ${intensity}%)`);
+}
+
+function setButtonsLive(live) {
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const row = document.getElementById('btnRow');
+  if (live) {
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    row.classList.add('live-active');
+    document.body.classList.add('live-active');
+  } else {
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    row.classList.remove('live-active');
+    document.body.classList.remove('live-active');
+  }
+}
+
+async function stopXa() {
+  if (!isLive) return;
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  if (audioCtx && audioCtx.state !== 'closed') await audioCtx.close();
+  isLive = false;
+  setButtonsLive(false);
+  updateStatus('⏹ Đã dừng xả');
+  effectNodes.forEach(node => { try { node.disconnect(); } catch(e) {} });
+  effectNodes = [];
+  effectOutputNode = null;
+  eqFilters = [];
+  eqOutNode = null;
+}
+
+async function startXa() {
+  if (isLive) return;
+
+  try {
+    const constraints = {
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        sampleRate: 48000,
+        channelCount: 1,
+      }
+    };
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+      sampleRate: 48000,
+      latencyHint: 'interactive'
+    });
+
+    micSource = audioCtx.createMediaStreamSource(stream);
+    gainNode = audioCtx.createGain();
+    updateGain();
+
+    // EQ: mic -> filters -> (effect) -> gain -> speaker
+    const eq = createEQChain(audioCtx);
+    micSource.connect(eq.first);
+
+    applyEffect(currentEffect, currentIntensity);
+
+    gainNode.connect(audioCtx.destination);
+
+    isLive = true;
+    setButtonsLive(true);
+    updateStatus('🔥 Đang XẢ – Đã bật hiệu ứng');
+
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+  } catch (err) {
+    alert('❌ Lỗi mic: ' + err.message);
+    updateStatus('❌ Lỗi: ' + err.message);
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    setButtonsLive(false);
+  }
+}
+
+function updateGain() {
+  if (gainNode) {
+    const val = parseFloat(document.getElementById('preGain').value);
+    gainNode.gain.value = val / 100;
+    document.getElementById('pgVal').textContent = val + 'x';
+  } else {
+    const val = parseFloat(document.getElementById('preGain').value);
+    document.getElementById('pgVal').textContent = val + 'x';
+  }
+}
+
+function updateMusicVol() {
+  if (musicAudio) {
+    musicAudio.volume = parseFloat(document.getElementById('musicVol').value) / 100;
+  }
+  document.getElementById('musicVolVal').textContent = document.getElementById('musicVol').value + '%';
+}
+
+document.getElementById('musicFile').onchange = function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  if (musicAudio) {
+    musicAudio.pause();
+    musicAudio.src = '';
+  }
+  musicAudio = new Audio(url);
+  musicAudio.loop = true;
+  musicAudio.volume = parseFloat(document.getElementById('musicVol').value) / 100;
+  musicAudio.play().catch(() => {});
+};
+
+// Khôi phục theme đã chọn
+try {
+  const saved = localStorage.getItem('bugapp_theme') || 'blue';
+  setTheme(saved);
+} catch(e) {
+  setTheme('blue');
+}
+
+buildEQUI();
+</script>
+</body>
+</html>
