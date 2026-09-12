@@ -1,17 +1,24 @@
 package com.flowscompiler.template;
 
 import android.Manifest;
+import android.app.WallpaperManager;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
+import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
         settings.setMediaPlaybackRequiresUserGesture(false);
 
         webView.setWebViewClient(new WebViewClient());
+
+        // Jembatan JS <-> Android: dipanggil dari web lewat window.AndroidWallpaper.setWallpaper(base64)
+        webView.addJavascriptInterface(new WallpaperBridge(), "AndroidWallpaper");
 
         // Ini kuncinya: tanpa WebChromeClient + onPermissionRequest, getUserMedia()
         // (kamera/mikrofon/senter) di halaman web SELALU ditolak WebView,
@@ -112,6 +122,41 @@ public class MainActivity extends AppCompatActivity {
             webView.goBack();
         } else {
             super.onBackPressed();
+        }
+    }
+
+    // Jembatan JS <-> Android untuk fitur "Ubah Wallpaper" di halaman web.
+    // Dipanggil dari JS lewat: window.AndroidWallpaper.setWallpaper(base64String)
+    private class WallpaperBridge {
+        @JavascriptInterface
+        public void setWallpaper(String base64Image) {
+            try {
+                byte[] imageBytes = Base64.decode(base64Image, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+
+                if (bitmap == null) {
+                    notifyWallpaperResult(false, "Gagal membaca gambar.");
+                    return;
+                }
+
+                WallpaperManager.getInstance(MainActivity.this).setBitmap(bitmap);
+                notifyWallpaperResult(true, "Wallpaper berhasil diubah!");
+            } catch (IOException e) {
+                notifyWallpaperResult(false, "Gagal set wallpaper: " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                notifyWallpaperResult(false, "Data gambar tidak valid.");
+            }
+        }
+
+        private void notifyWallpaperResult(boolean success, String message) {
+            runOnUiThread(() -> {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                String escaped = message.replace("'", "\\'");
+                webView.evaluateJavascript(
+                        "window.onWallpaperResult && window.onWallpaperResult(" + success + ", '" + escaped + "')",
+                        null
+                );
+            });
         }
     }
 }
