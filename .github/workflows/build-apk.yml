@@ -104,6 +104,7 @@ jobs:
           set -e
           MANIFEST="android-template/app/src/main/AndroidManifest.xml"
           PERMS="${{ inputs.permissions_csv }}"
+          echo "Permission yang dikirim dari web: $PERMS"
           python3 - "$MANIFEST" "$PERMS" <<'PYEOF'
           import sys
           manifest_path, perms_csv = sys.argv[1], sys.argv[2]
@@ -115,6 +116,9 @@ jobs:
           with open(manifest_path, "w") as f:
               f.write(content)
           PYEOF
+          echo "===== Isi AndroidManifest.xml setelah izin diterapkan ====="
+          cat "$MANIFEST"
+          echo "============================================================"
 
       - name: Buat keystore sekali pakai untuk signing
         run: |
