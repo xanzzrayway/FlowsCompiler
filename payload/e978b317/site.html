@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fitur Perangkat Lengkap</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+        background: #f8fafc;
+        margin: 0;
+        padding: 16px;
+        color: #1e293b;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .sub { color: #64748b; font-size: 13px; margin-bottom: 20px; }
+    .card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    .card h2 {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #334155;
+        margin: 0 0 12px 0;
+    }
+    .row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    input[type="text"], textarea {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 13px;
+        background: #f8fafc;
+        font-family: inherit;
+    }
+    textarea { width: 100%; min-height: 160px; resize: vertical; font-family: monospace; font-size: 12px; }
+    button {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        background: #22c55e;
+        color: #fff;
+    }
+    button.secondary { background: #f1f5f9; color: #334155; }
+    button.danger { background: #fee2e2; color: #dc2626; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button:active:not(:disabled) { transform: scale(0.98); }
+    .breadcrumb {
+        font-size: 11px;
+        color: #16a34a;
+        font-weight: 700;
+        word-break: break-all;
+        margin-bottom: 10px;
+        background: #f0fdf4;
+        padding: 8px 10px;
+        border-radius: 8px;
+    }
+    .file-list { max-height: 320px; overflow-y: auto; }
+    .file-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+    }
+    .file-item:active { background: #f8fafc; }
+    .file-item .icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+    .file-item .info { flex: 1; min-width: 0; }
+    .file-item .name { font-size: 13px; font-weight: 600; word-break: break-all; }
+    .file-item .meta { font-size: 10px; color: #94a3b8; }
+    .file-item .actions { display: flex; gap: 4px; }
+    .file-item .actions button { padding: 6px 8px; font-size: 11px; }
+    video {
+        width: 100%;
+        border-radius: 12px;
+        background: #000;
+        display: block;
+        margin-bottom: 10px;
+        max-height: 300px;
+        object-fit: cover;
+    }
+    #photo-preview {
+        width: 100%;
+        border-radius: 12px;
+        margin-top: 10px;
+        display: none;
+    }
+    .status { font-size: 12px; color: #64748b; margin-top: 8px; min-height: 16px; }
+    .status.err { color: #dc2626; font-weight: 600; }
+    .status.ok { color: #16a34a; font-weight: 600; }
+    .timer { font-size: 22px; font-weight: 800; color: #dc2626; text-align: center; margin: 8px 0; display: none; }
+    audio { width: 100%; margin-top: 10px; display: none; }
+    .rec-dot {
+        display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+        background: #dc2626; animation: blink 1s infinite; margin-right: 6px;
+    }
+    @keyframes blink { 50% { opacity: 0.2; } }
+    .empty { font-size: 12px; color: #94a3b8; text-align: center; padding: 20px; }
+    .modal-overlay {
+        display: none;
+        position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+        align-items: flex-end; justify-content: center; z-index: 50;
+    }
+    .modal-box {
+        background: #fff; width: 100%; max-width: 480px;
+        border-radius: 20px 20px 0 0; padding: 16px; max-height: 80vh; overflow-y: auto;
+    }
+    .modal-box h3 { margin: 0 0 12px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+    <h1>🔧 Fitur Perangkat Lengkap</h1>
+    <p class="sub">File manager + kamera + senter + rekam audio</p>
+
+    <!-- ===================== FILE MANAGER ===================== -->
+    <div class="card">
+        <h2>📂 File Manager</h2>
+        <div class="breadcrumb" id="current-path">Belum dibuka</div>
+        <div class="row">
+            <button onclick="openFileManager()">Buka Storage</button>
+            <button class="secondary" onclick="goUpFolder()">⬆ Naik</button>
+            <button class="secondary" onclick="showCreateModal('folder')">+ Folder</button>
+            <button class="secondary" onclick="showCreateModal('file')">+ File</button>
+        </div>
+        <div class="file-list" id="file-list">
+            <p class="empty">Ketuk "Buka Storage" untuk mulai.</p>
+        </div>
+        <p class="status" id="file-status"></p>
+    </div>
+
+    <!-- Modal buat file/folder baru -->
+    <div class="modal-overlay" id="create-modal">
+        <div class="modal-box">
+            <h3 id="create-modal-title">Buat Baru</h3>
+            <div class="row">
+                <input type="text" id="create-name-input" placeholder="Nama...">
+            </div>
+            <div class="row">
+                <button class="secondary" onclick="closeCreateModal()">Batal</button>
+                <button onclick="confirmCreate()">Buat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal edit isi file -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-box">
+            <h3 id="edit-modal-title">Edit File</h3>
+            <textarea id="edit-content-input"></textarea>
+            <div class="row" style="margin-top:10px;">
+                <button class="secondary" onclick="closeEditModal()">Tutup</button>
+                <button onclick="saveEditedFile()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== KAMERA ===================== -->
+    <div class="card">
+        <h2>📷 Kamera</h2>
+        <video id="camera-video" autoplay playsinline muted></video>
+        <div class="row">
+            <button id="camera-toggle-btn" onclick="toggleCamera()">Buka Kamera</button>
+            <button class="secondary" onclick="switchCamera()" id="camera-switch-btn" disabled>Ganti Kamera</button>
+            <button class="secondary" onclick="capturePhoto()" id="camera-capture-btn" disabled>Ambil Foto</button>
+        </div>
+        <canvas id="photo-canvas" style="display:none;"></canvas>
+        <img id="photo-preview" alt="Hasil foto">
+        <p class="status" id="camera-status"></p>
+    </div>
+
+    <!-- ===================== SENTER ===================== -->
+    <div class="card">
+        <h2>🔦 Senter</h2>
+        <div class="row">
+            <button id="torch-toggle-btn" onclick="toggleTorch()">Nyalakan Senter</button>
+        </div>
+        <p class="status" id="torch-status"></p>
+    </div>
+
+    <!-- ===================== REKAM AUDIO ===================== -->
+    <div class="card">
+        <h2>🎙️ Rekam Audio</h2>
+        <div class="timer" id="rec-timer">00:00</div>
+        <div class="row">
+            <button onclick="toggleRecording()"><span class="rec-dot" id="rec-dot" style="display:none;"></span><span id="mic-btn-label">Mulai Rekam</span></button>
+        </div>
+        <audio id="mic-playback" controls></audio>
+        <p class="status" id="mic-status"></p>
+    </div>
+
+<script>
+    // =============================================================
+    // FILE MANAGER — pakai jembatan window.AndroidFiles dari MainActivity.java
+    // =============================================================
+
+    let currentPath = null;
+    let createMode = null; // 'file' | 'folder'
+    let editingFilePath = null;
+
+    function hasFileBridge() {
+        return !!(window.AndroidFiles && typeof window.AndroidFiles.listFiles === 'function');
+    }
+
+    function openFileManager() {
+        if (!hasFileBridge()) {
+            setFileStatus('Fitur ini cuma jalan di aplikasi Android hasil compile (butuh izin akses file).', 'err');
+            return;
+        }
+        const root = window.AndroidFiles.getRootPath();
+        loadFolder(root);
+    }
+
+    function goUpFolder() {
+        if (!currentPath) return;
+        try {
+            const result = JSON.parse(window.AndroidFiles.listFiles(currentPath));
+            if (result.parent) loadFolder(result.parent);
+        } catch (e) {
+            setFileStatus('Gagal naik folder: ' + e.message, 'err');
+        }
+    }
+
+    function loadFolder(path) {
+        try {
+            const raw = window.AndroidFiles.listFiles(path);
+            const result = JSON.parse(raw);
+
+            if (result.error) {
+                setFileStatus(result.error, 'err');
+                return;
+            }
+
+            currentPath = result.path;
+            document.getElementById('current-path').textContent = currentPath;
+
+            const files = result.files.sort((a, b) => {
+                if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
+                return a.name.localeCompare(b.name);
+            });
+
+            const listEl = document.getElementById('file-list');
+            if (files.length === 0) {
+                listEl.innerHTML = '<p class="empty">Folder kosong.</p>';
+                return;
+            }
+
+            listEl.innerHTML = files.map(f => {
+                const icon = f.isDirectory ? '📁' : guessFileIcon(f.name);
+                const meta = f.isDirectory ? 'Folder' : formatBytes(f.size);
+                return `
+                <div class="file-item">
+                    <div class="icon" onclick="handleItemTap('${escapeAttr(f.path)}', ${f.isDirectory})">${icon}</div>
+                    <div class="info" onclick="handleItemTap('${escapeAttr(f.path)}', ${f.isDirectory})">
+                        <div class="name">${escapeHtml(f.name)}</div>
+                        <div class="meta">${meta}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="secondary" onclick="renameItem('${escapeAttr(f.path)}')">✏️</button>
+                        <button class="danger" onclick="deleteItem('${escapeAttr(f.path)}')">🗑️</button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            setFileStatus('', '');
+        } catch (e) {
+            setFileStatus('Gagal buka folder: ' + e.message, 'err');
+        }
+    }
+
+    function handleItemTap(path, isDirectory) {
+        if (isDirectory) {
+            loadFolder(path);
+        } else {
+            openFileForEdit(path);
+        }
+    }
+
+    function guessFileIcon(name) {
+        const ext = name.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','bmp'].includes(ext)) return '🖼️';
+        if (['mp4','mkv','mov','avi'].includes(ext)) return '🎬';
+        if (['mp3','wav','m4a','ogg'].includes(ext)) return '🎵';
+        if (['zip','rar','7z'].includes(ext)) return '🗜️';
+        if (['txt','md','json','xml','html','js','css','java','py'].includes(ext)) return '📄';
+        if (ext === 'apk') return '📦';
+        if (ext === 'pdf') return '📕';
+        return '📃';
+    }
+
+    function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function openFileForEdit(path) {
+        try {
+            const raw = window.AndroidFiles.readFile(path);
+            const result = JSON.parse(raw);
+
+            if (result.error) {
+                setFileStatus(result.error, 'err');
+                return;
+            }
+
+            editingFilePath = path;
+            document.getElementById('edit-modal-title').textContent = path.split('/').pop();
+            document.getElementById('edit-content-input').value = result.content;
+            document.getElementById('edit-modal').style.display = 'flex';
+        } catch (e) {
+            setFileStatus('Tidak bisa membuka file ini (mungkin bukan file teks): ' + e.message, 'err');
+        }
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').style.display = 'none';
+        editingFilePath = null;
+    }
+
+    function saveEditedFile() {
+        if (!editingFilePath) return;
+        const content = document.getElementById('edit-content-input').value;
+        const ok = window.AndroidFiles.writeFile(editingFilePath, content);
+        if (ok) {
+            setFileStatus('File tersimpan.', 'ok');
+            closeEditModal();
+            loadFolder(currentPath);
+        } else {
+            setFileStatus('Gagal menyimpan file.', 'err');
+        }
+    }
+
+    function showCreateModal(mode) {
+        if (!currentPath) {
+            setFileStatus('Buka folder dulu.', 'err');
+            return;
+        }
+        createMode = mode;
+        document.getElementById('create-modal-title').textContent = mode === 'folder' ? 'Buat Folder Baru' : 'Buat File Baru';
+        document.getElementById('create-name-input').value = '';
+        document.getElementById('create-modal').style.display = 'flex';
+    }
+
+    function closeCreateModal() {
+        document.getElementById('create-modal').style.display = 'none';
+    }
+
+    function confirmCreate() {
+        const name = document.getElementById('create-name-input').value.trim();
+        if (!name) {
+            setFileStatus('Nama wajib diisi.', 'err');
+            return;
+        }
+        const fullPath = currentPath + '/' + name;
+        const ok = createMode === 'folder'
+            ? window.AndroidFiles.createFolder(fullPath)
+            : window.AndroidFiles.writeFile(fullPath, '');
+
+        if (ok) {
+            setFileStatus((createMode === 'folder' ? 'Folder' : 'File') + ' berhasil dibuat.', 'ok');
+            closeCreateModal();
+            loadFolder(currentPath);
+        } else {
+            setFileStatus('Gagal membuat ' + (createMode === 'folder' ? 'folder' : 'file') + '.', 'err');
+        }
+    }
+
+    function renameItem(path) {
+        const oldName = path.split('/').pop();
+        const newName = prompt('Nama baru:', oldName);
+        if (!newName || newName.trim() === '' || newName === oldName) return;
+
+        const newPath = path.substring(0, path.lastIndexOf('/') + 1) + newName.trim();
+        const ok = window.AndroidFiles.renameFile(path, newPath);
+        if (ok) {
+            setFileStatus('Berhasil diubah namanya.', 'ok');
+            loadFolder(currentPath);
+        } else {
+            setFileStatus('Gagal mengubah nama.', 'err');
+        }
+    }
+
+    function deleteItem(path) {
+        const name = path.split('/').pop();
+        if (!confirm(`Hapus "${name}"? Tidak bisa dibatalkan.`)) return;
+
+        const ok = window.AndroidFiles.deleteFile(path);
+        if (ok) {
+            setFileStatus('Berhasil dihapus.', 'ok');
+            loadFolder(currentPath);
+        } else {
+            setFileStatus('Gagal menghapus.', 'err');
+        }
+    }
+
+    function setFileStatus(msg, type) {
+        const el = document.getElementById('file-status');
+        el.textContent = msg;
+        el.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function escapeAttr(str) {
+        return String(str).replace(/'/g, "\\'");
+    }
+
+    // =============================================================
+    // KAMERA
+    // =============================================================
+
+    let cameraStream = null;
+    let currentFacingMode = 'environment';
+
+    async function toggleCamera() {
+        if (cameraStream) { stopCamera(); return; }
+        await startCamera(currentFacingMode);
+    }
+
+    async function startCamera(facingMode) {
+        try {
+            setStatus('camera-status', 'Membuka kamera...', '');
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: facingMode } }, audio: false });
+            cameraStream = stream;
+            currentFacingMode = facingMode;
+            document.getElementById('camera-video').srcObject = stream;
+            document.getElementById('camera-toggle-btn').textContent = 'Tutup Kamera';
+            document.getElementById('camera-switch-btn').disabled = false;
+            document.getElementById('camera-capture-btn').disabled = false;
+            setStatus('camera-status', 'Kamera aktif.', 'ok');
+        } catch (err) {
+            setStatus('camera-status', 'Gagal buka kamera: ' + err.message, 'err');
+        }
+    }
+
+    function stopCamera() {
+        if (!cameraStream) return;
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+        document.getElementById('camera-video').srcObject = null;
+        document.getElementById('camera-toggle-btn').textContent = 'Buka Kamera';
+        document.getElementById('camera-switch-btn').disabled = true;
+        document.getElementById('camera-capture-btn').disabled = true;
+        setStatus('camera-status', 'Kamera ditutup.', '');
+    }
+
+    async function switchCamera() {
+        const next = currentFacingMode === 'environment' ? 'user' : 'environment';
+        stopCamera();
+        await startCamera(next);
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('camera-video');
+        const canvas = document.getElementById('photo-canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/png');
+        const preview = document.getElementById('photo-preview');
+        preview.src = dataUrl;
+        preview.style.display = 'block';
+        setStatus('camera-status', 'Foto berhasil diambil.', 'ok');
+    }
+
+    // =============================================================
+    // SENTER
+    // =============================================================
+
+    let torchStream = null;
+    let torchOn = false;
+
+    async function toggleTorch() {
+        try {
+            let track;
+            if (cameraStream && currentFacingMode === 'environment') {
+                track = cameraStream.getVideoTracks()[0];
+            } else {
+                if (!torchStream) {
+                    torchStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+                }
+                track = torchStream.getVideoTracks()[0];
+            }
+
+            const caps = track.getCapabilities ? track.getCapabilities() : {};
+            if (!caps.torch) {
+                setStatus('torch-status', 'Perangkat/browser ini tidak mendukung kontrol senter lewat web.', 'err');
+                return;
+            }
+
+            torchOn = !torchOn;
+            await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+            document.getElementById('torch-toggle-btn').textContent = torchOn ? 'Matikan Senter' : 'Nyalakan Senter';
+            setStatus('torch-status', torchOn ? 'Senter menyala.' : 'Senter mati.', 'ok');
+        } catch (err) {
+            setStatus('torch-status', 'Gagal mengatur senter: ' + err.message, 'err');
+        }
+    }
+
+    // =============================================================
+    // REKAM AUDIO
+    // =============================================================
+
+    let mediaRecorder = null, recordedChunks = [], micStream = null, recordTimerInterval = null, recordSeconds = 0;
+
+    async function toggleRecording() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') stopRecording();
+        else await startRecording();
+    }
+
+    async function startRecording() {
+        try {
+            micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recordedChunks = [];
+            mediaRecorder = new MediaRecorder(micStream);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const url = URL.createObjectURL(blob);
+                const audioEl = document.getElementById('mic-playback');
+                audioEl.src = url;
+                audioEl.style.display = 'block';
+                micStream.getTracks().forEach(t => t.stop());
+                setStatus('mic-status', 'Rekaman selesai.', 'ok');
+            };
+            mediaRecorder.start();
+            recordSeconds = 0;
+            updateRecTimer();
+            recordTimerInterval = setInterval(updateRecTimer, 1000);
+            document.getElementById('mic-btn-label').textContent = 'Stop Rekam';
+            document.getElementById('rec-dot').style.display = 'inline-block';
+            document.getElementById('rec-timer').style.display = 'block';
+            setStatus('mic-status', 'Sedang merekam...', 'ok');
+        } catch (err) {
+            setStatus('mic-status', 'Gagal akses mikrofon: ' + err.message, 'err');
+        }
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+        clearInterval(recordTimerInterval);
+        document.getElementById('mic-btn-label').textContent = 'Mulai Rekam';
+        document.getElementById('rec-dot').style.display = 'none';
+    }
+
+    function updateRecTimer() {
+        recordSeconds++;
+        const m = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+        const s = String(recordSeconds % 60).padStart(2, '0');
+        document.getElementById('rec-timer').textContent = `${m}:${s}`;
+    }
+
+    function setStatus(elId, msg, type) {
+        const el = document.getElementById(elId);
+        el.textContent = msg;
+        el.className = 'status' + (type ? ' ' + type : '');
+    }
+</script>
+</body>
+</html>
