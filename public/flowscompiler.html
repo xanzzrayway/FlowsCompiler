@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flows Compiler</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS SDK (buat login Google & simpan limit per akun) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    
+    <link rel="stylesheet" href="flowscompiler.css">
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-8">
+    <!-- Tombol & Popup Pilihan Bahasa/Negara -->
+    <div class="fixed top-4 right-4 z-[60]">
+        <button onclick="toggleLangModal()" id="lang-trigger-btn" class="flex items-center gap-2 bg-white border border-slate-200 shadow-sm px-3 py-2 rounded-full text-xs font-bold text-slate-600 hover:border-slate-300 transition-all">
+            <span id="lang-current-flag">🇮🇩</span>
+            <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+        </button>
+
+        <div id="lang-modal" class="hidden absolute right-0 mt-2 w-64 max-h-80 overflow-y-auto hide-scrollbar bg-white border border-slate-100 rounded-2xl shadow-2xl p-2">
+                <button onclick="setLanguage('id', '🇮🇩')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇮🇩</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Indonesia</span>
+                        <span class="block text-[10px] text-slate-400">Bahasa Indonesia</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('en', '🇺🇸')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇺🇸</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Amerika Serikat</span>
+                        <span class="block text-[10px] text-slate-400">English (US)</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('en', '🇬🇧')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇬🇧</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Inggris (UK)</span>
+                        <span class="block text-[10px] text-slate-400">English (UK)</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('ms', '🇲🇾')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇲🇾</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Malaysia</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('en', '🇸🇬')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇸🇬</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Singapura</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('hi', '🇮🇳')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇮🇳</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">India</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('ja', '🇯🇵')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇯🇵</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Jepang</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('ko', '🇰🇷')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇰🇷</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Korea Selatan</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('zh', '🇨🇳')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇨🇳</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">China</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('ar', '🇸🇦')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇸🇦</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Arab Saudi</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('de', '🇩🇪')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇩🇪</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Jerman</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('fr', '🇫🇷')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇫🇷</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Prancis</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('es', '🇪🇸')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇪🇸</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Spanyol</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('pt', '🇧🇷')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇧🇷</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Brasil</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('pt', '🇵🇹')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇵🇹</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Portugal</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('ru', '🇷🇺')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇷🇺</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Rusia</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('vi', '🇻🇳')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇻🇳</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Vietnam</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('th', '🇹🇭')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇹🇭</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Thailand</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('tl', '🇵🇭')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇵🇭</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Filipina</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+                <button onclick="setLanguage('nl', '🇳🇱')" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all text-left">
+                    <span class="text-xl">🇳🇱</span>
+                    <span class="flex-1">
+                        <span class="block text-xs font-bold text-slate-700">Belanda</span>
+                        <span class="block text-[10px] text-slate-400">English</span>
+                    </span>
+                </button>
+        </div>
+    </div>
+
+
+    <!-- ================= SCREEN 1: LOGIN ================= -->
+    <div id="screen-login" class="screen w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8 flex flex-col gap-6">
+        <div class="flex flex-col items-center text-center gap-2">
+            <div class="w-12 h-12 bg-green-500 rounded-2xl flex items-center justify-center text-white btn-glow mb-2">
+                <i class="fa-solid fa-cubes text-2xl"></i>
+            </div>
+            <h1 class="font-extrabold text-2xl text-slate-800 tracking-tight" data-i18n="login_title">Login Ke Flows Compiler</h1>
+            <p class="text-xs text-slate-500" data-i18n="login_subtitle">Mulai kompilasi link dan file HTML lu jadi APK dengan mudah</p>
+        </div>
+
+        <div class="space-y-3">
+            <!-- Google Login Button (Supabase OAuth) -->
+            <button id="google-login-btn" onclick="loginWithGoogle()" class="w-full py-3 px-4 border border-slate-200 rounded-2xl font-bold text-sm text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-center gap-3">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.47 15 0 12 0 7.35 0 3.37 2.67 1.41 6.57l3.86 3C6.2 6.78 8.9 5.04 12 5.04z"/>
+                    <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.4 3.58l3.76 2.91c2.2-2.02 3.67-5 3.67-8.64z"/>
+                    <path fill="#FBBC05" d="M5.27 14.43c-.25-.74-.39-1.53-.39-2.35s.14-1.61.39-2.35L1.41 6.73C.51 8.52 0 10.5 0 12.5s.51 3.98 1.41 5.77l3.86-3.07z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.76-2.91c-1.04.7-2.38 1.12-4.2 1.12-3.1 0-5.8-1.74-6.73-4.53l-3.86 3c1.96 3.9 5.94 6.57 10.27 6.57z"/>
+                </svg>
+                <span data-i18n="login_google_btn">Login Dengan Google</span>
+            </button>
+            <p class="text-[10px] text-slate-400 text-center"></p>
+        </div>
+    </div>
+
+
+    <!-- ================= SCREEN 3: COMPILER APP ================= -->
+    <div id="screen-compiler" class="screen hidden w-full max-w-4xl bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden flex flex-col md:flex-row">
+        
+        <!-- Left Side: Main Form Configuration -->
+        <div class="flex-1 p-6 md:p-8 border-b md:border-b-0 md:border-r border-slate-100">
+            <!-- Header/Logo -->
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white btn-glow">
+                        <i class="fa-solid fa-cubes text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-xl text-slate-800 tracking-tight">Flows Compiler</h1>
+                        <p class="text-xs font-semibold text-green-600" data-i18n="tagline">Compile Link/file ke Apk</p>
+                    </div>
+                </div>
+                <!-- Logged In Badge -->
+                <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
+                    <i class="fa-solid fa-circle-user text-slate-500 text-sm"></i>
+                    <span id="user-display-name" class="text-[10px] font-bold text-slate-600">Guest</span>
+                    <button onclick="logoutSession()" class="text-slate-400 hover:text-red-500 ml-1" title="Keluar">
+                        <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-5">
+                <!-- App Name Input -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2" data-i18n="label_app_name">Nama Aplikasi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </span>
+                        <input type="text" id="input-app-name" placeholder="Contoh: Aplikasi Keren Gue" data-i18n-placeholder="ph_app_name"
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus-glow transition-all text-slate-700 font-medium">
+                    </div>
+                </div>
+
+                <!-- Package Name Input -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2" data-i18n="label_package_name">Nama Package</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </span>
+                        <input type="text" id="input-package-name" placeholder="com.bidzqwerty.myapp" 
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus-glow transition-all text-slate-700 font-medium">
+                    </div>
+                </div>
+
+                <!-- Version Input -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2" data-i18n="label_version">Versi Aplikasi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-code-branch"></i>
+                        </span>
+                        <input type="text" id="input-version" value="1.0.0" placeholder="Custom Versi (e.g. 1.0.0)" 
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus-glow transition-all text-slate-700 font-medium">
+                    </div>
+                </div>
+
+                <!-- Content Source Tabs -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2" data-i18n="label_source">Sumber Konten</label>
+                    <div class="grid grid-cols-3 gap-2 bg-slate-100 p-1 rounded-xl">
+                        <button onclick="switchTab('link')" id="tab-link" class="tab-btn py-2 text-xs font-bold rounded-lg text-green-600 bg-white shadow-sm transition-all">
+                            <i class="fa-solid fa-link mr-1"></i> Link
+                        </button>
+                        <button onclick="switchTab('html')" id="tab-html" class="tab-btn py-2 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-800 transition-all">
+                            <i class="fa-solid fa-code mr-1"></i> File Html
+                        </button>
+                        <button onclick="switchTab('zip')" id="tab-zip" class="tab-btn py-2 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-800 transition-all">
+                            <i class="fa-solid fa-file-zipper mr-1"></i> Zip
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Input based on tab -->
+                    <div class="mt-3">
+                        <!-- Link Input (Default) -->
+                        <div id="input-link" class="tab-content relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                <i class="fa-solid fa-globe"></i>
+                            </span>
+                            <input type="url" id="input-link-url" placeholder="https://example.com" 
+                                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus-glow transition-all text-slate-700">
+                        </div>
+
+                        <!-- HTML File Input (Hidden) -->
+                        <div id="input-html" class="tab-content hidden">
+                            <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <div id="html-upload-prompt" class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <i class="fa-solid fa-file-code text-slate-400 text-lg mb-1"></i>
+                                    <p class="text-xs text-slate-500 font-medium">Klik untuk upload file <span class="font-bold text-green-500">index.html</span></p>
+                                </div>
+                                <div id="html-upload-selected" class="hidden flex-col items-center justify-center text-center px-2">
+                                    <i class="fa-solid fa-circle-check text-green-500 text-lg mb-1"></i>
+                                    <p id="html-file-name" class="text-xs text-slate-700 font-bold truncate max-w-[220px]"></p>
+                                    <p class="text-[10px] text-green-600 font-semibold mt-0.5">File siap dipakai</p>
+                                </div>
+                                <input type="file" id="input-html-file" accept=".html,.htm,text/html" class="hidden" onchange="handleFileSelected(this, 'html')" />
+                            </label>
+                        </div>
+
+                        <!-- Zip File Input (Hidden) -->
+                        <div id="input-zip" class="tab-content hidden">
+                            <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <div id="zip-upload-prompt" class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <i class="fa-solid fa-file-archive text-slate-400 text-lg mb-1"></i>
+                                    <p class="text-xs text-slate-500 font-medium">Klik untuk upload file <span class="font-bold text-green-500">project.zip</span></p>
+                                </div>
+                                <div id="zip-upload-selected" class="hidden flex-col items-center justify-center text-center px-2">
+                                    <i class="fa-solid fa-circle-check text-green-500 text-lg mb-1"></i>
+                                    <p id="zip-file-name" class="text-xs text-slate-700 font-bold truncate max-w-[220px]"></p>
+                                    <p class="text-[10px] text-green-600 font-semibold mt-0.5">File siap dipakai</p>
+                                </div>
+                                <input type="file" id="input-zip-file" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" class="hidden" onchange="handleFileSelected(this, 'zip')" />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                                                <!-- App Permissions (Scrollable Box, Lengkap dengan nama asli + pencarian) -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider" data-i18n="label_permissions">Perizinan Aplikasi</label>
+                        <span class="text-[10px] text-slate-400 font-medium"><span id="perm-count">1</span> <span data-i18n="perm_selected_suffix">dipilih</span></span>
+                    </div>
+
+                    <div class="relative mb-2">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+                        <input type="text" id="perm-search-input" oninput="filterPermissions()" data-i18n-placeholder="perm_search_placeholder" placeholder="Cari izin... (mis: kamera / CAMERA)"
+                            class="w-full pl-8 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] focus-glow transition-all text-slate-700">
+                        <button type="button" onclick="clearPermSearch()" id="perm-search-clear" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
+                            <i class="fa-solid fa-circle-xmark text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div id="permissions-box" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-64 overflow-y-auto hide-scrollbar p-2 border border-slate-200 rounded-2xl bg-slate-50/50">
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="INTERNET" data-label-id="Internet" data-label-en="Internet" checked>
+                            <i class="fa-solid fa-wifi text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Internet</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">INTERNET</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ACCESS_NETWORK_STATE" data-label-id="Cek Status Jaringan" data-label-en="Check Network State">
+                            <i class="fa-solid fa-signal text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Cek Status Jaringan</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ACCESS_NETWORK_STATE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ACCESS_WIFI_STATE" data-label-id="Cek Status WiFi" data-label-en="Check WiFi State">
+                            <i class="fa-solid fa-wifi text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Cek Status WiFi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ACCESS_WIFI_STATE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="CHANGE_WIFI_STATE" data-label-id="Ubah Status WiFi" data-label-en="Change WiFi State">
+                            <i class="fa-solid fa-wifi text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Status WiFi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">CHANGE_WIFI_STATE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="CHANGE_NETWORK_STATE" data-label-id="Ubah Status Jaringan" data-label-en="Change Network State">
+                            <i class="fa-solid fa-network-wired text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Status Jaringan</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">CHANGE_NETWORK_STATE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="CAMERA" data-label-id="Kamera" data-label-en="Camera">
+                            <i class="fa-solid fa-camera text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kamera</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">CAMERA</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="RECORD_AUDIO" data-label-id="Rekam Audio" data-label-en="Record Audio">
+                            <i class="fa-solid fa-microphone text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Rekam Audio</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">RECORD_AUDIO</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ACCESS_FINE_LOCATION" data-label-id="Lokasi Presisi (GPS)" data-label-en="Precise Location (GPS)">
+                            <i class="fa-solid fa-location-crosshairs text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Lokasi Presisi (GPS)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ACCESS_FINE_LOCATION</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ACCESS_COARSE_LOCATION" data-label-id="Lokasi Perkiraan" data-label-en="Approximate Location">
+                            <i class="fa-solid fa-location-dot text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Lokasi Perkiraan</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ACCESS_COARSE_LOCATION</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ACCESS_BACKGROUND_LOCATION" data-label-id="Lokasi Latar Belakang" data-label-en="Background Location">
+                            <i class="fa-solid fa-location-arrow text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Lokasi Latar Belakang</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ACCESS_BACKGROUND_LOCATION</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_EXTERNAL_STORAGE" data-label-id="Baca File/Storage" data-label-en="Read File/Storage">
+                            <i class="fa-solid fa-folder-open text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca File/Storage</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_EXTERNAL_STORAGE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="WRITE_EXTERNAL_STORAGE" data-label-id="Tulis File/Storage" data-label-en="Write File/Storage">
+                            <i class="fa-solid fa-floppy-disk text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Tulis File/Storage</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">WRITE_EXTERNAL_STORAGE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="MANAGE_EXTERNAL_STORAGE" data-label-id="Kelola Semua File (Akses Penuh)" data-label-en="Manage All Files (Full Access)">
+                            <i class="fa-solid fa-hard-drive text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kelola Semua File (Akses Penuh)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">MANAGE_EXTERNAL_STORAGE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_MEDIA_IMAGES" data-label-id="Akses Galeri Foto" data-label-en="Access Photo Gallery">
+                            <i class="fa-solid fa-image text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Akses Galeri Foto</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_MEDIA_IMAGES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_MEDIA_VIDEO" data-label-id="Akses Galeri Video" data-label-en="Access Video Gallery">
+                            <i class="fa-solid fa-video text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Akses Galeri Video</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_MEDIA_VIDEO</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_MEDIA_AUDIO" data-label-id="Akses File Audio" data-label-en="Access Audio Files">
+                            <i class="fa-solid fa-music text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Akses File Audio</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_MEDIA_AUDIO</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="POST_NOTIFICATIONS" data-label-id="Kirim Notifikasi" data-label-en="Post Notifications">
+                            <i class="fa-solid fa-bell text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kirim Notifikasi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">POST_NOTIFICATIONS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="USE_FULL_SCREEN_INTENT" data-label-id="Notifikasi Layar Penuh" data-label-en="Full-Screen Notifications">
+                            <i class="fa-solid fa-expand text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Notifikasi Layar Penuh</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">USE_FULL_SCREEN_INTENT</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="VIBRATE" data-label-id="Getar (Vibrate)" data-label-en="Vibrate">
+                            <i class="fa-solid fa-mobile-screen-button text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Getar (Vibrate)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">VIBRATE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="WAKE_LOCK" data-label-id="Cegah Layar Mati" data-label-en="Prevent Screen Sleep">
+                            <i class="fa-solid fa-lightbulb text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Cegah Layar Mati</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">WAKE_LOCK</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="FOREGROUND_SERVICE" data-label-id="Layanan Latar Depan" data-label-en="Foreground Service">
+                            <i class="fa-solid fa-arrows-spin text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Layanan Latar Depan</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">FOREGROUND_SERVICE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SYSTEM_ALERT_WINDOW" data-label-id="Aplikasi di Atas Aplikasi Lain" data-label-en="Draw Over Other Apps">
+                            <i class="fa-solid fa-layer-group text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Aplikasi di Atas Aplikasi Lain</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SYSTEM_ALERT_WINDOW</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SCHEDULE_EXACT_ALARM" data-label-id="Jadwalkan Alarm Presisi" data-label-en="Schedule Exact Alarm">
+                            <i class="fa-solid fa-stopwatch text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Jadwalkan Alarm Presisi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SCHEDULE_EXACT_ALARM</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="RECEIVE_BOOT_COMPLETED" data-label-id="Jalan Otomatis Saat Boot" data-label-en="Run Automatically on Boot">
+                            <i class="fa-solid fa-power-off text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Jalan Otomatis Saat Boot</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">RECEIVE_BOOT_COMPLETED</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_CONTACTS" data-label-id="Baca Kontak" data-label-en="Read Contacts">
+                            <i class="fa-solid fa-address-book text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Kontak</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_CONTACTS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="WRITE_CONTACTS" data-label-id="Tulis Kontak" data-label-en="Write Contacts">
+                            <i class="fa-solid fa-address-card text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Tulis Kontak</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">WRITE_CONTACTS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="GET_ACCOUNTS" data-label-id="Lihat Akun di Perangkat" data-label-en="Get Device Accounts">
+                            <i class="fa-solid fa-user-group text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Lihat Akun di Perangkat</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">GET_ACCOUNTS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="CALL_PHONE" data-label-id="Melakukan Panggilan" data-label-en="Make Phone Calls">
+                            <i class="fa-solid fa-phone text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Melakukan Panggilan</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">CALL_PHONE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ANSWER_PHONE_CALLS" data-label-id="Jawab Panggilan Otomatis" data-label-en="Answer Phone Calls">
+                            <i class="fa-solid fa-phone-volume text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Jawab Panggilan Otomatis</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ANSWER_PHONE_CALLS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_PHONE_STATE" data-label-id="Baca Status Telepon" data-label-en="Read Phone State">
+                            <i class="fa-solid fa-mobile-retro text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Status Telepon</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_PHONE_STATE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_CALL_LOG" data-label-id="Baca Log Panggilan" data-label-en="Read Call Log">
+                            <i class="fa-solid fa-clock text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Log Panggilan</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_CALL_LOG</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SEND_SMS" data-label-id="Kirim SMS" data-label-en="Send SMS">
+                            <i class="fa-solid fa-paper-plane text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kirim SMS</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SEND_SMS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="RECEIVE_SMS" data-label-id="Terima SMS" data-label-en="Receive SMS">
+                            <i class="fa-solid fa-envelope text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Terima SMS</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">RECEIVE_SMS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_SMS" data-label-id="Baca SMS" data-label-en="Read SMS">
+                            <i class="fa-solid fa-envelope-open-text text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca SMS</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_SMS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BLUETOOTH_CONNECT" data-label-id="Koneksi Bluetooth" data-label-en="Bluetooth Connect">
+                            <i class="fa-solid fa-bluetooth-b text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Koneksi Bluetooth</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BLUETOOTH_CONNECT</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BLUETOOTH_SCAN" data-label-id="Scan Bluetooth" data-label-en="Bluetooth Scan">
+                            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Scan Bluetooth</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BLUETOOTH_SCAN</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="NFC" data-label-id="NFC" data-label-en="NFC">
+                            <i class="fa-solid fa-wave-square text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">NFC</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">NFC</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="USE_BIOMETRIC" data-label-id="Biometrik (Sidik Jari/Wajah)" data-label-en="Biometric (Fingerprint/Face)">
+                            <i class="fa-solid fa-fingerprint text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Biometrik (Sidik Jari/Wajah)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">USE_BIOMETRIC</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BODY_SENSORS" data-label-id="Sensor Tubuh (Detak Jantung dll)" data-label-en="Body Sensors (Heart Rate etc.)">
+                            <i class="fa-solid fa-heart-pulse text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Sensor Tubuh (Detak Jantung dll)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BODY_SENSORS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ACTIVITY_RECOGNITION" data-label-id="Deteksi Aktivitas Fisik" data-label-en="Activity Recognition">
+                            <i class="fa-solid fa-person-walking text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Deteksi Aktivitas Fisik</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ACTIVITY_RECOGNITION</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="MODIFY_AUDIO_SETTINGS" data-label-id="Ubah Pengaturan Audio" data-label-en="Modify Audio Settings">
+                            <i class="fa-solid fa-volume-high text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Pengaturan Audio</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">MODIFY_AUDIO_SETTINGS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_CALENDAR" data-label-id="Baca Kalender" data-label-en="Read Calendar">
+                            <i class="fa-solid fa-calendar-days text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Kalender</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_CALENDAR</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="WRITE_CALENDAR" data-label-id="Tulis Kalender" data-label-en="Write Calendar">
+                            <i class="fa-solid fa-calendar-plus text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Tulis Kalender</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">WRITE_CALENDAR</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SET_WALLPAPER" data-label-id="Ubah Wallpaper" data-label-en="Set Wallpaper">
+                            <i class="fa-solid fa-image text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Wallpaper</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SET_WALLPAPER</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="EXPAND_STATUS_BAR" data-label-id="Perluas Status Bar" data-label-en="Expand Status Bar">
+                            <i class="fa-solid fa-bars text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Perluas Status Bar</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">EXPAND_STATUS_BAR</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="DISABLE_KEYGUARD" data-label-id="Nonaktifkan Kunci Layar" data-label-en="Disable Keyguard">
+                            <i class="fa-solid fa-lock-open text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Nonaktifkan Kunci Layar</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">DISABLE_KEYGUARD</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="REORDER_TASKS" data-label-id="Atur Ulang Aplikasi Terbaru" data-label-en="Reorder Recent Tasks">
+                            <i class="fa-solid fa-list text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Atur Ulang Aplikasi Terbaru</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">REORDER_TASKS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="KILL_BACKGROUND_PROCESSES" data-label-id="Hentikan Proses App Lain" data-label-en="Kill Background Processes">
+                            <i class="fa-solid fa-ban text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Hentikan Proses App Lain</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">KILL_BACKGROUND_PROCESSES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="REQUEST_INSTALL_PACKAGES" data-label-id="Install Aplikasi Lain" data-label-en="Install Other Apps">
+                            <i class="fa-solid fa-download text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Install Aplikasi Lain</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">REQUEST_INSTALL_PACKAGES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="QUERY_ALL_PACKAGES" data-label-id="Lihat Semua Aplikasi Terinstall" data-label-en="Query All Installed Apps">
+                            <i class="fa-solid fa-list-check text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Lihat Semua Aplikasi Terinstall</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">QUERY_ALL_PACKAGES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ADD_VOICEMAIL" data-label-id="Tambah Voicemail" data-label-en="Add Voicemail">
+                            <i class="fa-solid fa-voicemail text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Tambah Voicemail</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ADD_VOICEMAIL</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ACCESS_LOCATION_EXTRA_COMMANDS" data-label-id="Perintah Tambahan Lokasi" data-label-en="Extra Location Commands">
+                            <i class="fa-solid fa-location-crosshairs text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Perintah Tambahan Lokasi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ACCESS_LOCATION_EXTRA_COMMANDS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ACCESS_MEDIA_LOCATION" data-label-id="Akses Lokasi dari Metadata Media" data-label-en="Access Media Location Metadata">
+                            <i class="fa-solid fa-map-pin text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Akses Lokasi dari Metadata Media</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ACCESS_MEDIA_LOCATION</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ACCESS_NOTIFICATION_POLICY" data-label-id="Akses Kebijakan Notifikasi (Do Not Disturb)" data-label-en="Access Notification Policy (DND)">
+                            <i class="fa-solid fa-bell-slash text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Akses Kebijakan Notifikasi (Do Not Disturb)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ACCESS_NOTIFICATION_POLICY</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="ACCEPT_HANDOVER" data-label-id="Terima Alih Panggilan" data-label-en="Accept Call Handover">
+                            <i class="fa-solid fa-phone-flip text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Terima Alih Panggilan</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">ACCEPT_HANDOVER</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BATTERY_STATS" data-label-id="Baca Statistik Baterai" data-label-en="Read Battery Stats">
+                            <i class="fa-solid fa-battery-half text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Statistik Baterai</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BATTERY_STATS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BIND_ACCESSIBILITY_SERVICE" data-label-id="Layanan Aksesibilitas (Sistem)" data-label-en="Accessibility Service (System)">
+                            <i class="fa-solid fa-universal-access text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Layanan Aksesibilitas (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BIND_ACCESSIBILITY_SERVICE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BIND_NOTIFICATION_LISTENER_SERVICE" data-label-id="Dengar Notifikasi Aplikasi Lain (Sistem)" data-label-en="Notification Listener (System)">
+                            <i class="fa-solid fa-bell text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Dengar Notifikasi Aplikasi Lain (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BIND_NOTIFICATION_LISTENER_SERVICE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BIND_VPN_SERVICE" data-label-id="Layanan VPN (Sistem)" data-label-en="VPN Service (System)">
+                            <i class="fa-solid fa-shield-halved text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Layanan VPN (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BIND_VPN_SERVICE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BIND_WALLPAPER" data-label-id="Layanan Wallpaper Hidup (Sistem)" data-label-en="Live Wallpaper Service (System)">
+                            <i class="fa-solid fa-image text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Layanan Wallpaper Hidup (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BIND_WALLPAPER</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BLUETOOTH" data-label-id="Bluetooth (Legacy)" data-label-en="Bluetooth (Legacy)">
+                            <i class="fa-solid fa-bluetooth text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Bluetooth (Legacy)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BLUETOOTH</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BLUETOOTH_ADMIN" data-label-id="Kelola Bluetooth (Legacy)" data-label-en="Manage Bluetooth (Legacy)">
+                            <i class="fa-solid fa-bluetooth text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kelola Bluetooth (Legacy)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BLUETOOTH_ADMIN</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BLUETOOTH_ADVERTISE" data-label-id="Siarkan Sinyal Bluetooth" data-label-en="Bluetooth Advertise">
+                            <i class="fa-solid fa-tower-broadcast text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Siarkan Sinyal Bluetooth</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BLUETOOTH_ADVERTISE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BODY_SENSORS_BACKGROUND" data-label-id="Sensor Tubuh di Latar Belakang" data-label-en="Body Sensors in Background">
+                            <i class="fa-solid fa-heart-pulse text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Sensor Tubuh di Latar Belakang</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BODY_SENSORS_BACKGROUND</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="BROADCAST_STICKY" data-label-id="Kirim Broadcast Sticky" data-label-en="Send Sticky Broadcast">
+                            <i class="fa-solid fa-tower-broadcast text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kirim Broadcast Sticky</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">BROADCAST_STICKY</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="CAPTURE_AUDIO_OUTPUT" data-label-id="Tangkap Output Audio (Sistem)" data-label-en="Capture Audio Output (System)">
+                            <i class="fa-solid fa-volume-high text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Tangkap Output Audio (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">CAPTURE_AUDIO_OUTPUT</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="CHANGE_COMPONENT_ENABLED_STATE" data-label-id="Ubah Status Komponen Aplikasi (Sistem)" data-label-en="Change Component Enabled State (System)">
+                            <i class="fa-solid fa-toggle-on text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Status Komponen Aplikasi (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">CHANGE_COMPONENT_ENABLED_STATE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="CHANGE_CONFIGURATION" data-label-id="Ubah Konfigurasi Sistem" data-label-en="Change System Configuration">
+                            <i class="fa-solid fa-sliders text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Konfigurasi Sistem</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">CHANGE_CONFIGURATION</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="CLEAR_APP_CACHE" data-label-id="Bersihkan Cache Aplikasi Lain" data-label-en="Clear Other Apps' Cache">
+                            <i class="fa-solid fa-broom text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Bersihkan Cache Aplikasi Lain</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">CLEAR_APP_CACHE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="CONTROL_LOCATION_UPDATES" data-label-id="Kontrol Update Lokasi (Sistem)" data-label-en="Control Location Updates (System)">
+                            <i class="fa-solid fa-location-arrow text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kontrol Update Lokasi (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">CONTROL_LOCATION_UPDATES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="DELETE_CACHE_FILES" data-label-id="Hapus File Cache (Sistem)" data-label-en="Delete Cache Files (System)">
+                            <i class="fa-solid fa-trash text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Hapus File Cache (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">DELETE_CACHE_FILES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="DELETE_PACKAGES" data-label-id="Hapus Aplikasi Lain (Sistem)" data-label-en="Delete Other Apps (System)">
+                            <i class="fa-solid fa-trash-can text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Hapus Aplikasi Lain (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">DELETE_PACKAGES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="DUMP" data-label-id="Ambil Dump Status Sistem (Sistem)" data-label-en="Dump System State (System)">
+                            <i class="fa-solid fa-file-export text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ambil Dump Status Sistem (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">DUMP</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="FLASHLIGHT" data-label-id="Akses Senter (Legacy)" data-label-en="Flashlight Access (Legacy)">
+                            <i class="fa-solid fa-bolt text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Akses Senter (Legacy)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">FLASHLIGHT</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="GET_PACKAGE_SIZE" data-label-id="Lihat Ukuran Aplikasi Lain" data-label-en="Get Other Apps' Size">
+                            <i class="fa-solid fa-weight-hanging text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Lihat Ukuran Aplikasi Lain</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">GET_PACKAGE_SIZE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="GLOBAL_SEARCH" data-label-id="Pencarian Global (Sistem)" data-label-en="Global Search (System)">
+                            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Pencarian Global (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">GLOBAL_SEARCH</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="HIDE_OVERLAY_WINDOWS" data-label-id="Sembunyikan Overlay Aplikasi Lain" data-label-en="Hide Other Apps' Overlays">
+                            <i class="fa-solid fa-eye-slash text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Sembunyikan Overlay Aplikasi Lain</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">HIDE_OVERLAY_WINDOWS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="HIGH_SAMPLING_RATE_SENSORS" data-label-id="Sensor Sampling Rate Tinggi" data-label-en="High Sampling Rate Sensors">
+                            <i class="fa-solid fa-wave-square text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Sensor Sampling Rate Tinggi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">HIGH_SAMPLING_RATE_SENSORS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="INSTALL_LOCATION_PROVIDER" data-label-id="Pasang Penyedia Lokasi (Sistem)" data-label-en="Install Location Provider (System)">
+                            <i class="fa-solid fa-map-location-dot text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Pasang Penyedia Lokasi (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">INSTALL_LOCATION_PROVIDER</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="INSTALL_PACKAGES" data-label-id="Install Aplikasi (Sistem)" data-label-en="Install Packages (System)">
+                            <i class="fa-solid fa-box-open text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Install Aplikasi (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">INSTALL_PACKAGES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="INTERACT_ACROSS_PROFILES" data-label-id="Interaksi Lintas Profil Kerja" data-label-en="Interact Across Work Profiles">
+                            <i class="fa-solid fa-user-group text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Interaksi Lintas Profil Kerja</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">INTERACT_ACROSS_PROFILES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="LOADER_USAGE_STATS" data-label-id="Baca Statistik Penggunaan Aplikasi" data-label-en="Read App Usage Stats">
+                            <i class="fa-solid fa-chart-column text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Statistik Penggunaan Aplikasi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">LOADER_USAGE_STATS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="LOCATION_HARDWARE" data-label-id="Akses Hardware Lokasi (Sistem)" data-label-en="Location Hardware Access (System)">
+                            <i class="fa-solid fa-satellite-dish text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Akses Hardware Lokasi (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">LOCATION_HARDWARE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="MANAGE_ACCOUNTS" data-label-id="Kelola Akun (Legacy)" data-label-en="Manage Accounts (Legacy)">
+                            <i class="fa-solid fa-user-gear text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kelola Akun (Legacy)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">MANAGE_ACCOUNTS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="MANAGE_DOCUMENTS" data-label-id="Kelola Akses Dokumen (Sistem)" data-label-en="Manage Documents Access (System)">
+                            <i class="fa-solid fa-folder-tree text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kelola Akses Dokumen (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">MANAGE_DOCUMENTS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="MANAGE_OWN_CALLS" data-label-id="Kelola Panggilan Sendiri (VoIP)" data-label-en="Manage Own Calls (VoIP)">
+                            <i class="fa-solid fa-phone text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kelola Panggilan Sendiri (VoIP)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">MANAGE_OWN_CALLS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="MASTER_CLEAR" data-label-id="Reset Pabrik Perangkat (Sistem)" data-label-en="Factory Reset Device (System)">
+                            <i class="fa-solid fa-trash-arrow-up text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Reset Pabrik Perangkat (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">MASTER_CLEAR</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="MEDIA_CONTENT_CONTROL" data-label-id="Kontrol Pemutaran Media Sistem" data-label-en="Control System Media Playback">
+                            <i class="fa-solid fa-play text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kontrol Pemutaran Media Sistem</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">MEDIA_CONTENT_CONTROL</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="MODIFY_PHONE_STATE" data-label-id="Ubah Status Telepon (Sistem)" data-label-en="Modify Phone State (System)">
+                            <i class="fa-solid fa-phone-volume text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Status Telepon (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">MODIFY_PHONE_STATE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="MOUNT_FORMAT_FILESYSTEMS" data-label-id="Format Sistem File Eksternal (Sistem)" data-label-en="Format External Filesystems (System)">
+                            <i class="fa-solid fa-hard-drive text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Format Sistem File Eksternal (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">MOUNT_FORMAT_FILESYSTEMS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="MOUNT_UNMOUNT_FILESYSTEMS" data-label-id="Mount/Unmount Sistem File (Sistem)" data-label-en="Mount/Unmount Filesystems (System)">
+                            <i class="fa-solid fa-hard-drive text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Mount/Unmount Sistem File (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">MOUNT_UNMOUNT_FILESYSTEMS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="NFC_TRANSACTION_EVENT" data-label-id="Event Transaksi NFC" data-label-en="NFC Transaction Events">
+                            <i class="fa-solid fa-wave-square text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Event Transaksi NFC</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">NFC_TRANSACTION_EVENT</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="PACKAGE_USAGE_STATS" data-label-id="Statistik Penggunaan Paket Aplikasi" data-label-en="Package Usage Stats">
+                            <i class="fa-solid fa-chart-line text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Statistik Penggunaan Paket Aplikasi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">PACKAGE_USAGE_STATS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_BASIC_PHONE_STATE" data-label-id="Baca Status Dasar Telepon" data-label-en="Read Basic Phone State">
+                            <i class="fa-solid fa-mobile text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Status Dasar Telepon</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_BASIC_PHONE_STATE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_LOGS" data-label-id="Baca Log Sistem (Sistem)" data-label-en="Read System Logs (System)">
+                            <i class="fa-solid fa-file-lines text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Log Sistem (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_LOGS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_PHONE_NUMBERS" data-label-id="Baca Nomor Telepon Perangkat" data-label-en="Read Device Phone Numbers">
+                            <i class="fa-solid fa-phone text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Nomor Telepon Perangkat</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_PHONE_NUMBERS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_PRECISE_PHONE_STATE" data-label-id="Baca Status Telepon Presisi (Sistem)" data-label-en="Read Precise Phone State (System)">
+                            <i class="fa-solid fa-signal text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Status Telepon Presisi (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_PRECISE_PHONE_STATE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_SYNC_SETTINGS" data-label-id="Baca Pengaturan Sinkronisasi" data-label-en="Read Sync Settings">
+                            <i class="fa-solid fa-arrows-rotate text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Pengaturan Sinkronisasi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_SYNC_SETTINGS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_SYNC_STATS" data-label-id="Baca Statistik Sinkronisasi" data-label-en="Read Sync Statistics">
+                            <i class="fa-solid fa-arrows-rotate text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Statistik Sinkronisasi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_SYNC_STATS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="READ_VOICEMAIL" data-label-id="Baca Voicemail (Sistem)" data-label-en="Read Voicemail (System)">
+                            <i class="fa-solid fa-voicemail text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Baca Voicemail (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">READ_VOICEMAIL</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="REBOOT" data-label-id="Restart Perangkat (Sistem)" data-label-en="Reboot Device (System)">
+                            <i class="fa-solid fa-power-off text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Restart Perangkat (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">REBOOT</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="RECEIVE_MMS" data-label-id="Terima MMS" data-label-en="Receive MMS">
+                            <i class="fa-solid fa-comment-dots text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Terima MMS</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">RECEIVE_MMS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="RECEIVE_WAP_PUSH" data-label-id="Terima WAP Push" data-label-en="Receive WAP Push">
+                            <i class="fa-solid fa-comment-dots text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Terima WAP Push</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">RECEIVE_WAP_PUSH</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="REQUEST_COMPANION_RUN_IN_BACKGROUND" data-label-id="Companion Device: Jalan di Latar Belakang" data-label-en="Companion Device: Run in Background">
+                            <i class="fa-solid fa-link text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Companion Device: Jalan di Latar Belakang</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">REQUEST_COMPANION_RUN_IN_BACKGROUND</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="REQUEST_COMPANION_USE_DATA_IN_BACKGROUND" data-label-id="Companion Device: Data di Latar Belakang" data-label-en="Companion Device: Background Data">
+                            <i class="fa-solid fa-link text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Companion Device: Data di Latar Belakang</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">REQUEST_COMPANION_USE_DATA_IN_BACKGROUND</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="REQUEST_DELETE_PACKAGES" data-label-id="Minta Hapus Aplikasi Lain" data-label-en="Request Delete Other Apps">
+                            <i class="fa-solid fa-trash text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Minta Hapus Aplikasi Lain</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">REQUEST_DELETE_PACKAGES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" data-label-id="Minta Abaikan Optimasi Baterai" data-label-en="Request Ignore Battery Optimizations">
+                            <i class="fa-solid fa-battery-full text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Minta Abaikan Optimasi Baterai</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="REQUEST_PASSWORD_COMPLEXITY" data-label-id="Minta Tingkat Kerumitan Password" data-label-en="Request Password Complexity">
+                            <i class="fa-solid fa-key text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Minta Tingkat Kerumitan Password</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">REQUEST_PASSWORD_COMPLEXITY</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SEND_RESPOND_VIA_MESSAGE" data-label-id="Balas Panggilan via Pesan (Sistem)" data-label-en="Respond via Message (System)">
+                            <i class="fa-solid fa-comment text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Balas Panggilan via Pesan (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SEND_RESPOND_VIA_MESSAGE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SET_ALWAYS_FINISH" data-label-id="Selesaikan Aktivitas Selalu (Sistem)" data-label-en="Always Finish Activities (System)">
+                            <i class="fa-solid fa-flag-checkered text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Selesaikan Aktivitas Selalu (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SET_ALWAYS_FINISH</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SET_ANIMATION_SCALE" data-label-id="Ubah Skala Animasi Sistem (Sistem)" data-label-en="Set Animation Scale (System)">
+                            <i class="fa-solid fa-film text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Skala Animasi Sistem (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SET_ANIMATION_SCALE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SET_DEBUG_APP" data-label-id="Set Aplikasi Debug (Sistem)" data-label-en="Set Debug App (System)">
+                            <i class="fa-solid fa-bug text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Set Aplikasi Debug (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SET_DEBUG_APP</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SET_PROCESS_LIMIT" data-label-id="Batasi Jumlah Proses (Sistem)" data-label-en="Set Process Limit (System)">
+                            <i class="fa-solid fa-list-ol text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Batasi Jumlah Proses (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SET_PROCESS_LIMIT</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SET_TIME" data-label-id="Ubah Waktu Sistem (Sistem)" data-label-en="Set System Time (System)">
+                            <i class="fa-solid fa-clock text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Waktu Sistem (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SET_TIME</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SET_TIME_ZONE" data-label-id="Ubah Zona Waktu Sistem" data-label-en="Set System Time Zone">
+                            <i class="fa-solid fa-earth-asia text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Zona Waktu Sistem</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SET_TIME_ZONE</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="SIGNAL_PERSISTENT_PROCESSES" data-label-id="Kirim Sinyal ke Proses Sistem (Sistem)" data-label-en="Signal Persistent Processes (System)">
+                            <i class="fa-solid fa-satellite text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kirim Sinyal ke Proses Sistem (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">SIGNAL_PERSISTENT_PROCESSES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="STATUS_BAR" data-label-id="Kontrol Status Bar (Sistem)" data-label-en="Control Status Bar (System)">
+                            <i class="fa-solid fa-window-minimize text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kontrol Status Bar (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">STATUS_BAR</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="TRANSMIT_IR" data-label-id="Kirim Sinyal Infrared" data-label-en="Transmit Infrared">
+                            <i class="fa-solid fa-satellite-dish text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Kirim Sinyal Infrared</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">TRANSMIT_IR</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="USE_FINGERPRINT" data-label-id="Sidik Jari (Legacy)" data-label-en="Fingerprint (Legacy)">
+                            <i class="fa-solid fa-fingerprint text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Sidik Jari (Legacy)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">USE_FINGERPRINT</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="USE_SIP" data-label-id="Gunakan SIP (VoIP)" data-label-en="Use SIP (VoIP)">
+                            <i class="fa-solid fa-phone text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Gunakan SIP (VoIP)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">USE_SIP</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="UWB_RANGING" data-label-id="Jangkauan Ultra-Wideband" data-label-en="Ultra-Wideband Ranging">
+                            <i class="fa-solid fa-signal text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Jangkauan Ultra-Wideband</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">UWB_RANGING</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="WRITE_APN_SETTINGS" data-label-id="Ubah Pengaturan APN (Sistem)" data-label-en="Write APN Settings (System)">
+                            <i class="fa-solid fa-network-wired text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Pengaturan APN (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">WRITE_APN_SETTINGS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="WRITE_GSERVICES" data-label-id="Ubah Google Services Map (Sistem)" data-label-en="Write GServices Map (System)">
+                            <i class="fa-solid fa-google text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Google Services Map (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">WRITE_GSERVICES</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="WRITE_SECURE_SETTINGS" data-label-id="Ubah Pengaturan Aman Sistem (Sistem)" data-label-en="Write Secure Settings (System)">
+                            <i class="fa-solid fa-lock text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Pengaturan Aman Sistem (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">WRITE_SECURE_SETTINGS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="WRITE_SETTINGS" data-label-id="Ubah Pengaturan Sistem" data-label-en="Write System Settings">
+                            <i class="fa-solid fa-gear text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Pengaturan Sistem</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">WRITE_SETTINGS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="WRITE_SYNC_SETTINGS" data-label-id="Ubah Pengaturan Sinkronisasi" data-label-en="Write Sync Settings">
+                            <i class="fa-solid fa-arrows-rotate text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Ubah Pengaturan Sinkronisasi</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">WRITE_SYNC_SETTINGS</span>
+                            </span>
+                        </label>
+                        <label class="perm-item flex items-center gap-2 p-2 rounded-xl border border-slate-200 hover:border-green-300 cursor-pointer bg-white transition-all">
+                            <input type="checkbox" class="perm-checkbox accent-green-500 w-4 h-4 shrink-0" data-permission="WRITE_VOICEMAIL" data-label-id="Tulis Voicemail (Sistem)" data-label-en="Write Voicemail (System)">
+                            <i class="fa-solid fa-voicemail text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                            <span class="leading-tight min-w-0">
+                                <span class="perm-label block text-[11px] font-semibold text-slate-700 truncate">Tulis Voicemail (Sistem)</span>
+                                <span class="block text-[9px] font-mono text-slate-400 truncate">WRITE_VOICEMAIL</span>
+                            </span>
+                        </label>
+                    </div>
+                    <p id="perm-no-result" class="hidden text-[11px] text-slate-400 text-center py-3" data-i18n="perm_no_result">Tidak ada izin yang cocok.</p>
+                    <p class="text-[10px] text-slate-400 mt-1.5"><i class="fa-solid fa-arrows-up-down text-[9px]"></i> <span id="perm-scroll-hint" data-i18n-count="127">Scroll untuk lihat semua izin (127 izin tersedia)</span></p>
+                </div>
+                            </div>
+        </div>
+
+        <!-- Right Side: Status, Icon & Action -->
+        <div class="w-full md:w-80 bg-slate-50/50 p-6 md:p-8 flex flex-col justify-between gap-6">
+            
+            <!-- Daily Limit Section -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="label_daily_limit">Limit Harian</p>
+                    <p id="display-limit" class="text-base font-extrabold text-slate-800">0/2 Compile</p>
+                    <p class="text-[9px] text-slate-400 font-medium mt-0.5" data-i18n="limit_saved_note">Tersimpan di akun Google kamu</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+            </div>
+
+            <!-- Icon Upload Section -->
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider" data-i18n="label_icon">Ikon Aplikasi</label>
+                <div class="relative group">
+                    <input type="file" id="icon-input" accept="image/*" class="hidden" onchange="previewIcon(event)">
+                    <label for="icon-input" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:border-green-400 bg-white hover:bg-green-50/10 transition-all p-4">
+                        <div id="upload-prompt" class="flex flex-col items-center text-center">
+                            <i class="fa-solid fa-image text-2xl text-green-500 mb-2"></i>
+                            <span class="text-xs font-bold text-slate-700">Upload Gambar</span>
+                            <span class="text-[10px] text-slate-400 mt-1">Format PNG/JPG (1:1)</span>
+                        </div>
+                        <div id="icon-preview-container" class="hidden flex flex-col items-center justify-center">
+                            <img id="icon-preview" src="#" alt="Preview" class="w-14 h-14 rounded-xl object-cover shadow-md border border-slate-100">
+                            <span class="text-[10px] text-green-600 font-bold mt-2"><i class="fa-solid fa-circle-check"></i> Ikon Terpilih</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Log Output Console -->
+            <div class="space-y-2 flex-1 flex flex-col min-h-[120px]">
+                <div class="flex items-center justify-between">
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider" data-i18n="label_log">Log Output</label>
+                    <button onclick="openHistoryModal()" class="text-[10px] font-bold text-green-600 hover:text-green-700 flex items-center gap-1">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Riwayat
+                    </button>
+                </div>
+                <div id="log-output" class="flex-1 bg-slate-900 rounded-2xl p-3 text-[10px] font-mono text-green-400 overflow-y-auto h-28 custom-scrollbar border border-slate-800">
+                    <div>[System] Ready to compile...</div>
+                    <div class="text-slate-500">[System] Menunggu aksi Build Aplikasi.</div>
+                </div>
+            </div>
+
+            <!-- Build Button -->
+            <div id="build-button-container" class="space-y-2">
+                <button id="build-btn" onclick="startBuild()" class="w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-extrabold text-sm btn-glow tracking-wider flex items-center justify-center gap-2 uppercase">
+                    <i class="fa-solid fa-hammer"></i> Build Aplikasi
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Riwayat Compile -->
+    <div id="history-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col shadow-2xl">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h3 class="font-extrabold text-slate-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-green-500"></i> <span data-i18n="history_title">Riwayat Compile</span>
+                </h3>
+                <button onclick="closeHistoryModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="history-list" class="flex-1 overflow-y-auto hide-scrollbar p-4 space-y-3">
+                <!-- Diisi oleh JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Logic -->
+    <script src="flowscompiler.js"></script>
+</body>
+</html>
