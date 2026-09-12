@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fitur Perangkat</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+        background: #f8fafc;
+        margin: 0;
+        padding: 16px;
+        color: #1e293b;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .sub { color: #64748b; font-size: 13px; margin-bottom: 20px; }
+    .card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    .card h2 {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #334155;
+        margin: 0 0 12px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    input[type="text"] {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 13px;
+        background: #f8fafc;
+    }
+    button {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        background: #22c55e;
+        color: #fff;
+        transition: 0.15s;
+    }
+    button:active { transform: scale(0.97); }
+    button.secondary { background: #f1f5f9; color: #334155; }
+    button.danger { background: #fee2e2; color: #dc2626; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .storage-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px;
+        background: #f8fafc;
+        border-radius: 10px;
+        margin-bottom: 8px;
+    }
+    .storage-item .info { flex: 1; min-width: 0; }
+    .storage-item .k { font-size: 11px; font-weight: 800; color: #16a34a; word-break: break-all; }
+    .storage-item .v { font-size: 12px; color: #475569; word-break: break-all; }
+    .storage-empty { font-size: 12px; color: #94a3b8; text-align: center; padding: 12px; }
+    video {
+        width: 100%;
+        border-radius: 12px;
+        background: #000;
+        display: block;
+        margin-bottom: 10px;
+        max-height: 320px;
+        object-fit: cover;
+    }
+    #photo-preview {
+        width: 100%;
+        border-radius: 12px;
+        margin-top: 10px;
+        display: none;
+    }
+    .status {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 8px;
+        min-height: 16px;
+    }
+    .status.err { color: #dc2626; }
+    .status.ok { color: #16a34a; }
+    .timer {
+        font-size: 22px;
+        font-weight: 800;
+        color: #dc2626;
+        text-align: center;
+        margin: 8px 0;
+        display: none;
+    }
+    audio { width: 100%; margin-top: 10px; display: none; }
+    .rec-dot {
+        display: inline-block;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #dc2626;
+        animation: blink 1s infinite;
+        margin-right: 6px;
+    }
+    @keyframes blink { 50% { opacity: 0.2; } }
+</style>
+</head>
+<body>
+
+    <h1>🔧 Fitur Perangkat</h1>
+    <p class="sub">Halaman uji coba: storage, kamera, senter, dan mikrofon</p>
+
+    <!-- ===================== 1. STORAGE MANAGER ===================== -->
+    <div class="card">
+        <h2>💾 Kelola Storage (localStorage)</h2>
+
+        <div class="row">
+            <input type="text" id="storage-key-input" placeholder="Nama data (key)">
+        </div>
+        <div class="row">
+            <input type="text" id="storage-value-input" placeholder="Isi/nilai data (value)">
+            <button onclick="saveStorageItem()">Simpan</button>
+        </div>
+
+        <div id="storage-list"></div>
+        <p class="status" id="storage-status"></p>
+    </div>
+
+    <!-- ===================== 2. KAMERA ===================== -->
+    <div class="card">
+        <h2>📷 Kamera</h2>
+        <video id="camera-video" autoplay playsinline muted></video>
+        <div class="row">
+            <button id="camera-toggle-btn" onclick="toggleCamera()">Buka Kamera</button>
+            <button class="secondary" onclick="switchCamera()" id="camera-switch-btn" disabled>Ganti Kamera</button>
+            <button class="secondary" onclick="capturePhoto()" id="camera-capture-btn" disabled>Ambil Foto</button>
+        </div>
+        <canvas id="photo-canvas" style="display:none;"></canvas>
+        <img id="photo-preview" alt="Hasil foto">
+        <a id="photo-download" style="display:none; font-size:12px; font-weight:700; color:#16a34a;" download="foto.png">⬇ Download Foto</a>
+        <p class="status" id="camera-status"></p>
+    </div>
+
+    <!-- ===================== 3. SENTER ===================== -->
+    <div class="card">
+        <h2>🔦 Senter (Flashlight)</h2>
+        <div class="row">
+            <button id="torch-toggle-btn" onclick="toggleTorch()">Nyalakan Senter</button>
+        </div>
+        <p class="status" id="torch-status">Senter memakai kamera belakang, dibuka otomatis saat tombol ditekan.</p>
+    </div>
+
+    <!-- ===================== 4. REKAM MIKROFON ===================== -->
+    <div class="card">
+        <h2>🎙️ Rekam Mikrofon</h2>
+        <div class="timer" id="rec-timer">00:00</div>
+        <div class="row">
+            <button id="mic-record-btn" onclick="toggleRecording()"><span class="rec-dot" id="rec-dot" style="display:none;"></span><span id="mic-btn-label">Mulai Rekam</span></button>
+        </div>
+        <audio id="mic-playback" controls></audio>
+        <a id="mic-download" style="display:none; font-size:12px; font-weight:700; color:#16a34a; margin-top:6px; display:block;" download="rekaman.webm">⬇ Download Rekaman</a>
+        <p class="status" id="mic-status"></p>
+    </div>
+
+<script>
+    // =============================================================
+    // 1. STORAGE MANAGER (localStorage) — tambah, ubah nilai, ubah nama key, hapus
+    // =============================================================
+
+    function renderStorageList() {
+        const list = document.getElementById('storage-list');
+        const keys = Object.keys(localStorage);
+
+        if (keys.length === 0) {
+            list.innerHTML = '<p class="storage-empty">Belum ada data tersimpan.</p>';
+            return;
+        }
+
+        list.innerHTML = keys.map(key => {
+            const value = localStorage.getItem(key);
+            return `
+            <div class="storage-item">
+                <div class="info">
+                    <div class="k">${escapeHtml(key)}</div>
+                    <div class="v">${escapeHtml(value)}</div>
+                </div>
+                <button class="secondary" onclick="renameStorageItem('${escapeAttr(key)}')">Ubah Nama</button>
+                <button class="danger" onclick="deleteStorageItem('${escapeAttr(key)}')">Hapus</button>
+            </div>`;
+        }).join('');
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function escapeAttr(str) {
+        return String(str).replace(/'/g, "\\'");
+    }
+
+    function saveStorageItem() {
+        const keyInput = document.getElementById('storage-key-input');
+        const valueInput = document.getElementById('storage-value-input');
+        const key = keyInput.value.trim();
+        const value = valueInput.value;
+
+        if (!key) {
+            setStatus('storage-status', 'Nama data (key) wajib diisi.', 'err');
+            return;
+        }
+
+        localStorage.setItem(key, value);
+        keyInput.value = '';
+        valueInput.value = '';
+        renderStorageList();
+        setStatus('storage-status', `Data "${key}" tersimpan.`, 'ok');
+    }
+
+    function renameStorageItem(oldKey) {
+        const newKey = prompt('Nama baru untuk data ini:', oldKey);
+        if (newKey === null) return; // dibatalkan
+        const trimmed = newKey.trim();
+        if (!trimmed) {
+            setStatus('storage-status', 'Nama baru tidak boleh kosong.', 'err');
+            return;
+        }
+        if (trimmed !== oldKey && localStorage.getItem(trimmed) !== null) {
+            if (!confirm(`Nama "${trimmed}" sudah dipakai. Timpa data itu?`)) return;
+        }
+
+        const value = localStorage.getItem(oldKey);
+        localStorage.removeItem(oldKey);
+        localStorage.setItem(trimmed, value);
+        renderStorageList();
+        setStatus('storage-status', `Nama diubah jadi "${trimmed}".`, 'ok');
+    }
+
+    function deleteStorageItem(key) {
+        if (!confirm(`Hapus data "${key}"?`)) return;
+        localStorage.removeItem(key);
+        renderStorageList();
+        setStatus('storage-status', `Data "${key}" dihapus.`, 'ok');
+    }
+
+    function setStatus(elId, msg, type) {
+        const el = document.getElementById(elId);
+        el.textContent = msg;
+        el.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    renderStorageList();
+
+    // =============================================================
+    // 2. KAMERA
+    // =============================================================
+
+    let cameraStream = null;
+    let currentFacingMode = 'environment'; // 'environment' = belakang, 'user' = depan
+
+    async function toggleCamera() {
+        if (cameraStream) {
+            stopCamera();
+            return;
+        }
+        await startCamera(currentFacingMode);
+    }
+
+    async function startCamera(facingMode) {
+        const statusEl = 'camera-status';
+        try {
+            setStatus(statusEl, 'Membuka kamera...', '');
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: facingMode } },
+                audio: false,
+            });
+            cameraStream = stream;
+            currentFacingMode = facingMode;
+
+            const video = document.getElementById('camera-video');
+            video.srcObject = stream;
+
+            document.getElementById('camera-toggle-btn').textContent = 'Tutup Kamera';
+            document.getElementById('camera-switch-btn').disabled = false;
+            document.getElementById('camera-capture-btn').disabled = false;
+            setStatus(statusEl, 'Kamera aktif.', 'ok');
+        } catch (err) {
+            setStatus(statusEl, 'Gagal buka kamera: ' + err.message, 'err');
+        }
+    }
+
+    function stopCamera() {
+        if (!cameraStream) return;
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+        document.getElementById('camera-video').srcObject = null;
+        document.getElementById('camera-toggle-btn').textContent = 'Buka Kamera';
+        document.getElementById('camera-switch-btn').disabled = true;
+        document.getElementById('camera-capture-btn').disabled = true;
+        setStatus('camera-status', 'Kamera ditutup.', '');
+    }
+
+    async function switchCamera() {
+        const nextMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+        stopCamera();
+        await startCamera(nextMode);
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('camera-video');
+        const canvas = document.getElementById('photo-canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const dataUrl = canvas.toDataURL('image/png');
+        const preview = document.getElementById('photo-preview');
+        preview.src = dataUrl;
+        preview.style.display = 'block';
+
+        const downloadLink = document.getElementById('photo-download');
+        downloadLink.href = dataUrl;
+        downloadLink.style.display = 'inline-block';
+
+        setStatus('camera-status', 'Foto berhasil diambil.', 'ok');
+    }
+
+    // =============================================================
+    // 3. SENTER (Flashlight / Torch)
+    // =============================================================
+
+    let torchStream = null;
+    let torchOn = false;
+
+    async function toggleTorch() {
+        const statusEl = 'torch-status';
+        const btn = document.getElementById('torch-toggle-btn');
+
+        try {
+            let track;
+            if (cameraStream && currentFacingMode === 'environment') {
+                track = cameraStream.getVideoTracks()[0];
+            } else {
+                if (!torchStream) {
+                    torchStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: { ideal: 'environment' } },
+                    });
+                }
+                track = torchStream.getVideoTracks()[0];
+            }
+
+            const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+            if (!capabilities.torch) {
+                setStatus(statusEl, 'Perangkat/browser ini tidak mendukung kontrol senter lewat web.', 'err');
+                return;
+            }
+
+            torchOn = !torchOn;
+            await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+
+            btn.textContent = torchOn ? 'Matikan Senter' : 'Nyalakan Senter';
+            setStatus(statusEl, torchOn ? 'Senter menyala.' : 'Senter mati.', 'ok');
+        } catch (err) {
+            setStatus(statusEl, 'Gagal mengatur senter: ' + err.message, 'err');
+        }
+    }
+
+    // =============================================================
+    // 4. REKAM MIKROFON
+    // =============================================================
+
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let micStream = null;
+    let recordTimerInterval = null;
+    let recordSeconds = 0;
+
+    async function toggleRecording() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            stopRecording();
+        } else {
+            await startRecording();
+        }
+    }
+
+    async function startRecording() {
+        const statusEl = 'mic-status';
+        try {
+            micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recordedChunks = [];
+
+            mediaRecorder = new MediaRecorder(micStream);
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) recordedChunks.push(e.data);
+            };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const url = URL.createObjectURL(blob);
+
+                const audioEl = document.getElementById('mic-playback');
+                audioEl.src = url;
+                audioEl.style.display = 'block';
+
+                const downloadLink = document.getElementById('mic-download');
+                downloadLink.href = url;
+                downloadLink.style.display = 'block';
+
+                micStream.getTracks().forEach(track => track.stop());
+                setStatus(statusEl, 'Rekaman selesai, siap diputar/download.', 'ok');
+            };
+
+            mediaRecorder.start();
+            recordSeconds = 0;
+            updateRecTimer();
+            recordTimerInterval = setInterval(updateRecTimer, 1000);
+
+            document.getElementById('mic-btn-label').textContent = 'Stop Rekam';
+            document.getElementById('rec-dot').style.display = 'inline-block';
+            document.getElementById('rec-timer').style.display = 'block';
+            setStatus(statusEl, 'Sedang merekam...', 'ok');
+        } catch (err) {
+            setStatus(statusEl, 'Gagal akses mikrofon: ' + err.message, 'err');
+        }
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        }
+        clearInterval(recordTimerInterval);
+        document.getElementById('mic-btn-label').textContent = 'Mulai Rekam';
+        document.getElementById('rec-dot').style.display = 'none';
+    }
+
+    function updateRecTimer() {
+        recordSeconds++;
+        const m = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+        const s = String(recordSeconds % 60).padStart(2, '0');
+        document.getElementById('rec-timer').textContent = `${m}:${s}`;
+    }
+</script>
+</body>
+</html>
