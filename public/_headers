@@ -1,0 +1,15 @@
+# File ini bikin Cloudflare Pages ngasih tau browser: JANGAN cache file-file ini.
+# Tanpa ini, browser suka nyimpen versi lama flowscompiler.html/js/css,
+# jadi update baru nggak kelihatan sampai user hapus data penjelajahan manual.
+
+/flowscompiler.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/flowscompiler.css
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/flowscompiler.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/
+  Cache-Control: no-cache, no-store, must-revalidate

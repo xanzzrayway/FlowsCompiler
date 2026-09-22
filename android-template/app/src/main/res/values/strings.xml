@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Flows App</string>
+    <string name="target_url">https://example.com</string>
+</resources>
