@@ -1,0 +1,1180 @@
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ffffff">
+    <title>Fandex Browser - FDX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a73e8',
+                        darkbg: '#121212',
+                        darksurface: '#1e1e1e',
+                    },
+                    fontFamily: {
+                        sans: ['Roboto', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { -webkit-tap-highlight-color: transparent; scrollbar-width: thin; }
+        body { font-family: 'Roboto', sans-serif; overflow: hidden; position: fixed; width: 100%; height: 100%; }
+        .dark body { background-color: #121212; }
+        #browser-frame { width: 100%; height: calc(100% - 56px); border: none; background: #fff; }
+        .dark #browser-frame { background: #1e1e1e; }
+        .tab-card { transition: transform 0.1s ease; }
+        .tab-card:active { transform: scale(0.98); }
+        .find-bar { transition: transform 0.15s ease; }
+        input[type="search"]::-webkit-search-cancel-button { display: none; }
+        .overlay { backdrop-filter: blur(2px); }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+        .dark ::-webkit-scrollbar-thumb { background: #555; }
+        .no-select { user-select: none; -webkit-user-select: none; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="bg-white dark:bg-darkbg text-gray-900 dark:text-gray-100">
+    <!-- Main Browser Container -->
+    <div id="app" class="flex flex-col h-screen no-select">
+        <!-- Top Bar -->
+        <div id="top-bar" class="flex items-center bg-white dark:bg-darksurface border-b border-gray-200 dark:border-gray-700 px-2 py-1 safe-top">
+            <button id="btn-back" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95" onclick="goBack()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button id="btn-forward" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95" onclick="goForward()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <button id="btn-reload" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95" onclick="reloadPage()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
+            <div id="address-bar-container" class="flex-1 mx-2">
+                <div class="relative flex items-center bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1.5">
+                    <svg id="url-icon" class="w-4 h-4 text-gray-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input id="url-input" type="search" class="w-full bg-transparent text-sm outline-none" placeholder="Search or enter URL" autocomplete="off" spellcheck="false" onkeydown="handleUrlInput(event)" onfocus="this.select()">
+                    <button id="clear-url" class="hidden p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 ml-1" onclick="clearUrl()">
+                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <button id="btn-home" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95" onclick="goHome()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            </button>
+            <button id="btn-tabs" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 relative" onclick="toggleTabs()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                <span id="tab-count" class="absolute -top-0.5 -right-0.5 bg-primary text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">1</span>
+            </button>
+            <button id="btn-menu" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95" onclick="toggleMenu()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+            </button>
+        </div>
+
+        <!-- Browser Content Area -->
+        <div id="browser-content" class="flex-1 relative overflow-hidden">
+            <!-- Home Page -->
+            <div id="home-page" class="absolute inset-0 overflow-y-auto bg-white dark:bg-darkbg">
+                <div class="flex flex-col items-center justify-center min-h-full px-6 py-12">
+                    <div class="mb-8">
+                        <div class="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mb-4">
+                            <span class="text-white text-3xl font-bold">FDX</span>
+                        </div>
+                        <h1 class="text-xl font-medium text-center">Fandex Browser</h1>
+                        <p class="text-gray-500 text-sm text-center mt-1">Fast & Clean Browsing</p>
+                    </div>
+                    <div class="w-full max-w-sm bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-3 flex items-center" onclick="document.getElementById('url-input').focus()">
+                        <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <span class="text-gray-400 text-sm">Search or enter URL</span>
+                    </div>
+                    <!-- Quick Links -->
+                    <div id="quick-links" class="grid grid-cols-4 gap-4 mt-8 w-full max-w-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- WebView Container -->
+            <div id="webview-container" class="absolute inset-0 hidden">
+                <iframe id="browser-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" src="about:blank"></iframe>
+                <!-- Loading Indicator -->
+                <div id="loading-indicator" class="absolute top-0 left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700 hidden">
+                    <div id="loading-bar" class="h-full bg-primary" style="width: 0%"></div>
+                </div>
+                <!-- Error Page -->
+                <div id="error-page" class="absolute inset-0 hidden flex-col items-center justify-center bg-white dark:bg-darkbg p-6">
+                    <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <h2 class="text-lg font-medium mb-2">This site can't be reached</h2>
+                    <p id="error-message" class="text-gray-500 text-sm text-center mb-4"></p>
+                    <button class="bg-primary text-white px-6 py-2 rounded-full text-sm font-medium" onclick="reloadPage()">Try Again</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Find in Page Bar -->
+        <div id="find-bar" class="find-bar absolute top-14 left-0 right-0 bg-white dark:bg-darksurface border-b border-gray-200 dark:border-gray-700 px-3 py-2 hidden z-50">
+            <div class="flex items-center gap-2">
+                <input id="find-input" type="search" class="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1.5 text-sm outline-none" placeholder="Find in page..." oninput="findInPage(this.value)">
+                <span id="find-count" class="text-xs text-gray-500 min-w-[3rem]">0/0</span>
+                <button class="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" onclick="findPrev()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                </button>
+                <button class="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" onclick="findNext()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <button class="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" onclick="closeFindBar()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab View Overlay -->
+        <div id="tab-view" class="absolute inset-0 bg-black/50 z-40 hidden" onclick="closeTabs(event)">
+            <div class="absolute inset-x-4 top-20 bottom-20 bg-white dark:bg-darksurface rounded-2xl shadow-2xl overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="font-medium">Tabs (<span id="tab-count-header">1</span>)</h2>
+                    <button class="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium" onclick="newTab()">+ New Tab</button>
+                </div>
+                <div id="tabs-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Overlay -->
+        <div id="menu-overlay" class="absolute inset-0 z-40 hidden" onclick="closeMenu()">
+            <div id="menu-panel" class="absolute top-14 right-2 w-72 max-h-[80vh] bg-white dark:bg-darksurface rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-y-auto" onclick="event.stopPropagation()">
+                <div class="py-2">
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="newTab(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>New Tab</span>
+                    </button>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="newIncognitoTab(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                        <span>New Incognito Tab</span>
+                    </button>
+                    <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="showHistory(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>History</span>
+                    </button>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="showBookmarks(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                        <span>Bookmarks</span>
+                    </button>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="showDownloads(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <span>Downloads</span>
+                    </button>
+                    <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="findInPageAction(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <span>Find in Page</span>
+                    </button>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="toggleDesktopSite(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        <span>Desktop Site</span>
+                        <span id="desktop-toggle" class="ml-auto text-xs text-gray-400">Off</span>
+                    </button>
+                    <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="addBookmark(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                        <span>Add to Bookmark</span>
+                    </button>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="sharePage(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.887 12.938 9 12.482 9 12c0-.482-.113-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                        <span>Share</span>
+                    </button>
+                    <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="clearBrowsingData(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <span>Clear Browsing Data</span>
+                    </button>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="showSettings(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>Settings</span>
+                    </button>
+                    <button class="menu-item w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left" onclick="showAbout(); closeMenu();">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>About Fandex</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings-page" class="absolute inset-0 bg-white dark:bg-darkbg z-50 hidden flex-col">
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-darksurface">
+                <button class="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" onclick="closeSettings()">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <h2 class="font-medium text-lg">Settings</h2>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <!-- Search Engine -->
+                <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-sm font-medium text-gray-500 mb-3">Search Engine</h3>
+                    <select id="search-engine-select" class="w-full bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm outline-none" onchange="setSearchEngine(this.value)">
+                        <option value="google">Google</option>
+                        <option value="bing">Bing</option>
+                        <option value="duckduckgo">DuckDuckGo</option>
+                        <option value="yahoo">Yahoo</option>
+                        <option value="brave">Brave</option>
+                    </select>
+                </div>
+                <!-- Theme -->
+                <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-sm font-medium text-gray-500 mb-3">Theme</h3>
+                    <div class="flex gap-3">
+                        <button class="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm" onclick="setTheme('light')" id="theme-light">Light</button>
+                        <button class="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm" onclick="setTheme('dark')" id="theme-dark">Dark</button>
+                        <button class="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm" onclick="setTheme('system')" id="theme-system">System</button>
+                    </div>
+                </div>
+                <!-- Block Ads -->
+                <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium">Block Ads</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Basic ad blocking</p>
+                    </div>
+                    <button id="block-ads-toggle" class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full relative" onclick="toggleAdBlock()">
+                        <div class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 shadow"></div>
+                    </button>
+                </div>
+                <!-- JavaScript -->
+                <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium">JavaScript</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Enable JavaScript execution</p>
+                    </div>
+                    <button id="js-toggle" class="w-11 h-6 bg-primary rounded-full relative" onclick="toggleJavaScript()">
+                        <div class="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 shadow"></div>
+                    </button>
+                </div>
+                <!-- Cookies -->
+                <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium">Accept Cookies</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Allow websites to store cookies</p>
+                    </div>
+                    <button id="cookies-toggle" class="w-11 h-6 bg-primary rounded-full relative" onclick="toggleCookies()">
+                        <div class="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 shadow"></div>
+                    </button>
+                </div>
+                <!-- Clear Data -->
+                <div class="px-4 py-4">
+                    <button class="w-full py-3 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-lg text-sm font-medium" onclick="clearBrowsingData()">Clear All Browsing Data</button>
+                </div>
+                <div class="px-4 py-6 text-center text-xs text-gray-400">
+                    Fandex Browser v1.0.0<br>
+                    Fast & Clean Browsing Experience
+                </div>
+            </div>
+        </div>
+
+        <!-- History Page -->
+        <div id="history-page" class="absolute inset-0 bg-white dark:bg-darkbg z-50 hidden flex-col">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-darksurface">
+                <div class="flex items-center gap-3">
+                    <button class="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" onclick="closeHistory()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <h2 class="font-medium text-lg">History</h2>
+                </div>
+                <button class="text-sm text-red-500 font-medium px-3 py-1" onclick="clearHistory()">Clear</button>
+            </div>
+            <div id="history-list" class="flex-1 overflow-y-auto">
+            </div>
+        </div>
+
+        <!-- Bookmarks Page -->
+        <div id="bookmarks-page" class="absolute inset-0 bg-white dark:bg-darkbg z-50 hidden flex-col">
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-darksurface">
+                <button class="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" onclick="closeBookmarks()">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <h2 class="font-medium text-lg">Bookmarks</h2>
+            </div>
+            <div id="bookmarks-list" class="flex-1 overflow-y-auto">
+            </div>
+        </div>
+
+        <!-- Downloads Page -->
+        <div id="downloads-page" class="absolute inset-0 bg-white dark:bg-darkbg z-50 hidden flex-col">
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-darksurface">
+                <button class="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" onclick="closeDownloads()">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <h2 class="font-medium text-lg">Downloads</h2>
+            </div>
+            <div id="downloads-list" class="flex-1 overflow-y-auto">
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div id="about-page" class="absolute inset-0 bg-white dark:bg-darkbg z-50 hidden flex-col">
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-darksurface">
+                <button class="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" onclick="closeAbout()">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <h2 class="font-medium text-lg">About Fandex</h2>
+            </div>
+            <div class="flex-1 overflow-y-auto flex flex-col items-center justify-center px-6">
+                <div class="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center mb-6">
+                    <span class="text-white text-4xl font-bold">FDX</span>
+                </div>
+                <h1 class="text-2xl font-bold mb-2">Fandex Browser</h1>
+                <p class="text-gray-500 mb-6">Version 1.0.0</p>
+                <div class="w-full max-w-sm bg-gray-100 dark:bg-gray-800 rounded-xl p-4 text-sm space-y-3">
+                    <p>Fandex is a lightweight, fast, and clean browser designed for simplicity and speed.</p>
+                    <p class="text-gray-500">Features: Tab browsing, Bookmarks, History, Downloads, Incognito mode, Find in page, and more.</p>
+                    <p class="text-gray-500 text-xs mt-4">© 2024 Fandex Browser. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clear Data Modal -->
+        <div id="clear-modal" class="absolute inset-0 bg-black/50 z-60 hidden flex items-center justify-center p-6" onclick="closeClearModal(event)">
+            <div class="bg-white dark:bg-darksurface rounded-2xl p-6 w-full max-w-sm" onclick="event.stopPropagation()">
+                <h3 class="text-lg font-medium mb-4">Clear Browsing Data</h3>
+                <div class="space-y-3 mb-6">
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" id="clear-history" checked class="w-4 h-4 rounded">
+                        <span class="text-sm">Browsing History</span>
+                    </label>
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" id="clear-bookmarks" class="w-4 h-4 rounded">
+                        <span class="text-sm">Bookmarks</span>
+                    </label>
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" id="clear-downloads" class="w-4 h-4 rounded">
+                        <span class="text-sm">Downloads</span>
+                    </label>
+                </div>
+                <div class="flex gap-3">
+                    <button class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm font-medium" onclick="document.getElementById('clear-modal').classList.add('hidden')">Cancel</button>
+                    <button class="flex-1 py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium" onclick="executeClearData()">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-4 py-2 rounded-full text-sm shadow-lg hidden z-70">
+            <span id="toast-text"></span>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        const state = {
+            tabs: [],
+            activeTabId: null,
+            tabCounter: 0,
+            history: JSON.parse(localStorage.getItem('fandex_history') || '[]'),
+            bookmarks: JSON.parse(localStorage.getItem('fandex_bookmarks') || '[]'),
+            downloads: JSON.parse(localStorage.getItem('fandex_downloads') || '[]'),
+            settings: JSON.parse(localStorage.getItem('fandex_settings') || '{"searchEngine":"google","theme":"system","blockAds":false,"javascript":true,"cookies":true,"desktopSite":false}'),
+            isIncognito: false,
+            currentUrl: '',
+            pageTitle: 'Home',
+        };
+
+        const searchEngines = {
+            google: 'https://www.google.com/search?q=',
+            bing: 'https://www.bing.com/search?q=',
+            duckduckgo: 'https://duckduckgo.com/?q=',
+            yahoo: 'https://search.yahoo.com/search?p=',
+            brave: 'https://search.brave.com/search?q='
+        };
+
+        const quickLinks = [
+            { name: 'Google', url: 'https://www.google.com', color: '#4285f4', icon: 'G' },
+            { name: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', icon: '▶' },
+            { name: 'Wikipedia', url: 'https://www.wikipedia.org', color: '#333', icon: 'W' },
+            { name: 'Reddit', url: 'https://www.reddit.com', color: '#ff4500', icon: 'R' },
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTheme();
+            loadSettings();
+            newTab();
+            renderQuickLinks();
+            updateTabCount();
+        });
+
+        // Theme
+        function applyTheme() {
+            const html = document.documentElement;
+            if (state.settings.theme === 'dark') {
+                html.classList.add('dark');
+                html.classList.remove('light');
+            } else if (state.settings.theme === 'light') {
+                html.classList.remove('dark');
+                html.classList.add('light');
+            } else {
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    html.classList.add('dark');
+                    html.classList.remove('light');
+                } else {
+                    html.classList.remove('dark');
+                    html.classList.add('light');
+                }
+            }
+            updateThemeButtons();
+        }
+
+        function setTheme(theme) {
+            state.settings.theme = theme;
+            saveSettings();
+            applyTheme();
+        }
+
+        function updateThemeButtons() {
+            ['light', 'dark', 'system'].forEach(t => {
+                const btn = document.getElementById(`theme-${t}`);
+                if (state.settings.theme === t) {
+                    btn.classList.add('bg-primary', 'text-white', 'border-primary');
+                    btn.classList.remove('border-gray-300', 'dark:border-gray-600');
+                } else {
+                    btn.classList.remove('bg-primary', 'text-white', 'border-primary');
+                    btn.classList.add('border-gray-300', 'dark:border-gray-600');
+                }
+            });
+        }
+
+        function loadSettings() {
+            document.getElementById('search-engine-select').value = state.settings.searchEngine;
+            const adsToggle = document.getElementById('block-ads-toggle');
+            adsToggle.classList.toggle('bg-primary', state.settings.blockAds);
+            adsToggle.classList.toggle('bg-gray-300', !state.settings.blockAds);
+            adsToggle.classList.toggle('dark:bg-gray-600', !state.settings.blockAds);
+            adsToggle.querySelector('div').style.left = state.settings.blockAds ? 'auto' : '0.125rem';
+            adsToggle.querySelector('div').style.right = state.settings.blockAds ? '0.125rem' : 'auto';
+
+            const jsToggle = document.getElementById('js-toggle');
+            jsToggle.classList.toggle('bg-primary', state.settings.javascript);
+            jsToggle.querySelector('div').style.left = state.settings.javascript ? 'auto' : '0.125rem';
+            jsToggle.querySelector('div').style.right = state.settings.javascript ? '0.125rem' : 'auto';
+
+            const cookiesToggle = document.getElementById('cookies-toggle');
+            cookiesToggle.classList.toggle('bg-primary', state.settings.cookies);
+            cookiesToggle.querySelector('div').style.left = state.settings.cookies ? 'auto' : '0.125rem';
+            cookiesToggle.querySelector('div').style.right = state.settings.cookies ? '0.125rem' : 'auto';
+
+            document.getElementById('desktop-toggle').textContent = state.settings.desktopSite ? 'On' : 'Off';
+        }
+
+        function saveSettings() {
+            localStorage.setItem('fandex_settings', JSON.stringify(state.settings));
+        }
+
+        function setSearchEngine(engine) {
+            state.settings.searchEngine = engine;
+            saveSettings();
+        }
+
+        function toggleAdBlock() {
+            state.settings.blockAds = !state.settings.blockAds;
+            saveSettings();
+            loadSettings();
+        }
+
+        function toggleJavaScript() {
+            state.settings.javascript = !state.settings.javascript;
+            saveSettings();
+            loadSettings();
+        }
+
+        function toggleCookies() {
+            state.settings.cookies = !state.settings.cookies;
+            saveSettings();
+            loadSettings();
+        }
+
+        function toggleDesktopSite() {
+            state.settings.desktopSite = !state.settings.desktopSite;
+            saveSettings();
+            loadSettings();
+            if (state.activeTabId) {
+                const tab = state.tabs.find(t => t.id === state.activeTabId);
+                if (tab) navigateTo(tab.url);
+            }
+        }
+
+        // Quick Links
+        function renderQuickLinks() {
+            const container = document.getElementById('quick-links');
+            container.innerHTML = quickLinks.map(link => `
+                <button class="flex flex-col items-center gap-2" onclick="navigateTo('${link.url}')">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold" style="background-color: ${link.color}">
+                        ${link.icon}
+                    </div>
+                    <span class="text-xs text-gray-600 dark:text-gray-400">${link.name}</span>
+                </button>
+            `).join('');
+        }
+
+        // Tab Management
+        function newTab(url = null, title = 'Home') {
+            state.tabCounter++;
+            const tab = {
+                id: state.tabCounter,
+                url: url || '',
+                title: title,
+                history: [],
+                historyIndex: -1,
+                isIncognito: state.isIncognito,
+                scrollPosition: 0,
+            };
+            state.tabs.push(tab);
+            state.activeTabId = tab.id;
+            state.isIncognito = false;
+            updateTabCount();
+            renderTabs();
+            if (url) {
+                navigateTo(url);
+            } else {
+                showHomePage();
+            }
+            closeTabsDirect();
+        }
+
+        function newIncognitoTab() {
+            state.isIncognito = true;
+            newTab();
+            showToast('Incognito Tab - Your activity won\'t be saved');
+        }
+
+        function closeTab(tabId, event) {
+            if (event) event.stopPropagation();
+            if (state.tabs.length === 1) {
+                newTab();
+                return;
+            }
+            const index = state.tabs.findIndex(t => t.id === tabId);
+            state.tabs.splice(index, 1);
+            if (state.activeTabId === tabId) {
+                const newIndex = Math.min(index, state.tabs.length - 1);
+                switchToTab(state.tabs[newIndex].id);
+            }
+            updateTabCount();
+            renderTabs();
+        }
+
+        function switchToTab(tabId) {
+            const tab = state.tabs.find(t => t.id === tabId);
+            if (!tab) return;
+            state.activeTabId = tabId;
+            if (tab.url) {
+                showWebView(tab.url, tab.title);
+            } else {
+                showHomePage();
+            }
+            renderTabs();
+            updateTabCount();
+        }
+
+        function updateTabCount() {
+            const count = state.tabs.length;
+            document.getElementById('tab-count').textContent = count;
+            document.getElementById('tab-count-header').textContent = count;
+        }
+
+        function renderTabs() {
+            const list = document.getElementById('tabs-list');
+            list.innerHTML = state.tabs.map(tab => `
+                <div class="tab-card bg-gray-100 dark:bg-gray-800 rounded-xl p-3 ${tab.id === state.activeTabId ? 'ring-2 ring-primary' : ''}" onclick="switchToTab(${tab.id})">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <span class="text-primary text-sm font-bold">${tab.title.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium truncate">${tab.title}</p>
+                            <p class="text-xs text-gray-500 truncate">${tab.url || 'Home'}</p>
+                        </div>
+                        <button class="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex-shrink-0" onclick="closeTab(${tab.id}, event)">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    ${tab.isIncognito ? '<span class="text-xs text-gray-400 mt-1 block">🕶 Incognito</span>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function toggleTabs() {
+            const view = document.getElementById('tab-view');
+            if (view.classList.contains('hidden')) {
+                renderTabs();
+                view.classList.remove('hidden');
+            } else {
+                closeTabsDirect();
+            }
+        }
+
+        function closeTabs(event) {
+            if (event.target === document.getElementById('tab-view')) {
+                closeTabsDirect();
+            }
+        }
+
+        function closeTabsDirect() {
+            document.getElementById('tab-view').classList.add('hidden');
+        }
+
+        // Navigation
+        function navigateTo(input) {
+            let url = input.trim();
+            if (!url) return;
+
+            // Check if it's a URL or search query
+            if (!url.match(/^https?:\/\//i)) {
+                if (url.includes('.') && !url.includes(' ')) {
+                    url = 'https://' + url;
+                } else {
+                    const engine = state.settings.searchEngine;
+                    url = searchEngines[engine] + encodeURIComponent(url);
+                }
+            }
+
+            const activeTab = state.tabs.find(t => t.id === state.activeTabId);
+            if (!activeTab) return;
+
+            // Update tab history
+            if (activeTab.url && activeTab.historyIndex >= 0) {
+                activeTab.history = activeTab.history.slice(0, activeTab.historyIndex + 1);
+            }
+            activeTab.history.push(url);
+            activeTab.historyIndex = activeTab.history.length - 1;
+            activeTab.url = url;
+
+            state.currentUrl = url;
+            showWebView(url, url);
+            addToHistory(url, url);
+
+            document.getElementById('url-input').value = url;
+            document.getElementById('clear-url').classList.remove('hidden');
+        }
+
+        function showWebView(url, title) {
+            document.getElementById('home-page').classList.add('hidden');
+            document.getElementById('webview-container').classList.remove('hidden');
+            document.getElementById('error-page').classList.add('hidden');
+            document.getElementById('error-page').classList.remove('flex');
+
+            const frame = document.getElementById('browser-frame');
+            const loading = document.getElementById('loading-indicator');
+            const bar = document.getElementById('loading-bar');
+
+            loading.classList.remove('hidden');
+            bar.style.width = '30%';
+
+            try {
+                frame.src = url;
+                setTimeout(() => { bar.style.width = '60%'; }, 200);
+                setTimeout(() => { bar.style.width = '80%'; }, 500);
+
+                frame.onload = () => {
+                    setTimeout(() => {
+                        bar.style.width = '100%';
+                        setTimeout(() => {
+                            loading.classList.add('hidden');
+                            bar.style.width = '0%';
+                        }, 300);
+                    }, 200);
+
+                    // Try to get page title
+                    try {
+                        const doc = frame.contentDocument;
+                        if (doc && doc.title) {
+                            const activeTab = state.tabs.find(t => t.id === state.activeTabId);
+                            if (activeTab) {
+                                activeTab.title = doc.title;
+                                updateTabCount();
+                                renderTabs();
+                            }
+                        }
+                    } catch(e) {}
+                };
+
+                frame.onerror = () => {
+                    showError('Failed to load page');
+                };
+            } catch(e) {
+                showError('Cannot load this page. The website may block iframe embedding.');
+            }
+
+            document.getElementById('url-input').value = url;
+            document.getElementById('clear-url').classList.remove('hidden');
+            document.getElementById('url-icon').setAttribute('stroke', '#1a73e8');
+        }
+
+        function showHomePage() {
+            document.getElementById('home-page').classList.remove('hidden');
+            document.getElementById('webview-container').classList.add('hidden');
+            document.getElementById('error-page').classList.add('hidden');
+            document.getElementById('url-input').value = '';
+            document.getElementById('clear-url').classList.add('hidden');
+            document.getElementById('url-icon').setAttribute('stroke', '#6b7280');
+        }
+
+        function showError(message) {
+            const errorPage = document.getElementById('error-page');
+            const loading = document.getElementById('loading-indicator');
+            document.getElementById('error-message').textContent = message;
+            errorPage.classList.remove('hidden');
+            errorPage.classList.add('flex');
+            loading.classList.add('hidden');
+        }
+
+        function goBack() {
+            const tab = state.tabs.find(t => t.id === state.activeTabId);
+            if (tab && tab.historyIndex > 0) {
+                tab.historyIndex--;
+                const url = tab.history[tab.historyIndex];
+                tab.url = url;
+                state.currentUrl = url;
+                showWebView(url, url);
+                document.getElementById('url-input').value = url;
+            } else {
+                showHomePage();
+            }
+        }
+
+        function goForward() {
+            const tab = state.tabs.find(t => t.id === state.activeTabId);
+            if (tab && tab.historyIndex < tab.history.length - 1) {
+                tab.historyIndex++;
+                const url = tab.history[tab.historyIndex];
+                tab.url = url;
+                state.currentUrl = url;
+                showWebView(url, url);
+                document.getElementById('url-input').value = url;
+            }
+        }
+
+        function reloadPage() {
+            const frame = document.getElementById('browser-frame');
+            if (frame.src && frame.src !== 'about:blank') {
+                frame.src = frame.src;
+            } else if (state.currentUrl) {
+                navigateTo(state.currentUrl);
+            }
+        }
+
+        function goHome() {
+            const tab = state.tabs.find(t => t.id === state.activeTabId);
+            if (tab) {
+                tab.url = '';
+                tab.title = 'Home';
+            }
+            showHomePage();
+        }
+
+        function handleUrlInput(event) {
+            if (event.key === 'Enter') {
+                const url = event.target.value.trim();
+                if (url) {
+                    navigateTo(url);
+                    event.target.blur();
+                }
+            }
+        }
+
+        function clearUrl() {
+            document.getElementById('url-input').value = '';
+            document.getElementById('clear-url').classList.add('hidden');
+            document.getElementById('url-input').focus();
+        }
+
+        // History
+        function addToHistory(title, url) {
+            if (state.isIncognito) return;
+            const entry = {
+                title: title,
+                url: url,
+                time: new Date().toISOString()
+            };
+            state.history.unshift(entry);
+            // Keep last 500 entries
+            if (state.history.length > 500) state.history = state.history.slice(0, 500);
+            localStorage.setItem('fandex_history', JSON.stringify(state.history));
+        }
+
+        function showHistory() {
+            const list = document.getElementById('history-list');
+            if (state.history.length === 0) {
+                list.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p>No history yet</p></div>';
+            } else {
+                list.innerHTML = state.history.map((entry, i) => {
+                    const date = new Date(entry.time);
+                    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const dateStr = date.toLocaleDateString();
+                    return `
+                        <button class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 text-left" onclick="navigateTo('${entry.url}'); closeHistory();">
+                            <div class="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <span class="text-sm text-gray-500">${entry.title.charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium truncate">${entry.title}</p>
+                                <p class="text-xs text-gray-500 truncate">${entry.url}</p>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <p class="text-xs text-gray-500">${timeStr}</p>
+                                <p class="text-[10px] text-gray-400">${dateStr}</p>
+                            </div>
+                        </button>
+                    `;
+                }).join('');
+            }
+            document.getElementById('history-page').classList.remove('hidden');
+            document.getElementById('history-page').classList.add('flex');
+        }
+
+        function closeHistory() {
+            document.getElementById('history-page').classList.add('hidden');
+            document.getElementById('history-page').classList.remove('flex');
+        }
+
+        function clearHistory() {
+            state.history = [];
+            localStorage.setItem('fandex_history', JSON.stringify(state.history));
+            showHistory();
+            showToast('History cleared');
+        }
+
+        // Bookmarks
+        function addBookmark() {
+            const tab = state.tabs.find(t => t.id === state.activeTabId);
+            if (!tab || !tab.url) {
+                showToast('Nothing to bookmark');
+                return;
+            }
+            // Check if already bookmarked
+            if (state.bookmarks.some(b => b.url === tab.url)) {
+                showToast('Already bookmarked');
+                return;
+            }
+            state.bookmarks.push({
+                title: tab.title || tab.url,
+                url: tab.url,
+                time: new Date().toISOString()
+            });
+            localStorage.setItem('fandex_bookmarks', JSON.stringify(state.bookmarks));
+            showToast('Bookmark added');
+        }
+
+        function removeBookmark(url) {
+            state.bookmarks = state.bookmarks.filter(b => b.url !== url);
+            localStorage.setItem('fandex_bookmarks', JSON.stringify(state.bookmarks));
+            showBookmarks();
+            showToast('Bookmark removed');
+        }
+
+        function showBookmarks() {
+            const list = document.getElementById('bookmarks-list');
+            if (state.bookmarks.length === 0) {
+                list.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg><p>No bookmarks yet</p></div>';
+            } else {
+                list.innerHTML = state.bookmarks.map(b => `
+                    <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800">
+                        <button class="flex items-center gap-3 flex-1 min-w-0 text-left" onclick="navigateTo('${b.url}'); closeBookmarks();">
+                            <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <span class="text-primary text-sm font-bold">${b.title.charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium truncate">${b.title}</p>
+                                <p class="text-xs text-gray-500 truncate">${b.url}</p>
+                            </div>
+                        </button>
+                        <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex-shrink-0" onclick="removeBookmark('${b.url}')">
+                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('bookmarks-page').classList.remove('hidden');
+            document.getElementById('bookmarks-page').classList.add('flex');
+        }
+
+        function closeBookmarks() {
+            document.getElementById('bookmarks-page').classList.add('hidden');
+            document.getElementById('bookmarks-page').classList.remove('flex');
+        }
+
+        // Downloads
+        function addDownload(filename, url) {
+            const download = {
+                filename: filename,
+                url: url,
+                progress: 100,
+                status: 'completed',
+                time: new Date().toISOString()
+            };
+            state.downloads.unshift(download);
+            localStorage.setItem('fandex_downloads', JSON.stringify(state.downloads));
+            showToast('Download complete: ' + filename);
+        }
+
+        function showDownloads() {
+            const list = document.getElementById('downloads-list');
+            if (state.downloads.length === 0) {
+                list.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg><p>No downloads yet</p></div>';
+            } else {
+                list.innerHTML = state.downloads.map(d => {
+                    const date = new Date(d.time);
+                    return `
+                        <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                            <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium truncate">${d.filename}</p>
+                                <p class="text-xs text-gray-500 truncate">${d.url}</p>
+                                <p class="text-[10px] text-gray-400 mt-0.5">${date.toLocaleString()}</p>
+                            </div>
+                            <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" onclick="window.open('${d.url}', '_blank')">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+            document.getElementById('downloads-page').classList.remove('hidden');
+            document.getElementById('downloads-page').classList.add('flex');
+        }
+
+        function closeDownloads() {
+            document.getElementById('downloads-page').classList.add('hidden');
+            document.getElementById('downloads-page').classList.remove('flex');
+        }
+
+        // Menu
+        function toggleMenu() {
+            const overlay = document.getElementById('menu-overlay');
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+            } else {
+                closeMenu();
+            }
+        }
+
+        function closeMenu() {
+            document.getElementById('menu-overlay').classList.add('hidden');
+        }
+
+        // Find in Page
+        function findInPageAction() {
+            document.getElementById('find-bar').classList.remove('hidden');
+            document.getElementById('find-input').focus();
+        }
+
+        function closeFindBar() {
+            document.getElementById('find-bar').classList.add('hidden');
+            document.getElementById('find-input').value = '';
+            // Remove highlights
+            try {
+                const frame = document.getElementById('browser-frame');
+                const doc = frame.contentDocument;
+                if (doc) {
+                    const marks = doc.querySelectorAll('mark[style*="background-color: yellow"]');
+                    marks.forEach(m => {
+                        const parent = m.parentNode;
+                        parent.replaceChild(doc.createTextNode(m.textContent), m);
+                        parent.normalize();
+                    });
+                }
+            } catch(e) {}
+        }
+
+        function findInPage(query) {
+            if (!query) {
+                document.getElementById('find-count').textContent = '0/0';
+                return;
+            }
+            try {
+                const frame = document.getElementById('browser-frame');
+                const doc = frame.contentDocument;
+                if (!doc) return;
+
+                // Clear previous highlights
+                const marks = doc.querySelectorAll('mark[style*="background-color: yellow"]');
+                marks.forEach(m => {
+                    const parent = m.parentNode;
+                    parent.replaceChild(doc.createTextNode(m.textContent), m);
+                    parent.normalize();
+                });
+
+                // Simple text search
+                const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+                const matches = [];
+                let node;
+                while (node = walker.nextNode()) {
+                    const index = node.textContent.toLowerCase().indexOf(query.toLowerCase());
+                    if (index !== -1) {
+                        matches.push({ node, index });
+                    }
+                }
+
+                // Highlight first match
+                if (matches.length > 0) {
+                    const match = matches[0];
+                    const range = doc.createRange();
+                    range.setStart(match.node, match.index);
+                    range.setEnd(match.node, match.index + query.length);
+                    const mark = doc.createElement('mark');
+                    mark.style.backgroundColor = 'yellow';
+                    range.surroundContents(mark);
+                    mark.scrollIntoView({ block: 'center' });
+                }
+
+                document.getElementById('find-count').textContent = `${matches.length > 0 ? 1 : 0}/${matches.length}`;
+            } catch(e) {}
+        }
+
+        function findPrev() {
+            showToast('Previous match');
+        }
+
+        function findNext() {
+            showToast('Next match');
+        }
+
+        // Share
+        function sharePage() {
+            const tab = state.tabs.find(t => t.id === state.activeTabId);
+            if (!tab || !tab.url) {
+                showToast('Nothing to share');
+                return;
+            }
+            if (navigator.share) {
+                navigator.share({
+                    title: tab.title,
+                    url: tab.url
+                }).catch(() => {});
+            } else {
+                // Fallback - copy to clipboard
+                navigator.clipboard.writeText(tab.url).then(() => {
+                    showToast('Link copied to clipboard');
+                }).catch(() => {
+                    showToast('Share: ' + tab.url);
+                });
+            }
+        }
+
+        // Clear Browsing Data
+        function clearBrowsingData() {
+            document.getElementById('clear-modal').classList.remove('hidden');
+        }
+
+        function closeClearModal(event) {
+            if (event.target === document.getElementById('clear-modal')) {
+                document.getElementById('clear-modal').classList.add('hidden');
+            }
+        }
+
+        function executeClearData() {
+            if (document.getElementById('clear-history').checked) {
+                state.history = [];
+                localStorage.setItem('fandex_history', JSON.stringify(state.history));
+            }
+            if (document.getElementById('clear-bookmarks').checked) {
+                state.bookmarks = [];
+                localStorage.setItem('fandex_bookmarks', JSON.stringify(state.bookmarks));
+            }
+            if (document.getElementById('clear-downloads').checked) {
+                state.downloads = [];
+                localStorage.setItem('fandex_downloads', JSON.stringify(state.downloads));
+            }
+            document.getElementById('clear-modal').classList.add('hidden');
+            showToast('Browsing data cleared');
+        }
+
+        // Settings
+        function showSettings() {
+            document.getElementById('settings-page').classList.remove('hidden');
+            document.getElementById('settings-page').classList.add('flex');
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-page').classList.add('hidden');
+            document.getElementById('settings-page').classList.remove('flex');
+        }
+
+        // About
+        function showAbout() {
+            document.getElementById('about-page').classList.remove('hidden');
+            document.getElementById('about-page').classList.add('flex');
+        }
+
+        function closeAbout() {
+            document.getElementById('about-page').classList.add('hidden');
+            document.getElementById('about-page').classList.remove('flex');
+        }
+
+        // Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2500);
+        }
+
+        // Handle iframe navigation
+        document.getElementById('browser-frame').addEventListener('load', function() {
+            try {
+                const doc = this.contentDocument;
+                if (doc && doc.title) {
+                    const activeTab = state.tabs.find(t => t.id === state.activeTabId);
+                    if (activeTab) {
+                        activeTab.title = doc.title;
+                        activeTab.url = this.src;
+                        state.currentUrl = this.src;
+                        document.getElementById('url-input').value = this.src;
+                        document.getElementById('clear-url').classList.remove('hidden');
+                        updateTabCount();
+                        renderTabs();
+                        addToHistory(doc.title, this.src);
+                    }
+                }
+            } catch(e) {
+                // Cross-origin restriction - update URL only
+                const activeTab = state.tabs.find(t => t.id === state.activeTabId);
+                if (activeTab) {
+                    activeTab.url = this.src;
+                    state.currentUrl = this.src;
+                }
+            }
+        });
+
+        // Prevent accidental back navigation
+        window.addEventListener('popstate', function(e) {
+            e.preventDefault();
+        });
+        history.pushState(null, null, location.href);
+
+        // System theme change listener
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (state.settings.theme === 'system') {
+                applyTheme();
+            }
+        });
+
+        // Handle URL input focus
+        document.getElementById('url-input').addEventListener('focus', function() {
+            this.select();
+            document.getElementById('clear-url').classList.remove('hidden');
+        });
+
+        document.getElementById('url-input').addEventListener('input', function() {
+            document.getElementById('clear-url').classList.toggle('hidden', !this.value);
+        });
+    </script>
+</body>
+</html>
