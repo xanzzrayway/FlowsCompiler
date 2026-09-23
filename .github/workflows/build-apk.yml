@@ -150,8 +150,22 @@ jobs:
             -PkeyAliasName=flowscompiler \
             -PkeyPasswordVal=flowscompiler123
 
+      - name: Cek hasil APK
+        run: |
+          set -e
+          echo "===== Isi folder output APK ====="
+          ls -la android-template/app/build/outputs/apk/release/ || true
+          find android-template/app/build/outputs -name "*.apk" || true
+          if [ ! -f android-template/app/build/outputs/apk/release/app-release.apk ]; then
+            echo "::error::app-release.apk TIDAK DITEMUKAN setelah gradle assembleRelease. Build APK sebenarnya gagal walau step sebelumnya hijau."
+            exit 1
+          fi
+          echo "OK: app-release.apk ditemukan."
+
       - name: Buat GitHub Release & upload APK
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: build-${{ inputs.build_id }}
           name: "Build ${{ inputs.app_name }} (${{ inputs.build_id }})"
