@@ -155,6 +155,7 @@ jobs:
         with:
           tag_name: build-${{ inputs.build_id }}
           name: "Build ${{ inputs.app_name }} (${{ inputs.build_id }})"
+          fail_on_unmatched_files: true
           body: |
             Build otomatis dari Flows Compiler.
             - App name: ${{ inputs.app_name }}

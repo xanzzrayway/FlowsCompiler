@@ -1480,7 +1480,7 @@
                             appendLog('[Success] APK berhasil dibuat!', 'text-emerald-300 font-bold');
                             showDownloadButton(buildId);
                         } else if (data.conclusion === 'success') {
-                            appendLog(`[Warning] Build sukses tapi APK tidak ditemukan di Release. Cek manual: ${data.runUrl || '-'}`, 'text-yellow-400');
+                            appendLog(`[Warning] Build sukses tapi APK tidak ditemukan di Release. ${data.debug || ''} Cek manual: ${data.runUrl || '-'}`, 'text-yellow-400');
                         } else {
                             appendLog(`[Error] Build gagal (${data.conclusion || 'unknown'}). Cek log lengkap: ${data.runUrl || '-'}`, 'text-red-400');
                         }

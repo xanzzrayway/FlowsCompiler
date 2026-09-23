@@ -60,7 +60,16 @@ export async function onRequestGet({ request, env }) {
         // Arahkan ke proxy /api/download milik kita sendiri, BUKAN url github.com,
         // supaya user tidak pernah pindah domain saat download.
         result.downloadUrl = `/api/download?buildId=${buildId}`;
+      } else {
+        // Release ketemu tapi tidak ada file .apk terlampir — biar kelihatan
+        // di UI kenapa, bukan cuma "tidak ditemukan".
+        result.debug = `Release ada, tapi 0 asset .apk (assets: ${(releaseData.assets || []).map(a => a.name).join(', ') || 'kosong'})`;
       }
+    } else {
+      // Gagal ambil release sama sekali — biasanya token Cloudflare kurang izin,
+      // atau tag_name-nya tidak cocok. Tampilkan status code aslinya.
+      const errText = await releaseRes.text().catch(() => '');
+      result.debug = `Gagal fetch release (HTTP ${releaseRes.status}): ${errText.slice(0, 200)}`;
     }
   }
 
