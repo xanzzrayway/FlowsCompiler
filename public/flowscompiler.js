@@ -1440,6 +1440,9 @@
 
         function pollStatus(buildId) {
             let lastStep = '';
+            let releaseRetries = 0;
+            const MAX_RELEASE_RETRIES = 5; // ~10 detik toleransi delay sinkronisasi GitHub Release API
+
             statusInterval = setInterval(async () => {
                 try {
                     const res = await fetch(`/api/status?buildId=${buildId}`);
@@ -1451,6 +1454,19 @@
                     }
 
                     if (data.status === 'completed') {
+                        // Workflow run sudah selesai. Kalau conclusion-nya success tapi
+                        // link download APK belum muncul, itu bukan berarti gagal —
+                        // GitHub Release API kadang telat beberapa detik sinkron
+                        // dibanding status Actions. Coba lagi beberapa kali dulu
+                        // sebelum benar-benar menyatakan build gagal.
+                        if (data.conclusion === 'success' && !data.downloadUrl && releaseRetries < MAX_RELEASE_RETRIES) {
+                            releaseRetries++;
+                            if (releaseRetries === 1) {
+                                appendLog('[System] Build sukses, menunggu APK siap diunduh...', 'text-yellow-400');
+                            }
+                            return; // jangan clearInterval, coba lagi di tick berikutnya
+                        }
+
                         clearInterval(statusInterval);
                         setBuildingState(false);
 
@@ -1463,6 +1479,8 @@
                         if (data.conclusion === 'success' && data.downloadUrl) {
                             appendLog('[Success] APK berhasil dibuat!', 'text-emerald-300 font-bold');
                             showDownloadButton(buildId);
+                        } else if (data.conclusion === 'success') {
+                            appendLog(`[Warning] Build sukses tapi APK tidak ditemukan di Release. Cek manual: ${data.runUrl || '-'}`, 'text-yellow-400');
                         } else {
                             appendLog(`[Error] Build gagal (${data.conclusion || 'unknown'}). Cek log lengkap: ${data.runUrl || '-'}`, 'text-red-400');
                         }
