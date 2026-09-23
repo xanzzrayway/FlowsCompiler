@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>🚀 XSS CTF Generator</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #58a6ff;
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+
+        p {
+            color: #8b949e;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #238636;
+            color: #fff;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #2ea043;
+        }
+
+        button.blue {
+            background: #1f6feb;
+        }
+
+        button.blue:hover {
+            background: #388bfd;
+        }
+
+        #log {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .ok {
+            color: #3fb950;
+        }
+
+        .info {
+            color: #58a6ff;
+        }
+    </style>
+    <script>
+        const FILES = {
+          'build-apk.yml': { path:'.github/workflows/build-apk.yml', content:`name: Build APK
+        
+        on:
+          push:
+            branches: [ main ]
+          workflow_dispatch:
+        
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v4
+              - uses: actions/setup-node@v4
+                with: { node-version: '20' }
+              - uses: actions/setup-java@v4
+                with: { distribution: 'temurin', java-version: '17' }
+              - uses: android-actions/setup-android@v3
+              - run: npm install -g @bubblewrap/cli
+              - run: |
+                  mkdir -p build
+                  cp -r web/* build/
+              - working-directory: ./build
+                run: |
+                  cat > twa-manifest.**** << 'EOF'
+                  {
+                    "packageId": "com.bizz.xssctf",
+                    "host": "localhost",
+                    "name": "Mini CTF XSS",
+                    "launcherName": "XSS CTF",
+                    "display": "standalone",
+                    "themeColor": "#58a6ff",
+                    "backgroundColor": "#0d1117",
+                    "startUrl": "/index.html",
+                    "iconUrl": "icon-512.png",
+                    "maskableIconUrl": "icon-512.png",
+                    "signingKey": { "path": "./android.keystore", "alias": "android" },
+                    "appVersionName": "1.0.0",
+                    "appVersionCode": 1,
+                    "webManifestUrl": "manifest.json",
+                    "minSdkVersion": 21,
+                    "orientation": "portrait"
+                  }
+                  EOF
+              - working-directory: ./build
+                run: |
+                  keytool -genkeypair -v -keystore android.keystore -alias android -keyalg RSA -keysize 2048 -validity 10000 -storepass android123 -keypass android123 -dname "CN=Bizz, O=bl_ai, C=ID"
+              - working-directory: ./build
+                env:
+                  BUBBLEWRAP_KEYSTORE_PASSWORD: android123
+                  BUBBLEWRAP_KEY_PASSWORD: android123
+                run: bubblewrap build --skipPwaValidation
+              - working-directory: ./build
+                run: |
+                  [ -f "app-release-signed.apk" ] && mv app-release-signed.apk MiniCTF-XSS.apk
+                  [ -f "app-release-bundle.aab" ] && mv app-release-bundle.aab MiniCTF-XSS.aab
+                  true
+              - uses: actions/upload-artifact@v4
+                with:
+                  name: MiniCTF-XSS-APK
+                  path: |
+                    build/*.apk
+                    build/*.aab
+        `},
+          'README.md': { path:'README.md', content:`# 🎯 Mini CTF XSS — Android App
+        
+        Build APK otomatis via GitHub Actions.
+        
+        ## Cara Build
+        1. Tab Actions → workflow "Build APK" → Run
+        2. Tunggu ~5 menit
+        3. Download APK dari Artifacts
+        
+        ## Solusi Challenge
+        <details><summary>Buka</summary>
+        
+        - L1: \`<img src=x onerror=alert(1)>\`
+        - L2: \`<img src=x onerror=alert(1)>\`
+        - L3: \`" onfocus=alert(1) autofocus="\`
+        - L4: \`#<img src=x onerror=alert(1)>\`
+        - L5: \`<img src=x onerror=alert(1)>\`
+        
+        </details>
+        
+        ⚠️ Lab lokal.
+        `},
+          'index.html': { path:'web/index.html', content:`<!DOCTYPE html>
+        <html lang="id">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>🎯 **** CTF XSS</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#58a6ff">
+        </head>
+        <body>
+        <div class="container">
+        <h1>🎯 **** CTF XSS</h1>
+        <p class="subtitle">5 ***** Challenge</p>
+        <div class="menu">
+        <a href="level1.html" class="card"><span class="badge">Level 1</span><h3>Reflected XSS</h3></a>
+        <a href="level2.html" class="card"><span class="badge">***** 2</span><h3>Filter Bypass</h3></a>
+        <a href="level3.html" class="card"><span class="badge">Level 3</span><h3>Attribute Injection</h3></a>
+        <a href="level4.html" class="card"><span class="badge">***** 4</span><h3>DOM-based XSS</h3></a>
+        <a href="level5.html" class="card"><span class="badge">Level 5</span><h3>CSP Bypass</h3></a>
+        </div>
+        <div class="warn">⚠️ *** lokal</div>
+        <div id="progress" class="info">Progress: 0/5</div>
+        </div>
+        <script src="flag.js">
+    </script>
+    <script>
+        if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Level 1</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="flag.js"></script>
+    <script>
+        function r(){document.getElementById('result').innerHTML='Halo, '+document.getElementById('q').value;}
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>***** 2</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="flag.js"></script>
+    <script>
+        function r(){let q=document.getElementById('q').value;q=q.replace(/<script>/g,'');document.getElementById('result').innerHTML=q;}
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Level 3</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="flag.js"></script>
+    <script>
+        function r(){const q=document.getElementById('q').value;document.getElementById('result').innerHTML='<input type="text" value="'+q+'" readonly style="width:100%;padding:8px;">';}
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Level 4</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="flag.js"></script>
+    <script src="dom.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>***** 5</title>
+    <link rel="stylesheet" href="style.css">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline';">
+    <script>
+        const FILES = {
+          'build-apk.yml': { path:'.github/workflows/build-apk.yml', content:`name: Build APK
+        
+        on:
+          push:
+            branches: [ main ]
+          workflow_dispatch:
+        
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v4
+              - uses: actions/setup-node@v4
+                with: { node-version: '20' }
+              - uses: actions/setup-java@v4
+                with: { distribution: 'temurin', java-version: '17' }
+              - uses: android-actions/setup-android@v3
+              - run: npm install -g @bubblewrap/cli
+              - run: |
+                  mkdir -p build
+                  cp -r web/* build/
+              - working-directory: ./build
+                run: |
+                  cat > twa-manifest.json << 'EOF'
+                  {
+                    "packageId": "com.bizz.xssctf",
+                    "host": "localhost",
+                    "name": "Mini CTF XSS",
+                    "launcherName": "XSS CTF",
+                    "display": "standalone",
+                    "themeColor": "#58a6ff",
+                    "backgroundColor": "#0d1117",
+                    "startUrl": "/index.html",
+                    "iconUrl": "icon-512.png",
+                    "maskableIconUrl": "icon-512.png",
+                    "signingKey": { "path": "./android.keystore", "alias": "android" },
+                    "appVersionName": "1.0.0",
+                    "appVersionCode": 1,
+                    "webManifestUrl": "manifest.json",
+                    "minSdkVersion": 21,
+                    "orientation": "portrait"
+                  }
+                  EOF
+              - working-directory: ./build
+                run: |
+                  keytool -genkeypair -v -keystore android.keystore -alias android -keyalg RSA -keysize 2048 -validity 10000 -storepass android123 -keypass android123 -dname "CN=Bizz, O=bl_ai, C=ID"
+              - working-directory: ./build
+                env:
+                  BUBBLEWRAP_KEYSTORE_PASSWORD: android123
+                  BUBBLEWRAP_KEY_PASSWORD: android123
+                run: bubblewrap build --skipPwaValidation
+              - working-directory: ./build
+                run: |
+                  [ -f "app-release-signed.apk" ] && mv app-release-signed.apk MiniCTF-XSS.apk
+                  [ -f "app-release-bundle.aab" ] && mv app-release-bundle.aab MiniCTF-XSS.aab
+                  true
+              - uses: actions/upload-artifact@v4
+                with:
+                  name: MiniCTF-XSS-APK
+                  path: |
+                    build/*.apk
+                    build/*.aab
+        `},
+          'README.md': { path:'README.md', content:`# 🎯 Mini CTF XSS — Android App
+        
+        Build APK otomatis via GitHub Actions.
+        
+        ## Cara Build
+        1. Tab Actions → workflow "Build APK" → Run
+        2. Tunggu ~5 menit
+        3. Download APK dari Artifacts
+        
+        ## Solusi Challenge
+        <details><summary>Buka</summary>
+        
+        - L1: \`<img src=x onerror=alert(1)>\`
+        - L2: \`<img src=x onerror=alert(1)>\`
+        - L3: \`" onfocus=alert(1) autofocus="\`
+        - L4: \`#<img src=x onerror=alert(1)>\`
+        - L5: \`<img src=x onerror=alert(1)>\`
+        
+        </details>
+        
+        ⚠️ Lab lokal.
+        `},
+          'index.html': { path:'web/index.html', content:`<!DOCTYPE html>
+        <html lang="id">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>🎯 Mini CTF XSS</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#58a6ff">
+    </script>
+</head>
+
+<body>
+    <h1>🚀 XSS CTF App Generator</h1>
+    <p>Klik ****** di ***** &rarr; 14 file ******* ke-download otomatis.</p>
+    <p><button class="blue fr-rounded fr-large" onclick="generate()">🎁 Generate Semua File</button><button onclick="copyTree()">📋 Copy ******** Folder</button></p>
+    <div id="log">// Klik tombol **** mulai...</div>
+    <p>`}, &apos;level1.html&apos;: { path:&apos;web/level1.html&apos;, content:`</p>
+    <div class="container">
+        <h1>🎯 Level 1 &mdash; Reflected XSS</h1>
+        <div class="info">Input langsung ** innerHTML</div><label>Nama:</label> <input type="text" id="q" placeholder="Payload..."> <button onclick="r()">Kirim</button>
+        <div class="output">
+            <div id="result"><br></div>
+        </div>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>&lt;img src=x onerror=alert(1)&gt;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{r3fl3ct3d_xss_b4s1c}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(1)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="index.html">&larr; Menu</a><a href="level2.html">L2 &rarr;</a></div>
+    </div>
+    <p>`}, &apos;level2.html&apos;: { path:&apos;web/level2.html&apos;, content:`</p>
+    <div class="container">
+        <h1>🎯 ***** 2 &mdash; Filter Bypass</h1>
+        <div class="info">Filter cuma hapus &lt;script&gt;</div><label>Payload:</label> <input type="text" id="q" placeholder="Payload..."> <button onclick="r()">Kirim</button>
+        <div class="output">
+            <div id="result"><br></div>
+        </div>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>&lt;img src=x onerror=alert(1)&gt;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{byp4ss_f1lt3r_scr1pt}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(2)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="level1.html">&larr; L1</a><a href="index.html">Menu</a><a href="level3.html">L3 &rarr;</a></div>
+    </div>
+    <p>`}, &apos;level3.html&apos;: { path:&apos;web/level3.html&apos;, content:`</p>
+    <div class="container">
+        <h1>🎯 Level 3 &mdash; ********* Injection</h1>
+        <div class="info">Input masuk ke ******* value</div><label>Input:</label> <input type="text" id="q" placeholder="&quot; onfocus=alert(1) autofocus=&quot;"> <button onclick="r()">Kirim</button>
+        <div class="output">
+            <div id="result"><br></div>
+        </div>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>&quot; onfocus=alert(1) autofocus=&quot;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{4ttr1but3_1nj3ct10n}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(3)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="level2.html">&larr; L2</a><a href="index.html">Menu</a><a href="level4.html">L4 &rarr;</a></div>
+    </div>
+    <p>`}, &apos;level4.html&apos;: { path:&apos;web/level4.html&apos;, content:`</p>
+    <div class="container">
+        <h1>🎯 Level 4 &mdash; DOM-based XSS</h1>
+        <div class="info">Input dari location.hash</div>
+        <div class="output">
+            <div id="welcome">Loading...</div>
+        </div><label>Tes:</label> <input type="text" id="input" placeholder="Payload..."> <button onclick="renderFromInput()">Render</button>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>#&lt;img src=x onerror=alert(1)&gt;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{d0m_b4s3d_xss}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(4)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="level3.html">&larr; L3</a><a href="index.html">Menu</a><a href="level5.html">L5 &rarr;</a></div>
+    </div>
+    <p>`}, &apos;level5.html&apos;: { path:&apos;web/level5.html&apos;, content:`</p>
+    <h1>🚀 XSS CTF App Generator</h1>
+    <p>Klik tombol di ***** &rarr; 14 **** ******* ke-download otomatis.</p>
+    <p><button class="blue" onclick="generate()">🎁 Generate Semua File</button><button onclick="copyTree()" class="fr-rounded">📋 **** ******** Folder</button></p>
+    <div id="log">// Klik tombol buat mulai...</div>
+    <div class="container">
+        <h1>🎯 Mini CTF XSS</h1>
+        <p class="subtitle">5 Level Challenge</p>
+        <div class="menu"><a href="level1.html" class="card"><span class="badge">Level 1</span>
+                <h3>Reflected XSS</h3>
+            </a> <a href="level2.html" class="card"><span class="badge">***** 2</span>
+                <h3>****** Bypass</h3>
+            </a> <a href="level3.html" class="card"><span class="badge">Level 3</span>
+                <h3>Attribute Injection</h3>
+            </a> <a href="level4.html" class="card"><span class="badge">Level 4</span>
+                <h3>DOM-based XSS</h3>
+            </a> <a href="level5.html" class="card"><span class="badge">***** 5</span>
+                <h3>*** Bypass</h3>
+            </a></div>
+        <div class="warn">⚠️ *** lokal</div>
+        <div id="progress" class="info">Progress: 0/5</div>
+    </div>
+    <script src="flag.js"></script>
+    <script>
+        if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    </script>
+    <p>`}, &apos;level1.html&apos;: { path:&apos;web/level1.html&apos;, content:`
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Level 1</title>
+        <link rel="stylesheet" href="style.css">
+    </p>
+    <div class="container">
+        <h1>🎯 Level 1 &mdash; ********* XSS</h1>
+        <div class="info">Input langsung ** innerHTML</div><label>Nama:</label> <input type="text" id="q" placeholder="Payload..."> <button onclick="r()">Kirim</button>
+        <div class="output">
+            <div id="result"><br></div>
+        </div>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>&lt;img src=x onerror=alert(1)&gt;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{r3fl3ct3d_xss_b4s1c}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(1)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="index.html">&larr; Menu</a><a href="level2.html">L2 &rarr;</a></div>
+    </div>
+    <script src="flag.js"></script>
+    <script>
+        function r(){document.getElementById('result').innerHTML='Halo, '+document.getElementById('q').value;}
+    </script>
+    <p>`}, &apos;level2.html&apos;: { path:&apos;web/level2.html&apos;, content:`
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>***** 2</title>
+        <link rel="stylesheet" href="style.css">
+    </p>
+    <div class="container">
+        <h1>🎯 ***** 2 &mdash; Filter Bypass</h1>
+        <div class="info">Filter cuma ***** &lt;script&gt;</div><label>Payload:</label> <input type="text" id="q" placeholder="Payload..."> <button onclick="r()">Kirim</button>
+        <div class="output">
+            <div id="result"><br></div>
+        </div>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>&lt;img src=x onerror=alert(1)&gt;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{byp4ss_f1lt3r_scr1pt}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(2)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="level1.html">&larr; L1</a><a href="index.html">Menu</a><a href="level3.html">L3 &rarr;</a></div>
+    </div>
+    <script src="flag.js"></script>
+    <script>
+        function r(){let q=document.getElementById('q').value;q=q.replace(/<script>/g,'');document.getElementById('result').innerHTML=q;}
+    </script>
+    <p>`}, &apos;level3.html&apos;: { path:&apos;web/level3.html&apos;, content:`
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>***** 3</title>
+        <link rel="stylesheet" href="style.css">
+    </p>
+    <div class="container">
+        <h1>🎯 Level 3 &mdash; Attribute Injection</h1>
+        <div class="info">Input ***** ke atribut value</div><label>Input:</label> <input type="text" id="q" placeholder="&quot; onfocus=alert(1) autofocus=&quot;"> <button onclick="r()">Kirim</button>
+        <div class="output">
+            <div id="result"><br></div>
+        </div>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>&quot; onfocus=alert(1) autofocus=&quot;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{4ttr1but3_1nj3ct10n}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(3)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="level2.html">&larr; L2</a><a href="index.html">Menu</a><a href="level4.html">L4 &rarr;</a></div>
+    </div>
+    <script src="flag.js"></script>
+    <script>
+        function r(){const q=document.getElementById('q').value;document.getElementById('result').innerHTML='<input type="text" value="'+q+'" readonly style="width:100%;padding:8px;">';}
+    </script>
+    <p>`}, &apos;level4.html&apos;: { path:&apos;web/level4.html&apos;, content:`
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Level 4</title>
+        <link rel="stylesheet" href="style.css">
+    </p>
+    <div class="container">
+        <h1>🎯 Level 4 &mdash; DOM-based XSS</h1>
+        <div class="info">Input dari location.hash</div>
+        <div class="output">
+            <div id="welcome">Loading...</div>
+        </div><label>Tes:</label> <input type="text" id="input" placeholder="Payload..."> <button onclick="renderFromInput()">Render</button>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>#&lt;*** src=x onerror=alert(1)&gt;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{d0m_b4s3d_xss}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(4)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="level3.html">&larr; L3</a><a href="index.html">Menu</a><a href="level5.html">L5 &rarr;</a></div>
+    </div>
+    <script src="flag.js"></script>
+    <script src="dom.js"></script>
+    <p>`}, &apos;level5.html&apos;: { path:&apos;web/level5.html&apos;, content:`
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>***** 5</title>
+        <link rel="stylesheet" href="style.css">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline';">
+    </p>
+    <h1>🚀 XSS *** *** Generator</h1>
+    <p>Klik ****** di bawah &rarr; 14 file project ke-download otomatis.</p>
+    <p><button class="blue" onclick="generate()">🎁 Generate ***** File</button><button onclick="copyTree()">📋 Copy ******** Folder</button></p>
+    <div id="log">// Klik tombol buat mulai...</div>
+    <script>
+        const FILES = {
+          'build-apk.yml': { path:'.github/workflows/build-apk.yml', content:`name: Build APK
+        
+        on:
+          push:
+            branches: [ main ]
+          workflow_dispatch:
+        
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v4
+              - uses: actions/setup-node@v4
+                with: { node-version: '20' }
+              - uses: actions/setup-java@v4
+                with: { distribution: 'temurin', java-version: '17' }
+              - uses: android-actions/setup-android@v3
+              - run: npm install -g @bubblewrap/cli
+              - run: |
+                  mkdir -p build
+                  cp -r web/* build/
+              - working-directory: ./build
+                run: |
+                  cat > twa-manifest.json << 'EOF'
+                  {
+                    "packageId": "com.bizz.xssctf",
+                    "host": "localhost",
+                    "name": "Mini CTF XSS",
+                    "launcherName": "XSS CTF",
+                    "display": "standalone",
+                    "themeColor": "#58a6ff",
+                    "backgroundColor": "#0d1117",
+                    "startUrl": "/index.html",
+                    "iconUrl": "icon-512.png",
+                    "maskableIconUrl": "icon-512.png",
+                    "signingKey": { "path": "./android.keystore", "alias": "android" },
+                    "appVersionName": "1.0.0",
+                    "appVersionCode": 1,
+                    "webManifestUrl": "manifest.json",
+                    "minSdkVersion": 21,
+                    "orientation": "portrait"
+                  }
+                  EOF
+              - working-directory: ./build
+                run: |
+                  keytool -genkeypair -v -keystore android.keystore -alias android -keyalg RSA -keysize 2048 -validity 10000 -storepass android123 -keypass android123 -dname "CN=Bizz, O=bl_ai, C=ID"
+              - working-directory: ./build
+                env:
+                  BUBBLEWRAP_KEYSTORE_PASSWORD: android123
+                  BUBBLEWRAP_KEY_PASSWORD: android123
+                run: bubblewrap build --skipPwaValidation
+              - working-directory: ./build
+                run: |
+                  [ -f "app-release-signed.apk" ] && mv app-release-signed.apk MiniCTF-XSS.apk
+                  [ -f "app-release-bundle.aab" ] && mv app-release-bundle.aab MiniCTF-XSS.aab
+                  true
+              - uses: actions/upload-artifact@v4
+                with:
+                  name: MiniCTF-XSS-APK
+                  path: |
+                    build/*.apk
+                    build/*.aab
+        `},
+          'README.md': { path:'README.md', content:`# 🎯 Mini CTF XSS — Android App
+        
+        Build APK otomatis via GitHub Actions.
+        
+        ## Cara Build
+        1. Tab Actions → workflow "Build APK" → Run
+        2. Tunggu ~5 menit
+        3. Download APK dari Artifacts
+        
+        ## Solusi Challenge
+        <details><summary>Buka</summary>
+        
+        - L1: \`<img src=x onerror=alert(1)>\`
+        - L2: \`<img src=x onerror=alert(1)>\`
+        - L3: \`" onfocus=alert(1) autofocus="\`
+        - L4: \`#<img src=x onerror=alert(1)>\`
+        - L5: \`<img src=x onerror=alert(1)>\`
+        
+        </details>
+        
+        ⚠️ Lab lokal.
+        `},
+          'index.html': { path:'web/index.html', content:`<!DOCTYPE html>
+        <html lang="id">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>🎯 **** CTF XSS</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#58a6ff">
+        </head>
+        <body>
+        <div class="container">
+        <h1>🎯 Mini *** XSS</h1>
+        <p class="subtitle">5 Level Challenge</p>
+        <div class="menu">
+        <a href="level1.html" class="card"><span class="badge">Level 1</span><h3>Reflected XSS</h3></a>
+        <a href="level2.html" class="card"><span class="badge">***** 2</span><h3>Filter Bypass</h3></a>
+        <a href="level3.html" class="card"><span class="badge">Level 3</span><h3>********* Injection</h3></a>
+        <a href="level4.html" class="card"><span class="badge">Level 4</span><h3>DOM-***** XSS</h3></a>
+        <a href="level5.html" class="card"><span class="badge">Level 5</span><h3>CSP Bypass</h3></a>
+        </div>
+        <div class="warn">⚠️ Lab lokal</div>
+        <div id="progress" class="info">Progress: 0/5</div>
+        </div>
+        <script src="flag.js">
+    </script>
+    <script>
+        if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    </script>
+    <p>`}, &apos;level1.html&apos;: { path:&apos;web/level1.html&apos;, content:`
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Level 1</title>
+        <link rel="stylesheet" href="style.css">
+    </p>
+    <div class="container">
+        <h1>🎯 Level 1 &mdash; Reflected XSS</h1>
+        <div class="info">Input langsung ke innerHTML</div><label>Nama:</label> <input type="text" id="q" placeholder="Payload..."> <button onclick="r()">Kirim</button>
+        <div class="output">
+            <div id="result"><br></div>
+        </div>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>&lt;img src=x onerror=alert(1)&gt;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{r3fl3ct3d_xss_b4s1c}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(1)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="index.html">&larr; Menu</a><a href="level2.html">L2 &rarr;</a></div>
+    </div>
+    <script src="flag.js"></script>
+    <script>
+        function r(){document.getElementById('result').innerHTML='Halo, '+document.getElementById('q').value;}
+    </script>
+    <p>`}, &apos;level2.html&apos;: { path:&apos;web/level2.html&apos;, content:`
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Level 2</title>
+        <link rel="stylesheet" href="style.css">
+    </p>
+    <div class="container">
+        <h1>🎯 Level 2 &mdash; ****** Bypass</h1>
+        <div class="info">Filter cuma hapus &lt;script&gt;</div><label>Payload:</label> <input type="text" id="q" placeholder="Payload..."> <button onclick="r()">Kirim</button>
+        <div class="output">
+            <div id="result"><br></div>
+        </div>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>&lt;img src=x onerror=alert(1)&gt;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{byp4ss_f1lt3r_scr1pt}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(2)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="level1.html">&larr; L1</a><a href="index.html">Menu</a><a href="level3.html">L3 &rarr;</a></div>
+    </div>
+    <script src="flag.js"></script>
+    <script>
+        function r(){let q=document.getElementById('q').value;q=q.replace(/<script>/g,'');document.getElementById('result').innerHTML=q;}
+    </script>
+    <p>`}, &apos;level3.html&apos;: { path:&apos;web/level3.html&apos;, content:`
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>***** 3</title>
+        <link rel="stylesheet" href="style.css">
+    </p>
+    <div class="container">
+        <h1>🎯 Level 3 &mdash; ********* Injection</h1>
+        <div class="info">***** masuk ** atribut value</div><label>Input:</label> <input type="text" id="q" placeholder="&quot; onfocus=alert(1) autofocus=&quot;"> <button onclick="r()">Kirim</button>
+        <div class="output">
+            <div id="result"><br></div>
+        </div>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>&quot; onfocus=alert(1) autofocus=&quot;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{4ttr1but3_1nj3ct10n}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(3)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="level2.html">&larr; L2</a><a href="index.html">Menu</a><a href="level4.html">L4 &rarr;</a></div>
+    </div>
+    <script src="flag.js"></script>
+    <script>
+        function r(){const q=document.getElementById('q').value;document.getElementById('result').innerHTML='<input type="text" value="'+q+'" readonly style="width:100%;padding:8px;">';}
+    </script>
+    <p>`}, &apos;level4.html&apos;: { path:&apos;web/level4.html&apos;, content:`
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Level 4</title>
+        <link rel="stylesheet" href="style.css">
+    </p>
+    <div class="container">
+        <h1>🎯 ***** 4 &mdash; DOM-based XSS</h1>
+        <div class="info">***** **** location.hash</div>
+        <div class="output">
+            <div id="welcome">Loading...</div>
+        </div><label>Tes:</label> <input type="text" id="input" placeholder="Payload..."> <button onclick="renderFromInput()">Render</button>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>#&lt;img src=x onerror=alert(1)&gt;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{d0m_b4s3d_xss}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(4)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="level3.html">&larr; L3</a><a href="index.html">Menu</a><a href="level5.html">L5 &rarr;</a></div>
+    </div>
+    <script src="flag.js"></script>
+    <script src="dom.js"></script>
+    <p>`}, &apos;level5.html&apos;: { path:&apos;web/level5.html&apos;, content:`
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Level 5</title>
+        <link rel="stylesheet" href="style.css">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline';">
+    </p>
+    <div class="container">
+        <h1>🎯 Level 5 &mdash; CSP Bypass</h1>
+        <div class="info">CSP lemah: unsafe-inline</div><label>Payload:</label> <input type="text" id="q" placeholder="Payload..."> <button onclick="r()">Kirim</button>
+        <div class="output">
+            <div id="result"><br></div>
+        </div>
+        <details class="hint">
+            <summary>💡 Hint</summary>
+            <pre>&lt;img src=x onerror=alert(1)&gt;</pre>
+        </details>
+        <div class="info">🏁 Flag: <code>CTF{csp_byp4ss_3duk4s1}</code></div><label>Flag:</label><input type="text" id="flagInput"> <button onclick="submitFlag(5)">Submit</button>
+        <div id="progress" class="info">Progress: 0/5</div>
+        <div class="nav"><a href="level4.html">&larr; L4</a><a href="index.html">Menu</a></div>
+    </div>
+    <script src="flag.js"></script>
+    <script>
+        function r(){document.getElementById('result').innerHTML=document.getElementById('q').value;}
+    </script>
+    <p>`}, &apos;style.css&apos;: { path:&apos;web/style.css&apos;, content:`* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: &apos;Segoe UI&apos;, system-ui, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; line-height: 1.6; } .container { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 24px; max-width: 860px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.4); } h1 { font-size: 1.5rem; margin-bottom: 8px; color: #58a6ff; } h3 { font-size: 1.1rem; margin-bottom: 6px; } .subtitle { font-size: 0.9rem; color: #8b949e; margin-bottom: 24px; } .warn { background: #3d1f1f; border-left: 4px solid #f85149; padding: 12px 16px; border-radius: 6px; font-size: 0.85rem; margin-top: 24px; color: #ffa198; } .info { background: #1f2d3d; border-left: 4px solid #58a6ff; padding: 12px 16px; border-radius: 6px; font-size: 0.85rem; margin: 16px 0; color: #a5d6ff; } .success { background: #1f3d2a; border-left: 4px solid #3fb950; padding: 12px 16px; border-radius: 6px; color: #7ee787; } .menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 24px; } .card { display: block; background: #0d1117; border: 1px solid #30363d; border-radius: 10px; padding: 20px; text-decoration: none; color: inherit; transition: all 0.2s; } .card:hover { border-color: #58a6ff; } .card .badge { display: inline-block; background: #1f6feb; color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; } .card h3 { color: #58a6ff; } label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: #8b949e; margin-top: 16px; } input[type=&quot;text&quot;] { width: 100%; padding: 10px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-family: monospace; font-size: 0.9rem; outline: none; } input:focus { border-color: #58a6ff; } button { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 0.9rem; cursor: pointer; font-weight: 600; margin-top: 12px; } button:hover { background: #2ea043; } .output { margin-top: 20px; padding: 16px; background: #0d1117; border: 1px dashed #30363d; border-radius: 6px; min-height: 50px; word-wrap: break-word; } .output-label { font-size: 0.7rem; color: #8b949e; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; } pre, code { font-family: monospace; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 2px 6px; color: #7ee787; font-size: 0.85rem; } pre { padding: 12px; overflow-x: auto; margin: 12px 0; display: block; } .hint { background: #2d2a1f; border-left: 4px solid #d29922; padding: 12px 16px; border-radius: 6px; font-size: 0.85rem; margin: 16px 0; color: #e3b341; } .hint summary { cursor: pointer; font-weight: 600; } .nav { display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap; } .nav a { color: #58a6ff; text-decoration: none; font-size: 0.85rem; padding: 6px 12px; border: 1px solid #30363d; border-radius: 6px; } .nav a:hover { background: #1f6feb; color: white; border-color: #1f6feb; } `}, &apos;flag.js&apos;: { path:&apos;web/flag.js&apos;, content:`&apos;use strict&apos;; const FLAGS = { level1:&apos;CTF{r3fl3ct3d_xss_b4s1c}&apos;, level2:&apos;CTF{byp4ss_f1lt3r_scr1pt}&apos;, level3:&apos;CTF{4ttr1but3_1nj3ct10n}&apos;, level4:&apos;CTF{d0m_b4s3d_xss}&apos;, level5:&apos;CTF{csp_byp4ss_3duk4s1}&apos; }; function checkFlag(level,answer){ const correct=FLAGS[&apos;level&apos;+level]; const el=document.getElementById(&apos;result&apos;); if(!el)return; if(!answer||!answer.trim()){el.innerHTML=&apos;⚠️ Isi flag dulu.&apos;;el.className=&apos;warn&apos;;return;} if(answer.trim()===correct){el.innerHTML=&apos;✅ BENAR! <code>&apos;+correct+&apos;</code>&apos;;el.className=&apos;success&apos;;localStorage.setItem(&apos;ctf_level&apos;+level,&apos;solved&apos;);updateProgress();} else{el.innerHTML=&apos;❌ Salah.&apos;;el.className=&apos;warn&apos;;} } function updateProgress(){ let solved=0; for(let i=1;i&lt;=5;i++)if(localStorage.getItem(&apos;ctf_level&apos;+i)===&apos;solved&apos;)solved++; const el=document.getElementById(&apos;progress&apos;); if(el)el.textContent=&apos;Progress: &apos;+solved+&apos;/5 level solved&apos;; } function submitFlag(level){const i=document.getElementById(&apos;flagInput&apos;);if(i)checkFlag(level,i.value);} window.addEventListener(&apos;DOMContentLoaded&apos;,updateProgress); window.submitFlag=submitFlag; `}, &apos;dom.js&apos;: { path:&apos;web/dom.js&apos;, content:`&apos;use strict&apos;; function loadFromHash(){ const hash=location.hash.slice(1); const w=document.getElementById(&apos;welcome&apos;); if(!w)return; if(!hash){w.textContent=&apos;Halo, guest!&apos;;return;} w.innerHTML=&apos;Halo, &apos;+decodeURIComponent(hash)+&apos;!&apos;; } function renderFromInput(){ const i=document.getElementById(&apos;input&apos;); const w=document.getElementById(&apos;welcome&apos;); if(!i||!w)return; if(!i.value){w.textContent=&apos;Input kosong.&apos;;return;} w.innerHTML=&apos;Halo, &apos;+i.value+&apos;!&apos;; } window.addEventListener(&apos;hashchange&apos;,loadFromHash); window.addEventListener(&apos;DOMContentLoaded&apos;,loadFromHash); window.renderFromInput=renderFromInput; `}, &apos;manifest.json&apos;: { path:&apos;web/manifest.json&apos;, content:`{ &quot;name&quot;: &quot;Mini CTF XSS&quot;, &quot;short_name&quot;: &quot;XSS CTF&quot;, &quot;description&quot;: &quot;Lab edukasi XSS&quot;, &quot;start_url&quot;: &quot;index.html&quot;, &quot;scope&quot;: &quot;./&quot;, &quot;display&quot;: &quot;standalone&quot;, &quot;orientation&quot;: &quot;portrait&quot;, &quot;background_color&quot;: &quot;#0d1117&quot;, &quot;theme_color&quot;: &quot;#58a6ff&quot;, &quot;lang&quot;: &quot;id&quot;, &quot;icons&quot;: [ { &quot;src&quot;: &quot;icon-192.png&quot;, &quot;sizes&quot;: &quot;192x192&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot; }, { &quot;src&quot;: &quot;icon-512.png&quot;, &quot;sizes&quot;: &quot;512x512&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot; }, { &quot;src&quot;: &quot;icon-512.png&quot;, &quot;sizes&quot;: &quot;512x512&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;maskable&quot; } ] } `}, &apos;sw.js&apos;: { path:&apos;web/sw.js&apos;, content:`const CACHE=&apos;xss-ctf-v1&apos;; const FILES=[&apos;index.html&apos;,&apos;style.css&apos;,&apos;flag.js&apos;,&apos;dom.js&apos;,&apos;level1.html&apos;,&apos;level2.html&apos;,&apos;level3.html&apos;,&apos;level4.html&apos;,&apos;level5.html&apos;,&apos;manifest.json&apos;]; self.addEventListener(&apos;install&apos;,e=&gt;{e.waitUntil(caches.open(CACHE).then(c=&gt;c.addAll(FILES)));}); self.addEventListener(&apos;fetch&apos;,e=&gt;{e.respondWith(caches.match(e.request).then(r=&gt;r||fetch(e.request)));}); `} }; // ============================================================ // FUNGSI GENERATE // ============================================================ function log(msg, cls=&apos;&apos;) { const el = document.getElementById(&apos;log&apos;); el.innerHTML += `<span class="${cls}">${msg}</span>\n`; el.scrollTop = el.scrollHeight; } async function generate() { document.getElementById(&apos;log&apos;).innerHTML = &apos;&apos;; log(&apos;🚀 Mulai generate...&apos;, &apos;info&apos;); log(&apos;&apos;, &apos;&apos;); const entries = Object.entries(FILES); let i = 0; for (const [name, data] of entries) { i++; const blob = new Blob([data.content], { type: &apos;text/plain&apos; }); const url = URL.createObjectURL(blob); const a = document.createElement(&apos;a&apos;); a.href = url; // Nama file unik biar gak ke-overwrite const safeName = data.path.replace(/\//g, &apos;__&apos;); a.download = safeName; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); log(`[${i}/${entries.length}] ✅ ${data.path}`, &apos;ok&apos;); await new Promise(r =&gt; setTimeout(r, 300)); } log(&apos;&apos;, &apos;&apos;); log(&apos;🎉 SELESAI! Semua file udah ke-download.&apos;, &apos;ok&apos;); log(&apos;&apos;, &apos;&apos;); log(&apos;📁 Struktur folder yang benar:&apos;, &apos;info&apos;); copyTree(); } function copyTree() { const tree = `xss-ctf-app/ ├── .github/ │ └── workflows/ │ └── build-apk.yml ├── web/ │ ├── index.html │ ├── level1.html │ ├── level2.html │ ├── level3.html │ ├── level4.html │ ├── level5.html │ ├── style.css │ ├── flag.js │ ├── dom.js │ ├── manifest.json │ ├── sw.js │ ├── icon-192.png &larr; bikin manual │ └── icon-512.png &larr; bikin manual └── README.md CATATAN: File yang di-download punya nama prefix: web__index.html &rarr; rename jadi web/index.html .github__workflows__build-apk.yml &rarr; pindah ke .github/workflows/build-apk.yml README.md &rarr; taruh di root `; navigator.clipboard.writeText(tree).then(() =&gt; { alert(&apos;📋 Struktur folder udah di-copy ke clipboard!&apos;); }).catch(() =&gt; { // Fallback const ta = document.createElement(&apos;textarea&apos;); ta.value = tree; document.body.appendChild(ta); ta.select(); document.execCommand(&apos;copy&apos;); document.body.removeChild(ta); alert(&apos;📋 Struktur folder udah di-copy!&apos;); }); } function copyFileList() { const list = Object.values(FILES).map(f =&gt; f.path).join(&apos;\n&apos;); navigator.clipboard.writeText(list).then(() =&gt; { alert(&apos;📋 Daftar file udah di-copy!&apos;); }); } // Log awal log(&apos;// Klik tombol &quot;🎁 Generate Semua File&quot; buat mulai&apos;, &apos;info&apos;); log(&apos;// Total: 12 file project + panduan struktur folder&apos;, &apos;info&apos;);</p>
+
+<div style="color: red">Word to HTML trial - please <a href="https://wordtohtml.net/site/payment">Go PRO</a> to get whole HTML.</div>
+</body>
+
+</html>
