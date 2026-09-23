@@ -991,11 +991,14 @@
             currentUsage = data;
         }
 
-        // Limit harian efektif: kalau kolom "plan" di Supabase = 'pro', pakai limit Pro (5),
-        // selain itu pakai limit default (2). Kolom "plan" ini diubah manual oleh admin
-        // langsung dari tabel Supabase (bukan otomatis lewat pembayaran).
+        // Limit harian efektif: prioritas ke kolom "daily_limit" per-user kalau diisi
+        // di Supabase (angka spesifik untuk akun itu). Kalau kolom itu kosong/null,
+        // baru fallback ke default berdasar "plan" (pro = 5, selain itu = 2).
         function effectiveDailyLimit() {
             if (!currentUsage) return DAILY_LIMIT;
+            if (currentUsage.daily_limit !== null && currentUsage.daily_limit !== undefined) {
+                return currentUsage.daily_limit;
+            }
             return currentUsage.plan === 'pro' ? PRO_DAILY_LIMIT : DAILY_LIMIT;
         }
 
