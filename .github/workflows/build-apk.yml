@@ -163,19 +163,32 @@ jobs:
           echo "OK: app-release.apk ditemukan."
 
       - name: Buat GitHub Release & upload APK
-        uses: softprops/action-gh-release@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: build-${{ inputs.build_id }}
-          name: "Build ${{ inputs.app_name }} (${{ inputs.build_id }})"
-          fail_on_unmatched_files: true
-          body: |
-            Build otomatis dari Flows Compiler.
-            - App name: ${{ inputs.app_name }}
-            - Package: ${{ inputs.app_id }}
-            - Versi: ${{ inputs.version_name }}
-          files: android-template/app/build/outputs/apk/release/app-release.apk
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          TAG="build-${{ inputs.build_id }}"
+          APK="android-template/app/build/outputs/apk/release/app-release.apk"
+
+          echo "Membuat release $TAG..."
+          gh release create "$TAG" \
+            --title "Build ${{ inputs.app_name }} (${{ inputs.build_id }})" \
+            --notes "Build otomatis dari Flows Compiler.
+          - App name: ${{ inputs.app_name }}
+          - Package: ${{ inputs.app_id }}
+          - Versi: ${{ inputs.version_name }}"
+
+          echo "Upload $APK ke release $TAG..."
+          gh release upload "$TAG" "$APK" --clobber
+
+          echo "Verifikasi asset benar-benar ke-upload..."
+          gh release view "$TAG" --json assets --jq '.assets[].name'
+          COUNT=$(gh release view "$TAG" --json assets --jq '[.assets[] | select(.name | endswith(".apk"))] | length')
+          if [ "$COUNT" -lt 1 ]; then
+            echo "::error::Asset .apk tidak terdaftar di release $TAG setelah upload."
+            exit 1
+          fi
+          echo "OK: asset .apk terkonfirmasi ada di release."
 
       - name: Bersihkan file payload dari repo
         if: always()
