@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bola Ngambang</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Segoe UI',Arial,sans-serif; background:#0f172a; color:#e2e8f0; min-height:100vh; padding:20px; }
+  h1 { font-size:22px; margin:6px 0 4px; }
+  .sub { opacity:.65; font-size:13px; margin-bottom:18px; }
+  .card { background:#1e293b; border-radius:14px; padding:16px; margin-bottom:14px; }
+  .card h2 { font-size:15px; margin:0 0 10px; }
+  .row { display:flex; justify-content:space-between; font-size:14px; padding:4px 0; }
+  .ok { color:#4ade80; } .no { color:#f87171; }
+  input { width:100%; padding:12px; border-radius:10px; border:none; margin-bottom:8px; font-size:15px; }
+  button { width:100%; padding:13px; border:none; border-radius:10px; font-size:15px; color:#fff; background:#7c3aed; margin-top:4px; }
+  button.alt { background:#334155; }
+  #msg { text-align:center; font-size:13px; min-height:20px; margin-top:6px; }
+  #warn { background:#7f1d1d; border-radius:10px; padding:12px; font-size:13px; margin-bottom:14px; display:none; }
+</style>
+</head>
+<body>
+
+<h1>🔵 Bola Ngambang</h1>
+<div class="sub">App otomatis terkunci begitu dibuka. Sandi default sudah aktif.</div>
+
+<div id="warn">Halaman ini harus dibuka lewat APK hasil compile. Di browser biasa, fitur bola tidak jalan.</div>
+
+<div class="card">
+  <h2>Status</h2>
+  <div class="row"><span>Izin tampil di atas app lain</span><span id="stOverlay">-</span></div>
+  <div class="row"><span>Sandi</span><span id="stPw">-</span></div>
+  <div class="row"><span>Kode cadangan</span><span id="stCodes">-</span></div>
+  <div class="row"><span>Layar</span><span id="stLock">-</span></div>
+  <button class="alt" id="btnOverlay">Beri Izin Overlay</button>
+</div>
+
+<div class="card">
+  <h2>Aksi</h2>
+  <button id="btnLock">🔒 Kunci Layar Sekarang</button>
+</div>
+
+<div class="card">
+  <h2>Tambahkan Kode Cadangan</h2>
+  <input type="password" id="curPw" placeholder="Sandi utama">
+  <input type="password" id="newCode" placeholder="Kode baru (min. 4 karakter)">
+  <button id="btnAddCode">➕ Tambahkan Kode</button>
+</div>
+
+<div id="msg"></div>
+
+<script>
+  const B = window.AndroidBubble;
+  const $ = id => document.getElementById(id);
+  const msg = t => { $('msg').textContent = t; };
+
+  function refresh() {
+    if (!B) { $('warn').style.display = 'block'; return; }
+    const ov = B.hasOverlayPermission(), pw = B.hasPassword();
+    $('stOverlay').textContent = ov ? 'Aktif' : 'Belum'; $('stOverlay').className = ov ? 'ok' : 'no';
+    $('stPw').textContent = pw ? 'Aktif (default)' : 'Belum'; $('stPw').className = pw ? 'ok' : 'no';
+    $('stCodes').textContent = B.backupCodeCount();
+    $('stLock').textContent = B.isLocked() ? 'Terkunci' : 'Terbuka';
+  }
+
+  $('btnOverlay').onclick = () => B ? B.requestOverlayPermission() : msg('Buka lewat APK');
+
+  $('btnLock').onclick = () => {
+    if (!B) return msg('Buka lewat APK');
+    if (!B.hasOverlayPermission()) return msg('Beri izin overlay dulu');
+    B.lockNow();
+  };
+
+  $('btnAddCode').onclick = () => {
+    if (!B) return msg('Buka lewat APK');
+    B.addBackupCode($('curPw').value, $('newCode').value)
+      ? msg('Kode ditambahkan ✔') : msg('Sandi utama salah / kode kurang dari 4 karakter');
+    $('curPw').value = $('newCode').value = '';
+    refresh();
+  };
+
+  refresh();
+  setInterval(refresh, 2000);
+</script>
+</body>
+</html>
