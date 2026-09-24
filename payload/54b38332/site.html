@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Layar Terkunci</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      height: 100vh;
+      height: 100dvh;
+      background: linear-gradient(160deg, #0f0c29, #1a163a, #24243e);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+      position: relative;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px 20px;
+      transition: background 0.5s ease;
+    }
+
+    body.unlocked {
+      background: linear-gradient(160deg, #0d3b2e, #1a5c4a, #0f2a24);
+    }
+
+    .bg {
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(255, 100, 100, 0.12), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(78, 205, 196, 0.1), transparent 40%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .center {
+      text-align: center;
+      z-index: 2;
+      margin-bottom: 20px;
+    }
+
+    .lock-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .lock-icon svg {
+      width: 26px;
+      height: 26px;
+      fill: white;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      opacity: 0.6;
+    }
+
+    .pin-dots {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin: 18px 0 20px;
+      z-index: 2;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.5);
+      background: transparent;
+      transition: all 0.2s ease;
+    }
+
+    .dot.filled {
+      background: white;
+      border-color: white;
+    }
+
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      width: 100%;
+      max-width: 290px;
+      z-index: 2;
+      margin-bottom: 20px;
+    }
+
+    .num-btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1.5px solid rgba(255, 255, 255, 0.28);
+      color: white;
+      font-size: 28px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      margin: 0 auto;
+      user-select: none;
+    }
+
+    .num-btn:active {
+      transform: scale(0.9);
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .num-btn.empty {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .bottom {
+      width: 100%;
+      max-width: 290px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+      padding: 0 8px;
+    }
+
+    .btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .btn:active {
+      transform: scale(0.9);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    .btn-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-label {
+      font-size: 11px;
+      opacity: 0.65;
+    }
+
+    body.unlocked .title {
+      color: #4ecdc4;
+    }
+
+    body.unlocked .lock-icon {
+      background: rgba(78, 205, 196, 0.25);
+      border-color: rgba(78, 205, 196, 0.5);
+    }
+
+    .fade-out {
+      opacity: 0 !important;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg"></div>
+
+  <div class="center">
+    <div class="lock-icon" id="lockIcon">
+      <svg id="lockSvg" viewBox="0 0 24 24">
+        <path d="M12 1C8.676 1 6 3.676 6 7v2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V11c0-1.1-.9-2-2-2h-2V7c0-3.324-2.676-6-6-6zm0 2c2.276 0 4 1.724 4 4v2H8V7c0-2.276 1.724-4 4-4zm0 10c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>
+      </svg>
+    </div>
+    <h1 class="title" id="titleText">UPS!, Layar Terkunci!</h1>
+    <p class="subtitle" id="subtitleText">Masukkan PIN untuk membuka</p>
+  </div>
+
+  <div class="pin-dots" id="pinDots">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <div class="numpad" id="numpad">
+    <button class="num-btn" data-num="1">1</button>
+    <button class="num-btn" data-num="2">2</button>
+    <button class="num-btn" data-num="3">3</button>
+    <button class="num-btn" data-num="4">4</button>
+    <button class="num-btn" data-num="5">5</button>
+    <button class="num-btn" data-num="6">6</button>
+    <button class="num-btn" data-num="7">7</button>
+    <button class="num-btn" data-num="8">8</button>
+    <button class="num-btn" data-num="9">9</button>
+    <button class="num-btn empty"></button>
+    <button class="num-btn" data-num="0">0</button>
+    <button class="num-btn" id="btnDelete">⌫</button>
+  </div>
+
+  <div class="bottom" id="bottomSection">
+    <div class="btn-wrapper">
+      <button class="btn">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57a1.02 1.02 0 0 0-1.02.24l-2.2 2.2a15.045 15.045 0 0 1-6.59-6.59l2.2-2.21a.96.96 0 0 0 .25-1.02A11.36 11.36 0 0 1 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/>
+        </svg>
+      </button>
+      <span class="btn-label">Darurat</span>
+    </div>
+
+    <div class="btn-wrapper">
+      <button class="btn">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+      </button>
+      <span class="btn-label">Bantuan</span>
+    </div>
+  </div>
+
+  <script>
+    const correctPIN = "5277";
+    let currentPIN = "";
+    const dots = document.querySelectorAll('.dot');
+    const numButtons = document.querySelectorAll('.num-btn[data-num]');
+    const btnDelete = document.getElementById('btnDelete');
+
+    function updateDots() {
+      dots.forEach((dot, i) => {
+        if (i < currentPIN.length) {
+          dot.classList.add('filled');
+        } else {
+          dot.classList.remove('filled');
+        }
+      });
+    }
+
+    function unlockScreen() {
+      document.body.classList.add('unlocked');
+      document.getElementById('lockSvg').innerHTML = `
+        <path d="M12 1C8.676 1 6 3.676 6 7h2c0-2.276 1.724-4 4-4s4 1.724 4 4v2h2V7c0-3.324-2.676-6-6-6zm-8 8c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V11c0-1.1-.9-2-2-2H4zm8 3c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>
+      `;
+      document.getElementById('titleText').textContent = 'Layar Terbuka!';
+      document.getElementById('subtitleText').textContent = 'Selamat datang kembali';
+      document.getElementById('numpad').classList.add('fade-out');
+      document.getElementById('pinDots').classList.add('fade-out');
+      document.getElementById('bottomSection').classList.add('fade-out');
+    }
+
+    function checkPIN() {
+      if (currentPIN === correctPIN) {
+        unlockScreen();
+      } else {
+        currentPIN = "";
+        updateDots();
+        document.getElementById('pinDots').style.transform = 'translateX(-8px)';
+        setTimeout(() => {
+          document.getElementById('pinDots').style.transform = 'translateX(8px)';
+          setTimeout(() => {
+            document.getElementById('pinDots').style.transform = 'translateX(0)';
+          }, 60);
+        }, 60);
+      }
+    }
+
+    numButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (currentPIN.length < 4) {
+          currentPIN += btn.dataset.num;
+          updateDots();
+          if (currentPIN.length === 4) {
+            setTimeout(checkPIN, 200);
+          }
+        }
+      });
+    });
+
+    btnDelete.addEventListener('click', () => {
+      currentPIN = currentPIN.slice(0, -1);
+      updateDots();
+    });
+  </script>
+</body>
+</html>
