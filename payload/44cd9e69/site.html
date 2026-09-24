@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+
+<body>
+    <p>&lt;!DOCTYPE html&gt;</p>
+    <p>&lt;html lang=&quot;id&quot;&gt;</p>
+    <p>&lt;head&gt;</p>
+    <p>&lt;meta charset=&quot;UTF-8&quot;&gt;</p>
+    <p>&lt;**** name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;</p>
+    <p>&lt;title&gt;🔐 XSS CTF Generator (Locked)&lt;/title&gt;</p>
+    <p>&lt;style&gt;</p>
+    <p>&nbsp; * { box-sizing: border-box; margin: 0; padding: 0; }</p>
+    <p>&nbsp; body {</p>
+    <p>&nbsp; &nbsp; font-family: system-ui, sans-serif;</p>
+    <p>&nbsp; &nbsp; background: #0d1117;</p>
+    <p>&nbsp; &nbsp; color: #c9d1d9;</p>
+    <p>&nbsp; &nbsp; min-height: 100vh;</p>
+    <p>&nbsp; &nbsp; padding: 20px;</p>
+    <p>&nbsp; &nbsp; display: flex;</p>
+    <p>&nbsp; &nbsp; align-items: center;</p>
+    <p>&nbsp; &nbsp; justify-content: center;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .container {</p>
+    <p>&nbsp; &nbsp; max-width: 700px;</p>
+    <p>&nbsp; &nbsp; width: 100%;</p>
+    <p>&nbsp; &nbsp; background: #161b22;</p>
+    <p>&nbsp; &nbsp; border: 1px solid #30363d;</p>
+    <p>&nbsp; &nbsp; border-radius: 12px;</p>
+    <p>&nbsp; &nbsp; padding: 32px;</p>
+    <p>&nbsp; &nbsp; box-shadow: 0 8px 32** rgba(0,0,0,0.4);</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; h1 { color: #58a6ff; font-size: 1.4rem; margin-bottom: 8px; }</p>
+    <p>&nbsp; p { color: #8b949e; font-size: 0.9rem; margin-bottom: 20px; }</p>
+    <p><br></p>
+    <p>&nbsp; /* ===== LOGIN SCREEN ===== */</p>
+    <p>&nbsp; #lockScreen {</p>
+    <p>&nbsp; &nbsp; display: block;</p>
+    <p>&nbsp; &nbsp; text-align: center;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; #lockScreen .icon {</p>
+    <p>&nbsp; &nbsp; font-size: 4rem;</p>
+    <p>&nbsp; &nbsp; margin-bottom: 16px;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; #lockScreen h2 {</p>
+    <p>&nbsp; &nbsp; color: #58a6ff;</p>
+    <p>&nbsp; &nbsp; margin-bottom: 8px;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; #lockScreen .sub {</p>
+    <p>&nbsp; &nbsp; color: #8b949e;</p>
+    <p>&nbsp; &nbsp; font-size: 0.85rem;</p>
+    <p>&nbsp; &nbsp; margin-bottom: 24px;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .pin-box {</p>
+    <p>&nbsp; &nbsp; display: flex;</p>
+    <p>&nbsp; &nbsp; justify-content: center;</p>
+    <p>&nbsp; &nbsp; gap: 10px;</p>
+    <p>&nbsp; &nbsp; margin-bottom: 20px;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .pin-box input {</p>
+    <p>&nbsp; &nbsp; width: 50px;</p>
+    <p>&nbsp; &nbsp; height: 60px;</p>
+    <p>&nbsp; &nbsp; text-align: center;</p>
+    <p>&nbsp; &nbsp; font-size: 1.5rem;</p>
+    <p>&nbsp; &nbsp; font-weight: 700;</p>
+    <p>&nbsp; &nbsp; background: #0d1117;</p>
+    <p>&nbsp; &nbsp; border: 2** solid #30363d;</p>
+    <p>&nbsp; &nbsp; border-radius: 8px;</p>
+    <p>&nbsp; &nbsp; color: #58a6ff;</p>
+    <p>&nbsp; &nbsp; outline: none;</p>
+    <p>&nbsp; &nbsp; transition: border 0.2s;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .pin-box input:focus {</p>
+    <p>&nbsp; &nbsp; border-color: #58a6ff;</p>
+    <p>&nbsp; &nbsp; box-shadow: 0 0 0 3px rgba(88,166,255,0.2);</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .pin-box input.filled {</p>
+    <p>&nbsp; &nbsp; border-color: #3fb950;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .keypad {</p>
+    <p>&nbsp; &nbsp; display: grid;</p>
+    <p>&nbsp; &nbsp; grid-template-columns: repeat(3, 1fr);</p>
+    <p>&nbsp; &nbsp; gap: 10px;</p>
+    <p>&nbsp; &nbsp; max-width: 300px;</p>
+    <p>&nbsp; &nbsp; margin: 0 auto 20px;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .keypad button {</p>
+    <p>&nbsp; &nbsp; background: #21262d;</p>
+    <p>&nbsp; &nbsp; color: #c9d1d9;</p>
+    <p>&nbsp; &nbsp; border: *** ***** #30363d;</p>
+    <p>&nbsp; &nbsp; border-radius: 8px;</p>
+    <p>&nbsp; &nbsp; padding: 16px;</p>
+    <p>&nbsp; &nbsp; font-size: 1.2rem;</p>
+    <p>&nbsp; &nbsp; font-weight: 600;</p>
+    <p>&nbsp; &nbsp; cursor: pointer;</p>
+    <p>&nbsp; &nbsp; transition: all 0.15s;</p>
+    <p>&nbsp; &nbsp; margin: 0;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .keypad button:hover {</p>
+    <p>&nbsp; &nbsp; background: #30363d;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .keypad button:active {</p>
+    <p>&nbsp; &nbsp; transform: scale(0.95);</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .keypad button.action {</p>
+    <p>&nbsp; &nbsp; background: #da3633;</p>
+    <p>&nbsp; &nbsp; color: white;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .keypad button.action:hover {</p>
+    <p>&nbsp; &nbsp; background: #f85149;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .keypad button.enter {</p>
+    <p>&nbsp; &nbsp; background: #238636;</p>
+    <p>&nbsp; &nbsp; color: white;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .keypad button.enter:hover {</p>
+    <p>&nbsp; &nbsp; background: #2ea043;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; #lockError {</p>
+    <p>&nbsp; &nbsp; color: #f85149;</p>
+    <p>&nbsp; &nbsp; font-size: 0.85rem;</p>
+    <p>&nbsp; &nbsp; min-height: 20px;</p>
+    <p>&nbsp; &nbsp; margin-bottom: 10px;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; #lockAttempts {</p>
+    <p>&nbsp; &nbsp; color: #8b949e;</p>
+    <p>&nbsp; &nbsp; font-size: 0.8rem;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .shake {</p>
+    <p>&nbsp; &nbsp; animation: ***** 0.4s;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; @keyframes shake {</p>
+    <p>&nbsp; &nbsp; 0%, 100% { transform: translateX(0); }</p>
+    <p>&nbsp; &nbsp; 25% { transform: translateX(-10px); }</p>
+    <p>&nbsp; &nbsp; 75% { transform: translateX(10px); }</p>
+    <p>&nbsp; }</p>
+    <p><br></p>
+    <p>&nbsp; /* ===== **** APP ===== */</p>
+    <p>&nbsp; #mainApp {</p>
+    <p>&nbsp; &nbsp; display: none;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .info {</p>
+    <p>&nbsp; &nbsp; background: #1f2d3d;</p>
+    <p>&nbsp; &nbsp; border-left: 4px solid #58a6ff;</p>
+    <p>&nbsp; &nbsp; padding: 12** 16px;</p>
+    <p>&nbsp; &nbsp; border-radius: 6px;</p>
+    <p>&nbsp; &nbsp; font-size: 0.9rem;</p>
+    <p>&nbsp; &nbsp; margin: 16px 0;</p>
+    <p>&nbsp; &nbsp; color: #a5d6ff;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .success {</p>
+    <p>&nbsp; &nbsp; background: #1f3d2a;</p>
+    <p>&nbsp; &nbsp; border-left: 4px solid #3fb950;</p>
+    <p>&nbsp; &nbsp; padding: 12px 16px;</p>
+    <p>&nbsp; &nbsp; border-radius: 6px;</p>
+    <p>&nbsp; &nbsp; font-size: 0.9rem;</p>
+    <p>&nbsp; &nbsp; margin: 16px 0;</p>
+    <p>&nbsp; &nbsp; color: #7ee787;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .warn {</p>
+    <p>&nbsp; &nbsp; background: #3d1f1f;</p>
+    <p>&nbsp; &nbsp; border-left: 4px solid #f85149;</p>
+    <p>&nbsp; &nbsp; padding: 12px 16px;</p>
+    <p>&nbsp; &nbsp; border-radius: 6px;</p>
+    <p>&nbsp; &nbsp; font-size: 0.85rem;</p>
+    <p>&nbsp; &nbsp; margin: 16px 0;</p>
+    <p>&nbsp; &nbsp; color: #ffa198;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; button.main-btn {</p>
+    <p>&nbsp; &nbsp; background: #238636;</p>
+    <p>&nbsp; &nbsp; color: white;</p>
+    <p>&nbsp; &nbsp; border: none;</p>
+    <p>&nbsp; &nbsp; padding: 14px 24px;</p>
+    <p>&nbsp; &nbsp; border-radius: 8px;</p>
+    <p>&nbsp; &nbsp; font-size: 1rem;</p>
+    <p>&nbsp; &nbsp; font-weight: 600;</p>
+    <p>&nbsp; &nbsp; cursor: pointer;</p>
+    <p>&nbsp; &nbsp; width: 100%;</p>
+    <p>&nbsp; &nbsp; margin-bottom: 10px;</p>
+    <p>&nbsp; &nbsp; transition: *** 0.2s;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; button.main-btn:hover { background: #2ea043; }</p>
+    <p>&nbsp; button.main-btn.blue { background: #1f6feb; font-size: 1.1rem; padding: 18px; }</p>
+    <p>&nbsp; button.main-btn.blue:hover { background: #388bfd; }</p>
+    <p>&nbsp; button.main-btn.red { background: #da3633; }</p>
+    <p>&nbsp; button.main-btn.red:hover { background: #f85149; }</p>
+    <p>&nbsp; #log {</p>
+    <p>&nbsp; &nbsp; background: #0d1117;</p>
+    <p>&nbsp; &nbsp; border: 1px solid #30363d;</p>
+    <p>&nbsp; &nbsp; border-radius: 8px;</p>
+    <p>&nbsp; &nbsp; padding: 16px;</p>
+    <p>&nbsp; &nbsp; font-family: monospace;</p>
+    <p>&nbsp; &nbsp; font-size: 0.85rem;</p>
+    <p>&nbsp; &nbsp; margin-top: 20px;</p>
+    <p>&nbsp; &nbsp; max-height: 400px;</p>
+    <p>&nbsp; &nbsp; overflow-y: auto;</p>
+    <p>&nbsp; &nbsp; white-space: pre-wrap;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .ok { color: #3fb950; }</p>
+    <p>&nbsp; .info-log { color: #58a6ff; }</p>
+    <p><br></p>
+    <p>&nbsp; .top-bar {</p>
+    <p>&nbsp; &nbsp; display: flex;</p>
+    <p>&nbsp; &nbsp; justify-content: space-between;</p>
+    <p>&nbsp; &nbsp; align-items: center;</p>
+    <p>&nbsp; &nbsp; margin-bottom: 20px;</p>
+    <p>&nbsp; &nbsp; padding-bottom: 16px;</p>
+    <p>&nbsp; &nbsp; border-bottom: 1px solid #30363d;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .top-bar .user {</p>
+    <p>&nbsp; &nbsp; color: #3fb950;</p>
+    <p>&nbsp; &nbsp; font-size: 0.85rem;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .top-bar .logout {</p>
+    <p>&nbsp; &nbsp; background: #da3633;</p>
+    <p>&nbsp; &nbsp; color: white;</p>
+    <p>&nbsp; &nbsp; border: none;</p>
+    <p>&nbsp; &nbsp; padding: 6px 12px;</p>
+    <p>&nbsp; &nbsp; border-radius: 6px;</p>
+    <p>&nbsp; &nbsp; font-size: 0.8rem;</p>
+    <p>&nbsp; &nbsp; cursor: pointer;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; .top-bar .logout:hover { background: #f85149; }</p>
+    <p>&lt;/style&gt;</p>
+    <p>&lt;/head&gt;</p>
+    <p>&lt;body&gt;</p>
+    <p>&nbsp; &lt;*** class=&quot;container&quot;&gt;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; &lt;!-- ===== LOCK SCREEN ===== --&gt;</p>
+    <p>&nbsp; &nbsp; &lt;div id=&quot;lockScreen&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;div class=&quot;icon&quot;&gt;🔐&lt;/div&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;h2&gt;Generator Terkunci&lt;/h2&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;p class=&quot;sub&quot;&gt;******** PIN 4 digit&lt;/p&gt;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;*** class=&quot;pin-box&quot; id=&quot;pinBox&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;input type=&quot;password&quot; maxlength=&quot;1&quot; inputmode=&quot;numeric&quot; data-i=&quot;0&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;***** type=&quot;password&quot; maxlength=&quot;1&quot; inputmode=&quot;numeric&quot; data-i=&quot;1&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;input type=&quot;password&quot; maxlength=&quot;1&quot; inputmode=&quot;numeric&quot; data-i=&quot;2&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;input type=&quot;password&quot; maxlength=&quot;1&quot; inputmode=&quot;numeric&quot; data-i=&quot;3&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;/div&gt;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;div class=&quot;keypad&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;button onclick=&quot;press(&apos;1&apos;)&quot;&gt;1&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;****** onclick=&quot;press(&apos;2&apos;)&quot;&gt;2&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;button onclick=&quot;press(&apos;3&apos;)&quot;&gt;3&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;button onclick=&quot;press(&apos;4&apos;)&quot;&gt;4&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;button onclick=&quot;press(&apos;5&apos;)&quot;&gt;5&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;button onclick=&quot;press(&apos;6&apos;)&quot;&gt;6&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;****** onclick=&quot;press(&apos;7&apos;)&quot;&gt;7&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;****** onclick=&quot;press(&apos;8&apos;)&quot;&gt;8&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;button onclick=&quot;press(&apos;9&apos;)&quot;&gt;9&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;button class=&quot;action&quot; onclick=&quot;backspace()&quot;&gt;⌫&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;button onclick=&quot;press(&apos;0&apos;)&quot;&gt;0&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;button class=&quot;enter&quot; onclick=&quot;submitPin()&quot;&gt;✓&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;/div&gt;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;*** id=&quot;lockError&quot;&gt;&lt;/div&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;div id=&quot;lockAttempts&quot;&gt;**** percobaan: 5&lt;/div&gt;</p>
+    <p>&nbsp; &nbsp; &lt;/div&gt;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; &lt;!-- ===== MAIN APP ===== --&gt;</p>
+    <p>&nbsp; &nbsp; &lt;div id=&quot;mainApp&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;div class=&quot;top-bar&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class=&quot;user&quot;&gt;✅ Unlocked&lt;/div&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &lt;button class=&quot;logout&quot; onclick=&quot;logout()&quot;&gt;🔒 Lock&lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;/div&gt;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;h1&gt;🚀 XSS CTF App Generator&lt;/h1&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;p&gt;Klik tombol &rarr; 12 file ******* ke-******** otomatis&lt;/p&gt;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;div class=&quot;info&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; 📦 &lt;strong&gt;12 file&lt;/strong&gt; ***** ke-download: HTML, CSS, JS, YAML, README</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;/div&gt;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;button class=&quot;main-btn blue&quot; onclick=&quot;generate()&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; 🎁 Generate Semua File</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;****** class=&quot;main-btn&quot; onclick=&quot;copyTree()&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; 📋 Copy ******** Folder</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;button class=&quot;main-btn&quot; onclick=&quot;downloadZip()&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; 📦 ******** sebagai ZIP</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;/button&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;****** class=&quot;main-btn red&quot; onclick=&quot;changePinPrompt()&quot;&gt;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; 🔑 Ganti PIN</p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;/button&gt;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; &nbsp; &lt;*** id=&quot;log&quot;&gt;// Klik tombol **** mulai...&lt;/div&gt;</p>
+    <p>&nbsp; &nbsp; &lt;/div&gt;</p>
+    <p><br></p>
+    <p>&nbsp; &lt;/div&gt;</p>
+    <p><br></p>
+    <p>&lt;script&gt;</p>
+    <p>// ============================================================</p>
+    <p>// KONFIGURASI PIN</p>
+    <p>// ============================================================</p>
+    <p>const DEFAULT_PIN = &apos;1234&apos;; // *** default</p>
+    <p>const MAX_ATTEMPTS = 5;</p>
+    <p>***** STORAGE_KEY = &apos;xss_gen_pin&apos;;</p>
+    <p>***** ATTEMPTS_KEY = &apos;xss_gen_attempts&apos;;</p>
+    <p><br></p>
+    <p>// Ambil PIN **** localStorage (kalau user ****** ganti)</p>
+    <p>function getPin() {</p>
+    <p>&nbsp; return localStorage.getItem(STORAGE_KEY) || DEFAULT_PIN;</p>
+    <p>}</p>
+    <p><br></p>
+    <p>function setPin(newPin) {</p>
+    <p>&nbsp; localStorage.setItem(STORAGE_KEY, newPin);</p>
+    <p>}</p>
+    <p><br></p>
+    <p>// ============================================================</p>
+    <p>// STATE</p>
+    <p>// ============================================================</p>
+    <p>let *** = [&apos;&apos;, &apos;&apos;, &apos;&apos;, &apos;&apos;];</p>
+    <p>let currentIndex = 0;</p>
+    <p>let ******** = parseInt(localStorage.getItem(ATTEMPTS_KEY) || &apos;0&apos;);</p>
+    <p><br></p>
+    <p>// ============================================================</p>
+    <p>// LOGIN LOGIC</p>
+    <p>// ============================================================</p>
+    <p>function updateInputs() {</p>
+    <p>&nbsp; const inputs = document.querySelectorAll(&apos;#pinBox input&apos;);</p>
+    <p>&nbsp; inputs.forEach((inp, i) =&gt; {</p>
+    <p>&nbsp; &nbsp; inp.value = pin[i] ? &apos;●&apos; : &apos;&apos;;</p>
+    <p>&nbsp; &nbsp; inp.classList.toggle(&apos;filled&apos;, !!pin[i]);</p>
+    <p>&nbsp; });</p>
+    <p>}</p>
+    <p><br></p>
+    <p>function press(num) {</p>
+    <p>&nbsp; ** (currentIndex &gt;= 4) return;</p>
+    <p>&nbsp; pin[currentIndex] = num;</p>
+    <p>&nbsp; currentIndex++;</p>
+    <p>&nbsp; updateInputs();</p>
+    <p><br></p>
+    <p>&nbsp; // Auto-submit kalau 4 digit penuh</p>
+    <p>&nbsp; if (currentIndex === 4) {</p>
+    <p>&nbsp; &nbsp; setTimeout(submitPin, 200);</p>
+    <p>&nbsp; }</p>
+    <p>}</p>
+    <p><br></p>
+    <p>function backspace() {</p>
+    <p>&nbsp; if (************ === 0) return;</p>
+    <p>&nbsp; currentIndex--;</p>
+    <p>&nbsp; pin[currentIndex] = &apos;&apos;;</p>
+    <p>&nbsp; updateInputs();</p>
+    <p>}</p>
+    <p><br></p>
+    <p>function submitPin() {</p>
+    <p>&nbsp; ***** input = pin.join(&apos;&apos;);</p>
+    <p>&nbsp; const correct = getPin();</p>
+    <p>&nbsp; const ******* = document.getElementById(&apos;lockError&apos;);</p>
+    <p>&nbsp; const lockScreen = document.getElementById(&apos;lockScreen&apos;);</p>
+    <p><br></p>
+    <p>&nbsp; if (input === correct) {</p>
+    <p>&nbsp; &nbsp; // ✅ SUCCESS</p>
+    <p>&nbsp; &nbsp; attempts = 0;</p>
+    <p>&nbsp; &nbsp; localStorage.setItem(ATTEMPTS_KEY, &apos;0&apos;);</p>
+    <p>&nbsp; &nbsp; errorEl.textContent = &apos;&apos;;</p>
+    <p>&nbsp; &nbsp; lockScreen.style.display = &apos;none&apos;;</p>
+    <p>&nbsp; &nbsp; document.getElementById(&apos;mainApp&apos;).style.display = &apos;block&apos;;</p>
+    <p>&nbsp; &nbsp; log(&apos;✅ Unlocked! PIN benar.&apos;, &apos;ok&apos;);</p>
+    <p>&nbsp; } else {</p>
+    <p>&nbsp; &nbsp; // ❌ WRONG</p>
+    <p>&nbsp; &nbsp; attempts++;</p>
+    <p>&nbsp; &nbsp; localStorage.setItem(ATTEMPTS_KEY, attempts);</p>
+    <p>&nbsp; &nbsp; ***** remaining = MAX_ATTEMPTS - attempts;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; errorEl.textContent = `❌ PIN salah! Sisa: ${remaining}`;</p>
+    <p>&nbsp; &nbsp; document.getElementById(&apos;lockAttempts&apos;).textContent =</p>
+    <p>&nbsp; &nbsp; &nbsp; `Sisa percobaan: ${remaining}`;</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; lockScreen.classList.add(&apos;shake&apos;);</p>
+    <p>&nbsp; &nbsp; setTimeout(() =&gt; lockScreen.classList.remove(&apos;shake&apos;), 400);</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; // Reset input</p>
+    <p>&nbsp; &nbsp; pin = [&apos;&apos;, &apos;&apos;, &apos;&apos;, &apos;&apos;];</p>
+    <p>&nbsp; &nbsp; currentIndex = 0;</p>
+    <p>&nbsp; &nbsp; updateInputs();</p>
+    <p><br></p>
+    <p>&nbsp; &nbsp; if (remaining &lt;= 0) {</p>
+    <p>&nbsp; &nbsp; &nbsp; errorEl.textContent = &apos;🚫 Terkunci! Refresh halaman **** coba lagi.&apos;;</p>
+    <p>&nbsp; &nbsp; &nbsp; document.querySelectorAll(&apos;.keypad button&apos;).forEach(b =&gt; b.disabled = true);</p>
+    <p>&nbsp; &nbsp; &nbsp; document.querySelectorAll(&apos;#pinBox input&apos;).forEach(i =&gt; i.******** = true);</p>
+    <p>&nbsp; &nbsp; }</p>
+    <p>&nbsp; }</p>
+    <p>}</p>
+    <p><br></p>
+    <p>function logout() {</p>
+    <p>&nbsp; document.getElementById(&apos;lockScreen&apos;).style.display = &apos;block&apos;;</p>
+    <p>&nbsp; document.getElementById(&apos;mainApp&apos;).style.display = &apos;none&apos;;</p>
+    <p>&nbsp; pin = [&apos;&apos;, &apos;&apos;, &apos;&apos;, &apos;&apos;];</p>
+    <p>&nbsp; ************ = 0;</p>
+    <p>&nbsp; updateInputs();</p>
+    <p>&nbsp; document.getElementById(&apos;lockError&apos;).textContent = &apos;&apos;;</p>
+    <p>&nbsp; log(&apos;🔒 Locked.&apos;, &apos;info-log&apos;);</p>
+    <p>}</p>
+    <p><br></p>
+    <p>// ============================================================</p>
+    <p>// GANTI PIN</p>
+    <p>// ============================================================</p>
+    <p>function changePinPrompt() {</p>
+    <p>&nbsp; const ****** = prompt(&apos;Masukkan PIN lama:&apos;);</p>
+    <p>&nbsp; if (oldPin !== getPin()) {</p>
+    <p>&nbsp; &nbsp; alert(&apos;❌ PIN lama salah!&apos;);</p>
+    <p>&nbsp; &nbsp; return;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; const newPin = prompt(&apos;Masukkan *** baru (4 digit):&apos;);</p>
+    <p>&nbsp; if (!newPin || !/^\d{4}$/.test(newPin)) {</p>
+    <p>&nbsp; &nbsp; alert(&apos;❌ *** harus 4 ***** angka!&apos;);</p>
+    <p>&nbsp; &nbsp; return;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; const confirmPin = prompt(&apos;Konfirmasi PIN baru:&apos;);</p>
+    <p>&nbsp; if (confirmPin !== newPin) {</p>
+    <p>&nbsp; &nbsp; alert(&apos;❌ Konfirmasi gak cocok!&apos;);</p>
+    <p>&nbsp; &nbsp; return;</p>
+    <p>&nbsp; }</p>
+    <p>&nbsp; setPin(newPin);</p>
+    <p>&nbsp; alert(&apos;✅ *** ******** diganti!&apos;);</p>
+    <p>&nbsp; log(&apos;🔑 PIN diganti.&apos;, &apos;ok&apos;);</p>
+    <p>}</p>
+    <p><br></p>
+    <p>// ============================================================</p>
+    <p>// KEYBOARD ******* (buat PC)</p>
+    <p>// ============================================================</p>
+    <p>document.addEventListener(&apos;keydown&apos;, (e) =&gt; {</p>
+    <p>&nbsp; if (document.getElementById(&apos;lockScreen&apos;).style.display === &apos;none&apos;) return;</p>
+    <p>&nbsp; if (/^\d$/.test(e.key)) press(e.key);</p>
+    <p>&nbsp; else ** (e.key === &apos;Backspace&apos;) backspace();</p>
+    <p>&nbsp; else if (e.key === &apos;Enter&apos;) submitPin();</p>
+    <p>});</p>
+    <p><br></p>
+    <p>// ============================================================</p>
+    <p>// FILE GENERATOR (sama ***** sebelumnya)</p>
+    <p>// ============================================================</p>
+    <p>const FILES = {</p>
+    <p>&nbsp; &apos;build-apk.yml&apos;: { path:&apos;.github/workflows/build-apk.yml&apos;, content:`name: Build APK</p>
+    <p>on:</p>
+    <p>&nbsp; push:</p>
+    <p>&nbsp; &nbsp; branches: [ main ]</p>
+    <p>&nbsp; workflow_dispatch:</p>
+    <p>jobs:</p>
+    <p>&nbsp; build:</p>
+    <p>&nbsp; &nbsp; runs-on: ubuntu-latest</p>
+    <p>&nbsp; &nbsp; steps:</p>
+    <p>&nbsp; &nbsp; &nbsp; - uses: actions/checkout@v4</p>
+    <p>&nbsp; &nbsp; &nbsp; - uses: actions/setup-node@v4</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; with: { node-version: &apos;20&apos; }</p>
+    <p>&nbsp; &nbsp; &nbsp; - uses: actions/setup-java@v4</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; with: { distribution: &apos;temurin&apos;, java-version: &apos;17&apos; }</p>
+    <p>&nbsp; &nbsp; &nbsp; - uses: android-actions/setup-android@v3</p>
+    <p>&nbsp; &nbsp; &nbsp; - run: *** install -g @bubblewrap/cli</p>
+    <p>&nbsp; &nbsp; &nbsp; - run: |</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ***** -p build</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; cp -r web/* build/</p>
+    <p>&nbsp; &nbsp; &nbsp; - working-directory: ./build</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; run: |</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; cat &gt; twa-manifest.json &lt;&lt; &apos;EOF&apos;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; {</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;packageId&quot;: &quot;com.bizz.xssctf&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;host&quot;: &quot;localhost&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;name&quot;: &quot;Mini *** XSS&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;launcherName&quot;: &quot;*** CTF&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;display&quot;: &quot;standalone&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;themeColor&quot;: &quot;#58a6ff&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;backgroundColor&quot;: &quot;#0d1117&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;startUrl&quot;: &quot;/index.html&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;iconUrl&quot;: &quot;icon-512.png&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;maskableIconUrl&quot;: &quot;icon-512.png&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;signingKey&quot;: { &quot;path&quot;: &quot;./android.keystore&quot;, &quot;alias&quot;: &quot;android&quot; },</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;appVersionName&quot;: &quot;1.0.0&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;appVersionCode&quot;: 1,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;webManifestUrl&quot;: &quot;manifest.json&quot;,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;minSdkVersion&quot;: 21,</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;orientation&quot;: &quot;portrait&quot;</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; EOF</p>
+    <p>&nbsp; &nbsp; &nbsp; - working-directory: ./build</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; run: keytool -genkeypair -v -******** android.******** -alias android -****** RSA -keysize 2048 -validity 10000 -storepass android123 -keypass android123 -dname &quot;CN=Bizz, O=bl_ai, C=ID&quot;</p>
+    <p>&nbsp; &nbsp; &nbsp; - working-directory: ./build</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; env:</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; BUBBLEWRAP_KEYSTORE_PASSWORD: android123</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; BUBBLEWRAP_KEY_PASSWORD: android123</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; run: bubblewrap build --skipPwaValidation</p>
+    <p>&nbsp; &nbsp; &nbsp; - working-directory: ./build</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; run: |</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; [ -f &quot;app-release-signed.apk&quot; ] &amp;&amp; mv app-release-signed.apk MiniCTF-XSS.apk || true</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; [ -f &quot;app-release-bundle.aab&quot; ] &amp;&amp; mv app-release-bundle.*** MiniCTF-XSS.*** || true</p>
+    <p>&nbsp; &nbsp; &nbsp; - uses: actions/upload-artifact@v4</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; with:</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; name: MiniCTF-XSS-APK</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; path: |</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; build/*.apk</p>
+    <p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; build/*.aab</p>
+    <p>`},</p>
+    <p>&nbsp; &apos;README.md&apos;: { path:&apos;README.md&apos;, content:`# 🎯 Mini CTF XSS &mdash; Android App</p>
+    <p><br></p>
+    <p>***** APK *** GitHub Actions.</p>
+    <p><br></p>
+    <p>## Cara Build</p>
+    <p>1. Tab Actions &rarr; &quot;Build APK&quot; &rarr; Run</p>
+    <p>2. Tunggu 5 menit</p>
+    <p>3. Download APK **** Artifacts</p>
+    <p><br></p>
+    <p>## Solusi</p>
+    <p>- L1: \`&lt;img src=x onerror=alert(1)&gt;\`</p>
+    <p>- L2: \`&lt;img src=x onerror=alert(1)&gt;\`</p>
+    <p>- L3: \`&quot; onfocus=alert(1) autofocus=&quot;\`</p>
+    <p>- L4: \`#&lt;img src=x onerror=alert(1)&gt;\`</p>
+    <p>- L5: \`&lt;*** src=x onerror=alert(1)&gt;\`</p>
+    <p><br></p>
+    <p>⚠️ Lab lokal.</p>
+    <p>`},</p>
+    <p>&nbsp; &apos;index.html&apos;: { path:&apos;web/index.html&apos;, content:`&lt;!DOCTYPE html&gt;</p>
+    <p>&lt;html lang=&quot;id&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;</p>
+    <p>&lt;title&gt;🎯 Mini *** XSS&lt;/title&gt;&lt;**** rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;&lt;link rel=&quot;manifest&quot; href=&quot;manifest.json&quot;&gt;&lt;meta name=&quot;theme-color&quot; content=&quot;#58a6ff&quot;&gt;&lt;/head&gt;</p>
+    <p>&lt;body&gt;&lt;*** class=&quot;container&quot;&gt;</p>
+    <p>&lt;h1&gt;🎯 Mini CTF XSS&lt;/h1&gt;&lt;p class=&quot;subtitle&quot;&gt;5 Level Challenge&lt;/p&gt;</p>
+    <p>&lt;div class=&quot;menu&quot;&gt;</p>
+    <p>&lt;a href=&quot;level1.html&quot; class=&quot;card&quot;&gt;&lt;span class=&quot;badge&quot;&gt;L1&lt;/span&gt;&lt;h3&gt;********* XSS&lt;/h3&gt;&lt;/a&gt;</p>
+    <p>&lt;a href=&quot;level2.html&quot; class=&quot;card&quot;&gt;&lt;span class=&quot;badge&quot;&gt;L2&lt;/span&gt;&lt;h3&gt;Filter Bypass&lt;/h3&gt;&lt;/a&gt;</p>
+    <p>&lt;a href=&quot;level3.html&quot; class=&quot;card&quot;&gt;&lt;span class=&quot;badge&quot;&gt;L3&lt;/span&gt;&lt;h3&gt;Attribute Injection&lt;/h3&gt;&lt;/a&gt;</p>
+    <p>&lt;a href=&quot;level4.html&quot; class=&quot;card&quot;&gt;&lt;span class=&quot;badge&quot;&gt;L4&lt;/span&gt;&lt;h3&gt;DOM-based XSS&lt;/h3&gt;&lt;/a&gt;</p>
+    <p>&lt;a href=&quot;level5.html&quot; class=&quot;card&quot;&gt;&lt;**** class=&quot;badge&quot;&gt;L5&lt;/span&gt;&lt;h3&gt;CSP Bypass&lt;/h3&gt;&lt;/a&gt;</p>
+    <p>&lt;/div&gt;</p>
+    <p>&lt;div class=&quot;warn&quot;&gt;⚠️ Lab lokal&lt;/div&gt;</p>
+    <p>&lt;*** id=&quot;progress&quot; class=&quot;info&quot;&gt;Progress: 0/5&lt;/div&gt;</p>
+    <p>&lt;/div&gt;</p>
+    <p>&lt;script src=&quot;flag.js&quot;&gt;&lt;/script&gt;</p>
+    <p>&lt;script&gt;if(&apos;serviceWorker&apos; in navigator) navigator.serviceWorker.register(&apos;sw.js&apos;);&lt;/script&gt;</p>
+    <p>&lt;/body&gt;&lt;/html&gt;</p>
+    <p>`},</p>
+    <p>&nbsp; &apos;level1.html&apos;: { path:&apos;web/level1.html&apos;, content:`&lt;!DOCTYPE html&gt;</p>
+    <p>&lt;**** lang=&quot;id&quot;&gt;&lt;head&gt;&lt;**** charset=&quot;UTF-8&quot;&gt;&lt;**** name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;Level 1&lt;/title&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;&lt;/head&gt;</p>
+    <p>&lt;body&gt;&lt;div class=&quot;container&quot;&gt;</p>
+    <p>&lt;h1&gt;🎯 Level 1 &mdash; ********* XSS&lt;/h1&gt;</p>
+    <p>&lt;div class=&quot;info&quot;&gt;Input ke innerHTML&lt;/div&gt;</p>
+    <p>&lt;label&gt;Nama:&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;q&quot; placeholder=&quot;Payload...&quot;&gt;</p>
+    <p>&lt;button onclick=&quot;r()&quot;&gt;Kirim&lt;/button&gt;</p>
+    <p>&lt;div class=&quot;output&quot;&gt;&lt;div id=&quot;result&quot;&gt;&lt;/div&gt;&lt;/div&gt;</p>
+    <p>&lt;details class=&quot;hint&quot;&gt;&lt;summary&gt;💡 Hint&lt;/summary&gt;&lt;pre&gt;&amp;lt;img src=x onerror=alert(1)&amp;gt;&lt;/pre&gt;&lt;/details&gt;</p>
+    <p>&lt;div class=&quot;info&quot;&gt;🏁 Flag: &lt;code&gt;CTF{r3fl3ct3d_xss_b4s1c}&lt;/code&gt;&lt;/div&gt;</p>
+    <p>&lt;label&gt;Flag:&lt;/label&gt;&lt;***** type=&quot;text&quot; id=&quot;flagInput&quot;&gt;</p>
+    <p>&lt;****** onclick=&quot;submitFlag(1)&quot;&gt;Submit&lt;/button&gt;</p>
+    <p>&lt;div id=&quot;progress&quot; class=&quot;info&quot;&gt;Progress: 0/5&lt;/div&gt;</p>
+    <p>&lt;*** class=&quot;nav&quot;&gt;&lt;a href=&quot;index.html&quot;&gt;&larr; Menu&lt;/a&gt;&lt;a href=&quot;level2.html&quot;&gt;L2 &rarr;&lt;/a&gt;&lt;/div&gt;</p>
+    <p>&lt;/div&gt;</p>
+    <p>&lt;script src=&quot;flag.js&quot;&gt;&lt;/script&gt;</p>
+    <p>&lt;script&gt;function r(){document.getElementById(&apos;result&apos;).innerHTML=&apos;Halo, &apos;+document.getElementById(&apos;q&apos;).value;}&lt;/script&gt;</p>
+    <p>&lt;/body&gt;&lt;/html&gt;</p>
+    <p>`},</p>
+    <p>&nbsp; &apos;level2.html&apos;: { path:&apos;web/level2.html&apos;, content:`&lt;!DOCTYPE html&gt;</p>
+    <p>&lt;html lang=&quot;id&quot;&gt;&lt;head&gt;&lt;**** charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;Level 2&lt;/title&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;&lt;/head&gt;</p>
+    <p>&lt;body&gt;&lt;div class=&quot;container&quot;&gt;</p>
+    <p>&lt;h1&gt;🎯 Level 2 &mdash; Filter Bypass&lt;/h1&gt;</p>
+    <p>&lt;div class=&quot;info&quot;&gt;****** cuma hapus script tag&lt;/div&gt;</p>
+    <p>&lt;label&gt;Payload:&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;q&quot; placeholder=&quot;Payload...&quot;&gt;</p>
+    <p>&lt;****** onclick=&quot;r()&quot;&gt;Kirim&lt;/button&gt;</p>
+    <p>&lt;div class=&quot;output&quot;&gt;&lt;div id=&quot;result&quot;&gt;&lt;/div&gt;&lt;/div&gt;</p>
+    <p>&lt;******* class=&quot;hint&quot;&gt;&lt;summary&gt;💡 Hint&lt;/summary&gt;&lt;pre&gt;&amp;lt;img src=x onerror=alert(1)&amp;gt;&lt;/pre&gt;&lt;/details&gt;</p>
+    <p>&lt;div class=&quot;info&quot;&gt;🏁 Flag: &lt;code&gt;CTF{byp4ss_f1lt3r_scr1pt}&lt;/code&gt;&lt;/div&gt;</p>
+    <p>&lt;label&gt;Flag:&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;flagInput&quot;&gt;</p>
+    <p>&lt;button onclick=&quot;submitFlag(2)&quot;&gt;Submit&lt;/button&gt;</p>
+    <p>&lt;*** id=&quot;progress&quot; class=&quot;info&quot;&gt;Progress: 0/5&lt;/div&gt;</p>
+    <p>&lt;div class=&quot;nav&quot;&gt;&lt;a href=&quot;level1.html&quot;&gt;&larr; L1&lt;/a&gt;&lt;a href=&quot;index.html&quot;&gt;Menu&lt;/a&gt;&lt;a href=&quot;level3.html&quot;&gt;L3 &rarr;&lt;/a&gt;&lt;/div&gt;</p>
+    <p>&lt;/div&gt;</p>
+    <p>&lt;****** src=&quot;flag.js&quot;&gt;&lt;/script&gt;</p>
+    <p>&lt;script&gt;function r(){let q=document.getElementById(&apos;q&apos;).value;q=q.replace(/&lt;script&gt;/g,&apos;&apos;);document.getElementById(&apos;result&apos;).innerHTML=q;}&lt;/script&gt;</p>
+    <p>&lt;/body&gt;&lt;/html&gt;</p>
+    <p>`},</p>
+    <p>&nbsp; &apos;level3.html&apos;: { path:&apos;web/level3.html&apos;, content:`&lt;!DOCTYPE html&gt;</p>
+    <p>&lt;html lang=&quot;id&quot;&gt;&lt;head&gt;&lt;**** charset=&quot;UTF-8&quot;&gt;&lt;**** name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;Level 3&lt;/title&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;&lt;/head&gt;</p>
+    <p>&lt;body&gt;&lt;div class=&quot;container&quot;&gt;</p>
+    <p>&lt;h1&gt;🎯 ***** 3 &mdash; Attribute Injection&lt;/h1&gt;</p>
+    <p>&lt;div class=&quot;info&quot;&gt;Input masuk ke atribut value&lt;/div&gt;</p>
+    <p>&lt;label&gt;Input:&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;q&quot; placeholder=&apos;&quot; onfocus=alert(1) autofocus=&quot;&apos;&gt;</p>
+    <p>&lt;button onclick=&quot;r()&quot;&gt;Kirim&lt;/button&gt;</p>
+    <p>&lt;div class=&quot;output&quot;&gt;&lt;div id=&quot;result&quot;&gt;&lt;/div&gt;&lt;/div&gt;</p>
+    <p>&lt;details class=&quot;hint&quot;&gt;&lt;summary&gt;💡 Hint&lt;/summary&gt;&lt;pre&gt;&quot; onfocus=alert(1) autofocus=&quot;&lt;/pre&gt;&lt;/details&gt;</p>
+    <p>&lt;div class=&quot;info&quot;&gt;🏁 Flag: &lt;code&gt;CTF{4ttr1but3_1nj3ct10n}&lt;/code&gt;&lt;/div&gt;</p>
+    <p>&lt;label&gt;Flag:&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;flagInput&quot;&gt;</p>
+    <p>&lt;****** onclick=&quot;submitFlag(3)&quot;&gt;Submit&lt;/button&gt;</p>
+    <p>&lt;div id=&quot;progress&quot; class=&quot;info&quot;&gt;Progress: 0/5&lt;/div&gt;</p>
+    <p>&lt;div class=&quot;nav&quot;&gt;&lt;a href=&quot;level2.html&quot;&gt;&larr; L2&lt;/a&gt;&lt;a href=&quot;index.html&quot;&gt;Menu&lt;/a&gt;&lt;a href=&quot;level4.html&quot;&gt;L4 &rarr;&lt;/a&gt;&lt;/div&gt;</p>
+    <p>&lt;/div&gt;</p>
+    <p>&lt;script src=&quot;flag.js&quot;&gt;&lt;/script&gt;</p>
+    <p>&lt;script&gt;function r(){const q=document.getElementById(&apos;q&apos;).value;document.getElementById(&apos;result&apos;).innerHTML=&apos;&lt;input type=&quot;text&quot; value=&quot;&apos;+q+&apos;&quot; readonly style=&quot;width:100%;padding:8px;&quot;&gt;&apos;;}&lt;/script&gt;</p>
+    <p>&lt;/body&gt;&lt;/html&gt;</p>
+    <p>`},</p>
+    <p>&nbsp; &apos;level4.html&apos;: { path:&apos;web/level4.html&apos;, content:`&lt;!DOCTYPE html&gt;</p>
+    <p>&lt;html lang=&quot;id&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;Level 4&lt;/title&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;&lt;/head&gt;</p>
+    <p>&lt;body&gt;&lt;div class=&quot;container&quot;&gt;</p>
+    <p>&lt;h1&gt;🎯 Level 4 &mdash; DOM-***** XSS&lt;/h1&gt;</p>
+    <p>&lt;div class=&quot;info&quot;&gt;***** dari location.hash&lt;/div&gt;</p>
+    <p>&lt;div class=&quot;output&quot;&gt;&lt;div id=&quot;welcome&quot;&gt;Loading...&lt;/div&gt;&lt;/div&gt;</p>
+    <p>&lt;label&gt;Tes:&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;input&quot; placeholder=&quot;Payload...&quot;&gt;</p>
+    <p>&lt;button onclick=&quot;renderFromInput()&quot;&gt;Render&lt;/button&gt;</p>
+    <p>&lt;details class=&quot;hint&quot;&gt;&lt;summary&gt;💡 Hint&lt;/summary&gt;&lt;pre&gt;#&amp;lt;img src=x onerror=alert(1)&amp;gt;&lt;/pre&gt;&lt;/details&gt;</p>
+    <p>&lt;div class=&quot;info&quot;&gt;🏁 Flag: &lt;code&gt;CTF{d0m_b4s3d_xss}&lt;/code&gt;&lt;/div&gt;</p>
+    <p>&lt;label&gt;Flag:&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;flagInput&quot;&gt;</p>
+    <p>&lt;button onclick=&quot;submitFlag(4)&quot;&gt;Submit&lt;/button&gt;</p>
+    <p>&lt;div id=&quot;progress&quot; class=&quot;info&quot;&gt;Progress: 0/5&lt;/div&gt;</p>
+    <p>&lt;*** class=&quot;nav&quot;&gt;&lt;a href=&quot;level3.html&quot;&gt;&larr; L3&lt;/a&gt;&lt;a href=&quot;index.html&quot;&gt;Menu&lt;/a&gt;&lt;a href=&quot;level5.html&quot;&gt;L5 &rarr;&lt;/a&gt;&lt;/div&gt;</p>
+    <p>&lt;/div&gt;</p>
+    <p>&lt;script src=&quot;flag.js&quot;&gt;&lt;/script&gt;&lt;script src=&quot;dom.js&quot;&gt;&lt;/script&gt;</p>
+    <p>&lt;/body&gt;&lt;/html&gt;</p>
+    <p>`},</p>
+    <p>&nbsp; &apos;level5.html&apos;: { path:&apos;web/level5.html&apos;, content:`&lt;!DOCTYPE html&gt;</p>
+    <p>&lt;html lang=&quot;id&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;Level 5&lt;/title&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;&lt;meta data-fr-http-equiv=&quot;Content-Security-</p>
+
+<div style="color: red">Word to HTML trial - please <a href="https://wordtohtml.net/site/payment">Go PRO</a> to get whole HTML.</div>
+</body>
+
+</html>
