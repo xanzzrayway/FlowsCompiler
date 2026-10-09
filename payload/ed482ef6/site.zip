@@ -1,0 +1,784 @@
+
+buatkan script bukan html untuk membuat website untuk membuat mod kann aplikasi 
+
+Siap, gas! 🔥 Kalau kamu mau membuat website untuk modifikasi aplikasi APK, kamu bisa menggunakan JavaScript + Node.js + Express, bukan HTML saja.
+
+Website-nya bisa memiliki dashboard, upload APK, manajemen proyek, dan fitur analisis aplikasi.
+
+Struktur project
+apk-mod-studio/
+
+Struktur project Node.js
+
+server.js
+
+Backend API
+
+package.json
+
+Dependensi
+
+uploads/
+
+Penyimpanan APK
+
+public/
+
+Dashboard website
+
+Contoh backend server.js
+Berikut script dasar menggunakan Node.js untuk menerima file APK dan melihat daftar file yang diunggah. Script ini belum memodifikasi isi APK secara langsung.
+
+
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const uploadDir = path.join(__dirname, "uploads");
+
+fs.mkdirSync(uploadDir, { recursive: true });
+
+app.use(express.json());
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const safeName = path.basename(file.originalname)
+      .replace(/[^a-zA-Z0-9._-]/g, "_");
+    cb(null, `${Date.now()}-${safeName}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const isApk = path.extname(file.originalname)
+      .toLowerCase() === ".apk";
+
+    cb(isApk ? null : new Error("File harus APK"),
+       isApk);
+  }
+});
+
+app.get("/api/status", (req, res) => {
+  res.json({
+    success: true,
+    name: "APK Mod Studio",
+    message: "Server aktif"
+  });
+});
+
+app.post("/api/upload", upload.single("apk"),
+  (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Pilih file APK terlebih dahulu"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "APK berhasil diunggah",
+      file: req.file.filename,
+      size: req.file.size
+    });
+  }
+);
+
+app.get("/api/projects", (req, res) => {
+  const files = fs.readdirSync(uploadDir);
+
+  res.json({
+    success: true,
+    projects: files.map(file => ({
+      name: file,
+      size: fs.statSync(
+        path.join(uploadDir, file)
+      ).size
+    }))
+  });
+});
+
+app.use((err, req, res, next) => {
+  res.status(400).json({
+    success: false,
+    message: err.message || "Terjadi kesalahan"
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`APK Mod Studio berjalan di port ${PORT}`);
+});
+Cara menjalankan
+npm init -y
+npm install express multer
+node server.js
+Catatan: ini merupakan backend awal, bukan aplikasi modifikasi APK yang sudah lengkap. Jangan mengunggah APK yang tidak kamu miliki izin untuk modifikasi.
+
+Kamu ingin fitur modifikasi yang mana?
+1. Pilih jenis fitur
+
+
+Editor APK — ubah nama, ikon, dan metadata aplikasi milik sendiri
+
+APK Analyzer — analisis package, izin, dan informasi APK
+
+APK Build Studio — mengelola source code dan build APK sendiri
+
+Dashboard lengkap dengan login, upload, dan riwayat proyek
+2. Tempat menjalankan
+
+
+Termux Android
+
+Komputer / VS Code
+
+Server VPS
+
+Buatkan source code lengkap website APK Mod Studio menggunakan JavaScript dan Node.js, bukan HTML saja. Fitur: editor APK untuk aplikasi milik sendiri, ubah nama, ikon, dan metadata. Platform: Termux Android. Sertakan semua file, struktur folder, dan petunjuk instalasi.
+
+APK Mod Studio — Node.js untuk Termux Android
+Kita buat APK Mod Studio menggunakan JavaScript, Node.js, Express, dan Android SDK build tools. Website ini dirancang untuk mengelola aplikasi APK milik sendiri, dengan dashboard, upload APK, informasi proyek, serta alur penggantian nama dan ikon.
+
+Ada satu hal penting: mengganti nama tampilan, ikon, atau metadata di APK yang sudah dikompilasi memerlukan proses khusus—termasuk memeriksa resource, membangun ulang APK, dan menandatanganinya. Jadi, proyek di bawah memisahkan fitur yang siap digunakan dari proses build APK yang membutuhkan tool tambahan. Tidak mengklaim APK hasil modifikasi berhasil dibuat sebelum proses tersebut benar-benar berjalan.
+
+1. Struktur folder
+apk-mod-studio/
+
+server.js Backend API
+
+package.json Konfigurasi Node.js
+
+public/ Dashboard website
+
+uploads/ APK yang diunggah
+
+projects/ Metadata proyek
+
+2. File package.json
+Buat folder project dan simpan konfigurasi berikut sebagai package.json.
+
+
+{
+  "name": "apk-mod-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local APK project manager for Android",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}
+3. File server.js
+Backend ini menangani upload APK, upload ikon PNG, penyimpanan metadata proyek, dan daftar proyek. APK asli disimpan terpisah dari metadata editan.
+
+
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const crypto = require("crypto");
+
+const app = express();
+const PORT = Number(process.env.PORT || 3000);
+
+// Hanya izinkan akses lokal secara default.
+const HOST = process.env.HOST || "127.0.0.1";
+const ROOT = __dirname;
+const UPLOADS = path.join(ROOT, "uploads");
+const PROJECTS = path.join(ROOT, "projects");
+const PUBLIC = path.join(ROOT, "public");
+
+for (const dir of [UPLOADS, PROJECTS, PUBLIC]) {
+  fs.mkdirSync(dir, { recursive: true });
+}
+
+app.disable("x-powered-by");
+app.use(express.json({ limit: "100kb" }));
+app.use(express.static(PUBLIC));
+
+const idPattern = /^[a-f0-9]{24}$/;
+
+function projectFile(id) {
+  if (!idPattern.test(id)) {
+    throw new Error("ID proyek tidak valid");
+  }
+  return path.join(PROJECTS, `${id}.json`);
+}
+
+function readProject(id) {
+  const file = projectFile(id);
+  if (!fs.existsSync(file)) return null;
+  return JSON.parse(fs.readFileSync(file, "utf8"));
+}
+
+function saveProject(project) {
+  const file = projectFile(project.id);
+  const temp = `${file}.tmp`;
+  fs.writeFileSync(temp, JSON.stringify(project, null, 2));
+  fs.renameSync(temp, file);
+}
+
+function safeName(name) {
+  return path.basename(name)
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .slice(0, 100);
+}
+
+const apkStorage = multer.diskStorage({
+  destination: UPLOADS,
+  filename: (req, file, cb) => {
+    cb(null, `${crypto.randomUUID()}.apk`);
+  }
+});
+
+const uploadApk = multer({
+  storage: apkStorage,
+  limits: { fileSize: 100 * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, cb) => {
+    const ok = path.extname(file.originalname).toLowerCase() === ".apk";
+    cb(ok ? null : new Error("File harus berformat .apk"), ok);
+  }
+});
+
+const iconStorage = multer.diskStorage({
+  destination: UPLOADS,
+  filename: (req, file, cb) => {
+    cb(null, `${crypto.randomUUID()}.png`);
+  }
+});
+
+const uploadIcon = multer({
+  storage: iconStorage,
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, cb) => {
+    const ok = file.mimetype === "image/png" &&
+      path.extname(file.originalname).toLowerCase() === ".png";
+    cb(ok ? null : new Error("Ikon harus berupa PNG"), ok);
+  }
+});
+
+app.get("/api/status", (req, res) => {
+  res.json({
+    success: true,
+    app: "APK Mod Studio",
+    version: "1.0.0"
+  });
+});
+
+app.get("/api/projects", (req, res) => {
+  const projects = fs.readdirSync(PROJECTS)
+    .filter(name => name.endsWith(".json"))
+    .map(name => {
+      try {
+        return JSON.parse(
+          fs.readFileSync(path.join(PROJECTS, name), "utf8")
+        );
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .map(({ id, originalName, displayName, packageName, updatedAt }) => ({
+      id, originalName, displayName, packageName, updatedAt
+    }));
+
+  res.json({ success: true, projects });
+});
+
+app.post("/api/projects", uploadApk.single("apk"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: "Pilih APK terlebih dahulu"
+    });
+  }
+
+  const id = crypto.randomBytes(12).toString("hex");
+  const now = new Date().toISOString();
+
+  const project = {
+    id,
+    originalName: safeName(req.file.originalname),
+    apkFile: req.file.filename,
+    apkSize: req.file.size,
+    displayName: path.basename(req.file.originalname, ".apk"),
+    packageName: "",
+    versionName: "",
+    versionCode: "",
+    iconFile: null,
+    notes: "",
+    createdAt: now,
+    updatedAt: now
+  };
+
+  saveProject(project);
+  res.status(201).json({ success: true, project });
+});
+
+app.get("/api/projects/:id", (req, res) => {
+  const project = readProject(req.params.id);
+  if (!project) {
+    return res.status(404).json({
+      success: false, message: "Proyek tidak ditemukan"
+    });
+  }
+  res.json({ success: true, project });
+});
+
+app.put("/api/projects/:id", (req, res) => {
+  const project = readProject(req.params.id);
+  if (!project) {
+    return res.status(404).json({
+      success: false, message: "Proyek tidak ditemukan"
+    });
+  }
+
+  const fields = [
+    "displayName", "packageName", "versionName",
+    "versionCode", "notes"
+  ];
+
+  for (const field of fields) {
+    if (req.body[field] !== undefined) {
+      if (typeof req.body[field] !== "string") {
+        return res.status(400).json({
+          success: false, message: `${field} harus berupa teks`
+        });
+      }
+      if (req.body[field].length > 200) {
+        return res.status(400).json({
+          success: false, message: `${field} terlalu panjang`
+        });
+      }
+      project[field] = req.body[field].trim();
+    }
+  }
+
+  if (project.packageName &&
+      !/^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)+$/
+        .test(project.packageName)) {
+    return res.status(400).json({
+      success: false,
+      message: "Format package name tidak valid"
+    });
+  }
+
+  project.updatedAt = new Date().toISOString();
+  saveProject(project);
+  res.json({ success: true, project });
+});
+
+app.post(
+  "/api/projects/:id/icon",
+  uploadIcon.single("icon"),
+  (req, res) => {
+    const project = readProject(req.params.id);
+    if (!project) {
+      if (req.file) fs.rmSync(req.file.path, { force: true });
+      return res.status(404).json({
+        success: false, message: "Proyek tidak ditemukan"
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false, message: "Pilih ikon PNG"
+      });
+    }
+
+    if (project.iconFile) {
+      fs.rmSync(path.join(UPLOADS, project.iconFile), { force: true });
+    }
+
+    project.iconFile = req.file.filename;
+    project.updatedAt = new Date().toISOString();
+    saveProject(project);
+
+    res.json({
+      success: true,
+      iconUrl: `/api/projects/${project.id}/icon`
+    });
+  }
+);
+
+app.get("/api/projects/:id/icon", (req, res) => {
+  const project = readProject(req.params.id);
+  if (!project || !project.iconFile) {
+    return res.status(404).json({ message: "Ikon belum tersedia" });
+  }
+
+  const file = path.join(UPLOADS, path.basename(project.iconFile));
+  if (!fs.existsSync(file)) {
+    return res.status(404).json({ message: "File ikon tidak ditemukan" });
+  }
+
+  res.type("png").sendFile(file);
+});
+
+app.use((err, req, res, next) => {
+  const message = err instanceof multer.MulterError
+    ? `Upload gagal: ${err.message}`
+    : err.message || "Terjadi kesalahan";
+
+  res.status(400).json({ success: false, message });
+});
+
+app.listen(PORT, HOST, () => {
+  console.log(`APK Mod Studio: http://${HOST}:${PORT}`);
+});
+4. File public/index.html
+Buat folder public, lalu simpan dashboard berikut sebagai index.html. File ini menjadi antarmuka website; backend tetap dijalankan oleh Node.js.
+
+
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10121b">
+  <title>APK Mod Studio</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="logo">A</span>
+      <span>APK <b>MOD STUDIO</b></span>
+    </a>
+    <span class="status"><i></i> Local workspace</span>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <p class="eyebrow">ANDROID PROJECT WORKSPACE</p>
+      <h1>Build your next <span>Android project.</span></h1>
+      <p class="muted">
+        Kelola APK milikmu, ikon, nama tampilan, dan metadata proyek
+        dalam satu dashboard.
+      </p>
+    </section>
+
+    <section class="stats">
+      <article class="panel stat">
+        <span class="muted">Total proyek</span>
+        <strong id="projectCount">0</strong>
+      </article>
+      <article class="panel stat">
+        <span class="muted">Backend</span>
+        <strong id="serverStatus">Memeriksa...</strong>
+      </article>
+    </section>
+
+    <section class="panel section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">01 / IMPORT</p>
+          <h2>Impor APK</h2>
+        </div>
+      </div>
+      <form id="uploadForm">
+        <label class="dropzone" for="apkFile">
+          <span class="uploadIcon">↑</span>
+          <strong id="fileLabel">Pilih file APK</strong>
+          <span class="muted">Format .apk · Maksimum 100 MB</span>
+          <input id="apkFile" type="file"
+                 accept=".apk,application/vnd.android.package-archive"
+                 required>
+        </label>
+        <button class="primary" type="submit">Impor proyek</button>
+      </form>
+      <p id="uploadMessage" class="message" aria-live="polite"></p>
+    </section>
+
+    <section class="workspace">
+      <section class="panel section">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">02 / WORKSPACE</p>
+            <h2>Daftar proyek</h2>
+          </div>
+          <button class="secondary" id="refreshButton" type="button">
+            Refresh
+          </button>
+        </div>
+        <div id="projectList" class="projectList">
+          <p class="muted">Memuat proyek...</p>
+        </div>
+      </section>
+
+      <section class="panel section editor">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">03 / EDITOR</p>
+            <h2>Metadata editor</h2>
+          </div>
+        </div>
+
+        <div id="emptyEditor" class="empty">
+          Pilih proyek dari daftar untuk mulai mengedit metadata.
+        </div>
+
+        <form id="editorForm" hidden>
+          <div class="iconPreview">
+            <img id="iconPreview" alt="Pratinjau ikon proyek" hidden>
+            <span id="iconPlaceholder">A</span>
+          </div>
+
+          <label class="field">
+            <span>Nama tampilan</span>
+            <input name="displayName" maxlength="200" required>
+          </label>
+
+          <label class="field">
+            <span>Package name</span>
+            <input name="packageName"
+                   placeholder="com.example.myapp" maxlength="200">
+          </label>
+
+          <div class="twoColumns">
+            <label class="field">
+              <span>Version name</span>
+              <input name="versionName" placeholder="1.0.0" maxlength="200">
+            </label>
+            <label class="field">
+              <span>Version code</span>
+              <input name="versionCode" placeholder="1" maxlength="200">
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Catatan proyek</span>
+            <textarea name="notes" rows="3" maxlength="200"
+                      placeholder="Catatan untuk proyek ini"></textarea>
+          </label>
+
+          <label class="field">
+            <span>Ikon baru (PNG)</span>
+            <input id="iconFile" type="file" accept="image/png">
+          </label>
+
+          <button class="secondary full" id="uploadIconButton"
+                  type="button">Unggah ikon</button>
+          <button class="primary full" type="submit">Simpan metadata</button>
+          <p id="editorMessage" class="message" aria-live="polite"></p>
+          <p class="notice">
+            Perubahan ini disimpan sebagai metadata proyek. File APK asli
+            tidak diubah atau ditandatangani ulang.
+          </p>
+        </form>
+      </section>
+    </section>
+
+    <footer>
+      APK MOD STUDIO <span>·</span> Local project manager
+    </footer>
+  </main>
+</body>
+</html>
+5. File public/style.css
+
+:root {
+  color-scheme: dark;
+  --bg: #10121b;
+  --panel: #191c28;
+  --border: #2b3041;
+  --text: #f4f5fa;
+  --muted: #9ca3b7;
+  --accent: #a78bfa;
+  --accent2: #7c5ce7;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 15% 0%, #272047 0, transparent 38%),
+    var(--bg);
+  color: var(--text);
+  font: 15px/1.6 system-ui, sans-serif;
+}
+
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px max(5%, calc((100% - 1180px) / 2));
+  border-bottom: 1px solid var(--border);
+  background: #10121bcc;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  font-weight: 900;
+  font-size: 22px;
+}
+
+.status, .muted { color: var(--muted); }
+.status { font-size: 12px; }
+.status i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  margin-right: 6px;
+}
+
+.container {
+  width: min(1180px, 90%);
+  margin: 0 auto;
+}
+
+.hero { padding: 55px 0 30px; }
+.eyebrow {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+h1 {
+  font-size: clamp(30px, 5vw, 52px);
+  line-height: 1.12;
+  letter-spacing: -1.7px;
+  max-width: 700px;
+}
+
+h1 span { color: var(--accent); }
+h2 { margin: 0; font-size: 19px; }
+.hero .muted { max-width: 600px; }
+
+.panel {
+  background: #191c28eF;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+.stat { padding: 20px; display: grid; gap: 8px; }
+.stat strong { font-size: 24px; }
+
+.section { padding: 22px; margin-bottom: 18px; }
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.dropzone {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 30px 12px;
+  border: 1px dashed #59516e;
+  border-radius: 13px;
+  text-align: center;
+  background: #171625;
+  cursor: pointer;
+}
+
+.uploadIcon { font-size: 28px; color: var(--accent); }
+.dropzone input { max-width: 100%; margin-top: 8px; }
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-weight: 700;
+}
+
+.primary {
+  color: #fff;
+  background: linear-gradient(110deg, var(--accent2), #9567ed);
+}
+.secondary {
+  color: var(--text);
+  background: #25293a;
+  border: 1px solid var(--border);
+}
+#uploadForm > button { width: 100%; margin-top: 13px; }
+.full { width: 100%; margin-top: 10px; }
+
+button:disabled { opacity: .55; cursor: wait; }
+button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.projectList { display: grid; gap: 9px; }
+.project {
+  width: 100%;
+  display: flex;
+  text-align: left;
+  align-items: center;
+  gap: 12px;
+  background: #202333;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 13px;
+}
+.project.active { border-color: var(--accent); }
+.project .projectInfo { min-width: 0; flex: 1; }
+.project strong, .project small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.project small { color: var(--muted); font-size: 11px; }
+
+.projectIcon {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  flex-shrink: 0;
+  background: #353047;
+  
