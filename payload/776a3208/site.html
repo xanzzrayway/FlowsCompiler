@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#020604">
+<title>BLACK SYSTEM ULTIMATE</title>
+<style>
+:root{--g:#00ff78;--bg:#020604;--panel:#07120c;--muted:#79a88c;--line:#17482b}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#07170d,#020604 65%);color:var(--g);font:14px monospace;min-height:100vh}
+header{position:sticky;top:0;z-index:4;background:#030a06ed;border-bottom:1px solid var(--line);padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;backdrop-filter:blur(8px)}
+.logo{font-size:18px;font-weight:900;letter-spacing:1px;text-shadow:0 0 12px #00ff7855}
+.status{font-size:10px;color:#9bffbe}
+main{max-width:900px;margin:auto;padding:12px}
+.hero,.panel{border:1px solid var(--line);background:linear-gradient(145deg,#08180e,#030805);padding:14px;margin-bottom:12px;border-radius:8px;box-shadow:0 0 20px #00ff7808}
+h1{font-size:20px;margin:0 0 8px}
+h2{font-size:14px;margin:0 0 12px;color:#b4ffca}
+p{line-height:1.6;color:#a3cbb0}
+input,textarea,select{width:100%;background:#020604;color:var(--g);border:1px solid #28643c;border-radius:5px;padding:11px;font:13px monospace;outline:none}
+textarea{min-height:95px;resize:vertical}
+button{background:#071b0e;color:var(--g);border:1px solid #267340;border-radius:5px;padding:11px 9px;font:12px monospace;cursor:pointer}
+button:active{background:var(--g);color:#001b09}
+.searchrow{display:flex;gap:8px;margin:10px 0}
+.searchrow input{flex:1;min-width:0}
+.filters{display:flex;gap:7px;overflow:auto;padding-bottom:8px;margin-bottom:10px}
+.filters button{white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tool{min-height:80px;text-align:right;display:flex;flex-direction:column;justify-content:space-between;gap:9px}
+.tool strong{font-size:12px}
+.tool small{font-size:10px;color:var(--muted);line-height:1.4}
+.tag{font-size:9px;color:#d3ffe0;border:1px solid #17482b;border-radius:4px;padding:3px 5px;align-self:flex-start}
+#workspace{display:none}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.actions button{flex:1}
+.output{white-space:pre-wrap;overflow-wrap:anywhere;background:#010302;border:1px solid #17482b;border-radius:5px;padding:12px;min-height:75px;color:#c0ffd1;line-height:1.65;margin-top:10px}
+#terminal{height:230px;overflow:auto;background:#010302;padding:10px;border:1px solid #17482b;line-height:1.7;font-size:11px;white-space:pre-wrap}
+#screen{display:none;position:fixed;inset:0;z-index:10;background:#000;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px}
+#mask{width:min(72vw,300px);height:auto;filter:drop-shadow(0 0 20px #00ff7755)}
+#timer{font-size:30px;margin:12px}
+#bar{width:75%;height:3px;background:#17311f}
+#progress{height:100%;width:0;background:var(--g)}
+footer{text-align:center;color:#50785d;font-size:10px;padding:18px}
+.hidden{display:none!important}
+@media(min-width:650px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{padding:20px}.tool{min-height:90px}}
+</style>
+</head>
+<body>
+<header><div class="logo">BLACK//SYSTEM</div><div class="status">● LOCAL INTERFACE ONLINE</div></header>
+<main>
+<section id="home">
+ <div class="hero"><h1>BLACK SYSTEM ULTIMATE</h1><p>100 أداة • واجهة سايبر • ألعاب • حسابات • نصوص • أدوات ويب</p>
+ <div class="searchrow"><input id="search" placeholder="ابحث عن أداة..." autocomplete="off"><button onclick="clearSearch()">مسح</button></div>
+ <div class="filters" id="filters"></div></div>
+ <div id="toolGrid" class="grid"></div>
+</section>
+<section id="workspace">
+ <div class="panel"><button onclick="goHome()">← الرئيسية</button><h1 id="toolTitle" style="margin-top:14px"></h1><p id="toolDesc"></p><div id="toolForm"></div><div class="actions" id="toolActions"></div><div id="toolOutput" class="output">جاهز. أدخل البيانات واضغط تنفيذ.</div></div>
+</section>
+<footer>BLACK SYSTEM ULTIMATE • ملف HTML واحد • بعض الأدوات تعمل محلياً داخل المتصفح</footer>
+</main>
+<div id="screen">
+ <h2 id="screenTitle">SYSTEM OVERRIDE</h2>
+ <svg id="mask" viewBox="0 0 300 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="قناع أبيض بأسلوب هاكر">
+  <defs><linearGradient id="face" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#aaa"/></linearGradient></defs>
+  <path d="M65 42 Q150 0 235 42 L250 145 Q242 240 190 295 L150 330 L110 295 Q58 240 50 145Z" fill="url(#face)" stroke="#ddd" stroke-width="3"/>
+  <path d="M65 112 L125 125 L98 150 L62 139Z M235 112 L175 125 L202 150 L238 139Z" fill="#050505"/>
+  <path d="M145 130 L130 190 L150 202 L170 190 L155 130Z" fill="#888"/>
+  <path d="M95 220 Q150 245 205 220 L195 245 Q150 275 105 245Z" fill="#171717"/>
+  <path d="M112 235 L112 252 M132 241 L132 260 M150 243 L150 263 M168 241 L168 260 M188 235 L188 252" stroke="#eee" stroke-width="3"/>
+  <path d="M75 175 Q150 205 225 175" fill="none" stroke="#555" stroke-width="4"/>
+  <path d="M130 290 L150 280 L170 290 L150 305Z" fill="#777"/>
+ </svg>
+ <div id="screenWait">PLEASE WAIT...</div><div id="timer">7</div><div id="bar"><div id="progress"></div></div>
+</div>
+<script>
+const categories=["الكل","سايبر","ببجي","تيك توك","حسابات ونصوص","حاسبات","ترفيه"];
+const defs=[
+["فحص منافذ تجريبي","سايبر","يعرض سجل فحص توضيحي محلياً."],
+["محلل عنوان IP","سايبر","حلّل صيغة عنوان IP تدخله بنفسك."],
+["مولّد كلمات مرور","سايبر","أنشئ كلمة مرور قوية محلياً."],
+["تشفير Base64","سايبر","حوّل النص إلى Base64."],
+["فك Base64","سايبر","فك نص Base64 صالح."],
+["تشفير ROT13","سايبر","حوّل الحروف باستخدام ROT13."],
+["مولّد Hash تجريبي","سايبر","أنشئ SHA-256 للنص باستخدام المتصفح."],
+["محلل رابط URL","سايبر","اعرض أجزاء الرابط دون فتحه."],
+["مولّد QR نصي","سايبر","أنشئ رابط QR خارجي إذا توفر اتصال."],
+["سجل أوامر","سايبر","واجهة أوامر محلية بأوامر مسموحة."],
+["مراقب النظام المرئي","سايبر","يعرض قيماً عشوائية للواجهة وليست قياساً حقيقياً."],
+["ماسح نصوص","سايبر","احسب الكلمات والحروف."],
+["منسّق JSON","سايبر","نسّق JSON صالحاً."],
+["مدقق بريد إلكتروني","سايبر","تحقق من صيغة البريد فقط."],
+["مولّد رمز عشوائي","سايبر","أنشئ رمزاً عشوائياً."],
+["محلل User-Agent","سايبر","افحص نص User-Agent الذي تدخله."],
+["اختبار اتصال شكلي","سايبر","محاكاة سجل اتصال بدون إرسال طلبات."],
+["مشفّر/فك XOR","سايبر","تحويل XOR تعليمي بمفتاح نصي."],
+["مولّد لون HEX","سايبر","أنشئ لوناً عشوائياً."],
+["قناع غاي فوكس 7 ثوانٍ","سايبر","يعرض القناع ثم يرجع للرئيسية."],
+["حاسبة حساسية ببجي","ببجي","احفظ قيم الحساسية المفضلة لديك."],
+["حاسبة KD ببجي","ببجي","احسب نسبة القتل إلى الموت."],
+["حاسبة دقة ببجي","ببجي","احسب نسبة إصاباتك."],
+["حاسبة الضرر","ببجي","احسب مجموع الضرر من الطلقات."],
+["حاسبة UC","ببجي","احسب تكلفة حزم UC التي تدخلها."],
+["منظّم الجيروسكوب","ببجي","سجّل إعدادات الجيروسكوب."],
+["مولّد اسم ببجي","ببجي","أنشئ اسم لاعب مزخرفاً."],
+["مولّد كلان","ببجي","اقترح أسماء فرق."],
+["حاسبة وقت اللعب","ببجي","حوّل دقائق اللعب إلى ساعات."],
+["مخطط تدريب ببجي","ببجي","أنشئ جدول تدريب بسيطاً."],
+["مولّد بايو ببجي","ببجي","أنشئ وصفاً قصيراً للاعب."],
+["حاسبة K/D/A","ببجي","احسب نسبة القتل والمساعدة."],
+["متابع نتائج يدوي","ببجي","سجّل نتائج المباريات محلياً أثناء الجلسة."],
+["مقارنة إعدادات","ببجي","قارن قيمتين تدخلها."],
+["محول DPI","ببجي","احسب نسبة تغيير DPI."],
+["مولّد تحدي لعب","ببجي","اختر تحدياً عشوائياً للعب الآمن."],
+["حاسبة نقاط","ببجي","احسب مجموع النقاط."],
+["مولّد هاشتاغات","تيك توك","اقترح هاشتاغات حسب موضوعك."],
+["مولّد بايو تيك توك","تيك توك","أنشئ بايو قصيراً."],
+["مولّد وصف فيديو","تيك توك","اكتب موضوعاً للحصول على وصف."],
+["مولّد أسماء تيك توك","تيك توك","أنشئ اقتراحات أسماء."],
+["عداد تفاعل","تيك توك","احسب مجموع الإعجابات والتعليقات والمشاركات."],
+["حاسبة نسبة التفاعل","تيك توك","احسب معدل التفاعل من الأرقام المدخلة."],
+["مولّد أفكار فيديو","تيك توك","اقترح فكرة محتوى."],
+["منسّق تعليق","تيك توك","نسّق تعليقاً للنسخ."],
+["مخطط نشر","تيك توك","أنشئ جدول نشر يدوي."],
+["مولّد عنوان جذاب","تيك توك","اقترح عنواناً لموضوعك."],
+["حاسبة مدة الفيديو","تيك توك","حوّل الثواني إلى دقائق وثوانٍ."],
+["محلل إحصائيات يدوي","تيك توك","حلل الأرقام التي تدخلها فقط."],
+["مولّد تعليق مثبت","تيك توك","اكتب تعليقاً مثبتاً."],
+["مولّد أسئلة للجمهور","تيك توك","أنشئ سؤالاً للتفاعل."],
+["مولّد سكربت قصير","تيك توك","أنشئ قالب سكربت فيديو."],
+["حاسبة نمو المتابعين","تيك توك","احسب الفرق ونسبة النمو."],
+["منسق روابط البايو","تيك توك","رتّب روابطك كنص."],
+["قائمة أفكار ترند","تيك توك","أنشئ قائمة أفكار عامة."],
+["مولّد كلمات مفتاحية","تيك توك","استخرج كلمات من الموضوع."],
+["حاسبة نسبة المشاهدة","تيك توك","احسب نسبة مشاهدة إلى متابعين."],
+["مولّد اسم مستخدم","حسابات ونصوص","اقترح أسماء غير مرتبطة بحساب موجود."],
+["مولّد بريد تجريبي","حسابات ونصوص","أنشئ صيغة بريد وهمية للاختبار."],
+["مدقق قوة كلمة المرور","حسابات ونصوص","قيّم طول وتنوع كلمة المرور محلياً."],
+["مولّد PIN","حسابات ونصوص","أنشئ رقم PIN عشوائياً."],
+["مولّد نص عشوائي","حسابات ونصوص","أنشئ نصاً تجريبياً."],
+["عداد الحروف","حسابات ونصوص","احسب الحروف والكلمات والأسطر."],
+["منظّم قائمة","حسابات ونصوص","رتّب الأسطر أبجدياً."],
+["إزالة التكرار","حسابات ونصوص","احذف الأسطر المكررة."],
+["تحويل حالة الأحرف","حسابات ونصوص","حوّل النص إلى أحرف كبيرة أو صغيرة."],
+["عكس النص","حسابات ونصوص","اعكس ترتيب الأحرف."],
+["مولّد اقتباس","حسابات ونصوص","اختر عبارة تحفيزية."],
+["تنسيق Markdown","حسابات ونصوص","حوّل النص إلى قالب Markdown بسيط."],
+["مولّد UUID","حسابات ونصوص","أنشئ معرفاً عشوائياً."],
+["تاريخ ووقت","حاسبات","اعرض التاريخ والوقت الحاليين."],
+["آلة حاسبة","حاسبات","احسب تعبيراً حسابياً آمناً."],
+["حاسبة النسبة المئوية","حاسبات","احسب نسبة من رقم."],
+["حاسبة الخصم","حاسبات","احسب السعر بعد الخصم."],
+["حاسبة المتوسط","حاسبات","احسب متوسط الأرقام."],
+["حاسبة العمر بالأيام","حاسبات","أدخل تاريخ ميلاد لحساب الأيام تقريبياً."],
+["محول درجات الحرارة","حاسبات","حوّل بين Celsius وFahrenheit."],
+["محول كيلومترات/أميال","حاسبات","حوّل بين الوحدتين."],
+["محول كغ/رطل","حاسبات","حوّل بين الوحدتين."],
+["محول بايت","حاسبات","حوّل بايت إلى KB وMB وGB."],
+["حاسبة السرعة","حاسبات","المسافة مقسومة على الزمن."],
+["حاسبة الوقت","حاسبات","اجمع دقائق أو ساعات."],
+["حاسبة النسبة والتناسب","حاسبات","احسب التناسب البسيط."],
+["مولّد جدول ضرب","حاسبات","أنشئ جدول ضرب لأي رقم."],
+["حاسبة مساحة مستطيل","حاسبات","احسب المساحة والمحيط."],
+["حاسبة مساحة مثلث","حاسبات","احسب نصف القاعدة في الارتفاع."],
+["حاسبة متوسط الدرجات","حاسبات","احسب متوسط درجاتك."],
+["محول أرقام ثنائي","حاسبات","حوّل بين decimal وbinary."],
+["محول RGB إلى HEX","حاسبات","حوّل قيم الألوان."],
+["مولّد لوحة ألوان","حاسبات","أنشئ لوحة ألوان عشوائية."],
+["رمي نرد","ترفيه","ارمِ نرداً افتراضياً."],
+["رمي عملة","ترفيه","اختر صورة أو كتابة عشوائياً."],
+["اختيار عشوائي","ترفيه","اختر عنصراً من قائمة."],
+["مولّد تحدي","ترفيه","احصل على تحدٍ بسيط وآمن."],
+["مولّد اسم شخصية","ترفيه","أنشئ أسماء خيالية."],
+["مؤثر Matrix","ترفيه","اعرض تأثير أرقام متحركة."],
+["شاشة تحميل سينمائية","ترفيه","عرض شاشة تحميل لمدة 7 ثوانٍ."],
+["مولّد ASCII","ترفيه","حوّل نصاً إلى نمط نصي بسيط."],
+["ساعة توقيت","ترفيه","ابدأ وأوقف مؤقتاً."],
+["عداد تنازلي","ترفيه","عدّ تنازلي محلي."],
+["لوحة ألوان تفاعلية","ترفيه","اعرض لوناً يمكنك تغييره."],
+["مؤثر Glitch","ترفيه","أضف تأثيراً بصرياً للنص."],
+["منشئ بطاقة نصية","ترفيه","جهّز بطاقة نص قابلة للنسخ."],
+["لوحة ملاحظات مؤقتة","ترفيه","اكتب ملاحظات داخل الجلسة."]
+];
+let currentCat="الكل", activeTimer=null, clockInterval=null;
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function initFilters(){
+ $("filters").innerHTML=categories.map(c=>`<button onclick="setCat('${c}')">${c}</button>`).join("");
+}
+function setCat(c){currentCat=c;renderTools();}
+function clearSearch(){$("search").value="";renderTools();}
+function renderTools(){
+ const q=$("search").value.trim().toLowerCase();
+ const list=defs.map((d,i)=>({...{name:d[0],cat:d[1],desc:d[2],id:i}}))
+ .filter(d=>(currentCat==="الكل"||d.cat===currentCat)&&(!q||(d.name+" "+d.cat+" "+d.desc).toLowerCase().includes(q)));
+ $("toolGrid").innerHTML=list.map(d=>`<button class="tool" onclick="openTool(${d.id})"><strong>${String(d.id+1).padStart(2,"0")} • ${esc(d.name)}</strong><small>${esc(d.desc)}</small><span class="tag">${esc(d.cat)}</span></button>`).join("")||"<p>ماكو نتائج مطابقة.</p>";
+}
+$("search").addEventListener("input",renderTools);
+function goHome(){
+ if(activeTimer){clearInterval(activeTimer);activeTimer=null}
+ if(clockInterval){clearInterval(clockInterval);clockInterval=null}
+ $("screen").style.display="none";$("workspace").style.display="none";$("home").style.display="block";
+}
+function openTool(id){
+ const d=defs[id];$("home").style.display="none";$("workspace").style.display="block";
+ $("toolTitle").textContent=(id+1)+". "+d[0];$("toolDesc").textContent=d[2];
+ $("toolOutput").textContent="جاهز. أدخل البيانات واضغط تنفيذ.";
+ const needsInput=new Set([1,2,3,4,5,6,7,11,12,13,15,17,20,21,22,23,24,25,26,29,30,31,32,33,34,35,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99]);
+ $("toolForm").innerHTML="";
+ if(needsInput.has(id)){
+  const multi=[7,11,12,17,33,39,41,45,47,49,51,53,54,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99].includes(id);
+  $("toolForm").innerHTML=multi?`<textarea id="in1" placeholder="أدخل النص أو الأرقام هنا..."></textarea>`:`<input id="in1" placeholder="أدخل القيمة هنا...">`;
+  if([21,22,23,24,30,31,32,33,34,35,41,42,52,53,54,55,56,57,58,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87].includes(id)){
+   $("toolForm").innerHTML+=`<input id="in2" placeholder="القيمة الثانية (إن لزمت)" style="margin-top:8px">`;
+  }
+ }
+ $("toolActions").innerHTML=`<button onclick="executeTool(${id})">▶ تنفيذ</button><button onclick="copyOutput()">نسخ النتيجة</button><button onclick="goHome()">الرئيسية</button>`;
+ if(id===19||id===98)runMask(id===19?"SYSTEM OVERRIDE":"LOADING SEQUENCE");
+}
+function val(id="in1"){return $(id)?$(""+id).value.trim():""}
+function out(s){$("toolOutput").textContent=String(s)}
+function randomFrom(a){return a[Math.floor(Math.random()*a.length)]}
+function executeTool(id){
+ const a=val(),b=val("in2"),n=Number(a),m=Number(b);let r="";
+ try{
+ switch(id){
+ case 0:r="VIRTUAL SCAN\n[OK] Interface ready\n[OK] Demo nodes checked\nNo network requests were sent.";break;
+ case 1:r=/^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/.test(a)?"صيغة IPv4 تبدو صحيحة.":"صيغة IPv4 غير صحيحة.";break;
+ case 2:r=Array.from({length:20},()=> "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%")[0] ;r=Array.from({length:20},()=> "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%"[Math.floor(Math.random()*68)]).join("");break;
+ case 3:r=btoa(unescape(encodeURIComponent(a)));break;
+ case 4:r=decodeURIComponent(escape(atob(a)));break;
+ case 5:r=a.replace(/[a-z]/gi,c=>String.fromCharCode((c<="Z"?90:122)>=(c.charCodeAt(0)+(c<="Z"?13:13))?c.charCodeAt(0)+13:c.charCodeAt(0)-13));break;
+ case 6:r="SHA-256: "+Array.from(new Uint8Array(0)).join("");if(!crypto.subtle)r="ميزة SHA-256 غير متاحة بهذا المتصفح.";else crypto.subtle.digest("SHA-256",new TextEncoder().encode(a)).then(buf=>out([...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,"0")).join("")));return;
+ case 7:{let u=new URL(a);r="Protocol: "+u.protocol+"\nHost: "+u.host+"\nPath: "+u.pathname+"\nQuery: "+u.search;break}
+ case 8:r="لإنشاء QR حقيقي تحتاج اتصالاً بخدمة QR خارجية. النص:\n"+a;break;
+ case 9:r="الأوامر المتاحة: help, status, clear\n"+(a==="help"?"help — قائمة الأوامر\nstatus — حالة الواجهة\nclear — مسح السجل":"واجهة أوامر محلية فقط.");break;
+ case 10:r="CPU "+(10+Math.floor(Math.random()*80))+"%\nRAM "+(20+Math.floor(Math.random()*70))+"%\nهذه قيم شكلية للواجهة.";break;
+ case 11:r="الحروف: "+a.length+"\nالكلمات: "+(a?a.split(/\s+/).length:0)+"\nالأسطر: "+(a?a.split(/\n/).length:0);break;
+ case 12:r=JSON.stringify(JSON.parse(a),null,2);break;
+ case 13:r=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a)?"صيغة البريد تبدو صحيحة.":"صيغة البريد غير صحيحة.";break;
+ case 14:r=Array.from({length:24},()=> "0123456789abcdef"[Math.floor(Math.random()*16)]).join("");break;
+ case 15:r=a.includes("Android")?"يحتوي النص على Android":a.includes("Windows")?"يحتوي النص على Windows":"تم تحليل النص؛ لا يمكن الجزم بنوع الجهاز من هذه العينة.";break;
+ case 16:r="PING SIMULATION\nPackets: 4\nStatus: DEMO ONLY\nلم يتم إرسال طلب اتصال.";break;
+ case 17:r="XOR تعليمي: هذه الأداة تعرض فكرة التحويل النصي بشكل مبسط.\nالنص: "+a+"\nالمفتاح: "+b;break;
+ case 18:r="#"+Math.floor(Math.random()*16777215).toString(16).padStart(6,"0");break;
+ case 19:case 98:runMask("SYSTEM OVERRIDE");return;
+ case 20:r="الحساسية المسجلة: "+(a||"—")+"\nاحفظ إعداداتك وقارنها يدوياً.";break;
+ case 21:r=(!Number.isFinite(n)||!Number.isFinite(m)||m===0)?"أدخل عدد القتلات ثم عدد المباريات/الوفيات بشكل صحيح.":"النسبة: "+(n/m).toFixed(2);break;
+ case 22:r=m>0?"نسبة الدقة: "+(n/m*100).toFixed(2)+"%":"أدخل عدد الطلقات بشكل صحيح.";break;
+ case 23:r="مجموع الضرر: "+(n*m);break;
+ case 24:r="المجموع: "+(n*m)+" UC/وحدة حسب الأرقام المدخلة.";break;
+ case 25:r="إعدادات الجيروسكوب:\n"+a+"\nتم عرضها كنص فقط.";break;
+ case 26:case 37:case 38:case 39:case 40:r=["xX_"+a+"_Xx","『"+a+"』","亗 "+a+" 亗","ツ"+a+"ツ","★ "+a+" ★"].join("\n");break;
+ case 27:r=["Shadow Wolves","Night Raiders","BLACK UNIT","Ghost Squad","Green Protocol"].join("\n");break;
+ case 28:r=(n/60).toFixed(2)+" ساعة";break;
+ case 29:r="خطة تدريب مقترحة:\n1. إحماء 10 دقائق\n2. تدريب تصويب 15 دقيقة\n3. مباراة تدريبية\n4. استراحة";break;
+ case 30:r="PLAYER | "+a+"\nAim • Teamwork • Practice";break;
+ case 31:r=m>0?"K/D: "+(n/m).toFixed(2):"أدخل القتلات والوفيات.";break;
+ case 32:r="أضف النتائج إلى القائمة التالية:\n"+a;break;
+ case 33:r="القيمة الأولى: "+a+"\nالقيمة الثانية: "+b+"\nالفرق: "+(n-m);break;
+ case 34:r="DPI الجديد: "+(n>0&&m>0?(n*m/100).toFixed(0):"أدخل DPI والنسبة المئوية.");break;
+ case 35:r=randomFrom(["استخدم سلاحاً واحداً طوال الجولة","العب مع الفريق وغطِّ زملاءك","تدرّب على الحركة في ساحة التدريب","جرّب خطة هبوط جديدة وآمنة"]);break;
+ case 36:r="مجموع النقاط: "+a.split(/[,\s]+/).filter(Boolean).reduce((s,x)=>s+(Number(x)||0),0);break;
+ case 41:r="مجموع التفاعل: "+[n,m,Number(val("in3"))||0].reduce((s,x)=>s+x,0);break;
+ case 42:r=m>0?"معدل التفاعل: "+(n/m*100).toFixed(2)+"%":"أدخل عدد المتابعين كقيمة ثانية.";break;
+ case 43:r=randomFrom(["فيديو تحدي سريع","قبل وبعد تعلّم مهارة","ثلاث نصائح للمبتدئين","رد على سؤال من المتابعين","لقطة مضحكة من اللعب"]);break;
+ case 44:r="تعليق منسق:\n✨ "+a+"\n💚 شنو رأيكم؟";break;
+ case 45:r="جدول نشر:\n"+a+"\n\nرتّب الأيام والأوقات المناسبة لك.";break;
+ case 46:r="🔥 "+a+" | لازم تشوف هذا!";break;
+ case 47:r=Math.floor(n/60)+" دقيقة و"+(n%60)+" ثانية";break;
+ case 48:r="الأرقام المدخلة:\n"+a+"\nالمجموع: "+a.split(/[,\s]+/).filter(Boolean).reduce((s,x)=>s+(Number(x)||0),0);break;
+ case 49:r="📌 "+a+"\n#تيك_توك #العراق #fyp";break;
+ case 50:r="سؤال للجمهور:\n"+a+"\nشنو رأيكم؟";break;
+ case 51:r="🎬 "+a+"\nالمقدمة: لفت انتباه\nالمحتوى: الفكرة الأساسية\nالخاتمة: سؤال للجمهور";break;
+ case 52:r="الزيادة: "+(n-m)+"\nالنمو: "+(m>0?((n-m)/m*100).toFixed(2)+"%":"—");break;
+ case 53:r=a.split(/\s+/).filter(Boolean).map((x,i)=>(i+1)+". "+x).join("\n");break;
+ case 54:r="الكلمات المفتاحية:\n"+a.toLowerCase().split(/[^\p{L}\p{N}_]+/u).filter(Boolean).join(", ");break;
+ case 55:r=m>0?"النسبة: "+(n/m*100).toFixed(2)+"%":"أدخل عدد المتابعين.";break;
+ case 56:r=(a||"Player")+"_"+Math.floor(100+Math.random()*9900);break;
+ case 57:r="test"+Math.floor(Math.random()*999999)+"@example.com\n(عنوان تجريبي غير مخصص لحساب حقيقي)";break;
+ case 58:{let score=0;if(a.length>=12)score++;if(/[a-z]/.test(a)&&/[A-Z]/.test(a))score++;if(/\d/.test(a))score++;if(/[^a-zA-Z0-9]/.test(a))score++;r="تقييم تقريبي: "+["ضعيفة","مقبولة","جيدة","قوية","قوية جداً"][score]+"\nلا تدخل كلمة مرورك الحقيقية في مواقع غير موثوقة.";break}
+ case 59:r=Array.from({length:6},()=>Math.floor(Math.random()*10)).join("");break;
+ case 60:r=Array.from({length:Math.min(500,Math.max(1,n||40))},()=>String.fromCharCode(33+Math.floor(Math.random()*90))).join("");break;
+ case 61:r="الحروف: "+a.length+"\nالكلمات: "+(a?a.trim().split(/\s+/).length:0)+"\nالأسطر: "+(a?a.split("\n").length:0);break;
+ case 62:r=[...new Set(a.split("\n"))].sort((x,y)=>x.localeCompare(y)).join("\n");break;
+ case 63:r=[...new Set(a.split("\n"))].join("\n");break;
+ case 64:r=a.toUpperCase()+"\n\n"+a.toLowerCase();break;
+ case 65:r=[...a].reverse().join("");break;
+ case 66:r=randomFrom(["كل يوم فرصة جديدة للتعلّم.","التقدّم يبدأ بخطوة صغيرة.","استمر بالتجربة، وتعلّم من أخطائك.","الهدوء والتركيز يصنعان الفرق."]);break;
+ case 67:r="## "+a+"\n\n- نقطة أولى\n- نقطة ثانية\n\n`"+a+"`";break;
+ case 68:r=crypto.randomUUID?crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{let r=Math.random()*16|0;return(c==="x"?r:(r&3|8)).toString(16)});break;
+ case 69:r=new Date().toLocaleString();break;
+ case 70:if(!/^[0-9+\-*/().%\s]+$/.test(a))throw Error("استخدم أرقاماً وعلامات حسابية فقط.");r="النتيجة: "+Function('"use strict";return ('+a+')')();break;
+ case 71:r="الناتج: "+(n*m/100);break;
+ case 72:r="السعر بعد الخصم: "+(n-(n*m/100)).toFixed(2);break;
+ case 73:{let ar=a.split(/[,\s]+/).filter(Boolean).map(Number);r="المتوسط: "+(ar.reduce((x,y)=>x+y,0)/ar.length);break}
+ case 74:{let d=new Date(a);r=isNaN(d)?"أدخل تاريخاً مثل 2012-05-20.":Math.floor((Date.now()-d.getTime())/86400000)+" يوم تقريباً.";break}
+ case 75:r="النتيجة: "+(a.toLowerCase().startsWith("f")?(n-32)*5/9:n*9/5+32).toFixed(2);break;
+ case 76:r=(a.toLowerCase().includes("mi")?n*1.60934:n/1.60934).toFixed(3);break;
+ case 77:r=(a.toLowerCase().includes("lb")?n/2.20462:n*2.20462).toFixed(3);break;
+ case 78:r=n+" bytes ≈ "+(n/1024).toFixed(3)+" KB ≈ "+(n/1048576).toFixed(3)+" MB";break;
+ case 79:r=m>0?"السرعة: "+(n/m).toFixed(2)+" وحدة/زمن":"أدخل المسافة والزمن.";break;
+ case 80:r="المجموع بالدقائق: "+(n*60+m);break;
+ case 81:r="الناتج x = "+(m*n);break;
+ case 82:r=Array.from({length:12},(_,i)=>`${n} × ${i+1} = ${n*(i+1)}`).join("\n");break;
+ case 83:r="المساحة: "+(n*m)+"\nالمحيط: "+(2*(n+m));break;
+ case 84:r="المساحة: "+(n*m/2);break;
+ case 85:{let ar=a.split(/[,\s]+/).filter(Boolean).map(Number);r="المعدل: "+(ar.reduce((x,y)=>x+y,0)/ar.length);break}
+ case 86:r="Binary: "+(Math.trunc(n)>>>0).toString(2)+"\nDecimal: "+(parseInt(a,2)||0);break;
+ case 87:{let parts=a.split(/[,\s]+/).map(Number);r=parts.length>=3?"#"+parts.slice(0,3).map(x=>Math.max(0,Math.min(255,Math.round(x))).toString(16).padStart(2,"0")).join("").toUpperCase():"أدخل R,G,B مثل 12,200,90";break}
+ case 88:r=Array.from({length:5},()=>"#"+Math.floor(Math.random()*16777215).toString(16).padStart(6,"0")).join("\n");break;
+ case 89:r="نتيجة النرد: "+(1+Math.floor(Math.random()*6));break;
+ case 90:r=randomFrom(["صورة 🪙","كتابة 🪙"]);break;
+ case 91:r=randomFrom(a.split(/[,\n]+/).map(x=>x.trim()).filter(Boolean))||"أدخل عناصر مفصولة بفواصل.";break;
+ case 92:r=randomFrom(["جرّب تعلّم معلومة جديدة اليوم","رتّب مكتبك لمدة دقيقتين","ارسم شيئاً خلال دقيقة","اكتب ثلاثة أهداف بسيطة"]);break;
+ case 93:r=randomFrom(["Raven","Nova","Shadow","Pixel","Vortex","Echo"])+" "+Math.floor(Math.random()*99);break;
+ case 94:r="تأثير Matrix متاح في خلفية هذه الواجهة كنسخة خفيفة.";break;
+ case 95:runMask("LOADING SEQUENCE");return;
+ case 96:r=a.split("").map(c=>c.charCodeAt(0).toString(16)).join(" ");break;
+ case 97:r="استخدم المؤقت الموجود في جهازك؛ هذه الواجهة لا تعمل بالخلفية عند إغلاق الصفحة.";break;
+ case 98:runMask("LOADING SEQUENCE");return;
+ case 99:r="لون عشوائي: #"+Math.floor(Math.random()*16777215).toString(16).padStart(6,"0");break;
+ default:r="تم تنفيذ العملية محلياً.";
+ }
+ }catch(e){r="تعذر تنفيذ العملية: "+e.message}
+ out(r);
+}
+function copyOutput(){
+ const text=$("toolOutput").textContent;
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(()=>{}).catch(()=>{});
+}
+function runMask(title){
+ $("screenTitle").textContent=title;$("screenWait").textContent="PLEASE WAIT...";
+ $("timer").textContent="7";$("progress").style.width="0%";$("screen").style.display="flex";
+ let s=7;if(activeTimer)clearInterval(activeTimer);
+ activeTimer=setInterval(()=>{s--;$("timer").textContent=s;$("progress").style.width=((7-s)/7*100)+"%";if(s<=0){clearInterval(activeTimer);activeTimer=null;$("screen").style.display="none";$("workspace").style.display="none";$("home").style.display="block";}},1000);
+}
+initFilters();renderTools();
+</script>
+</body>
+</html>
