@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CoupleSync - Dashboard & Maps</title>
+
+    <!-- Leaflet CSS untuk Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* ==================== TEMA & VARIABEL ==================== */
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        :root {
+            --bg-main: #e0e5ec;
+            --text-main: #2c3e50;
+            --accent: #ff4757;
+            --accent-hover: #ff6b81;
+            --wa-bg: #efeae2;
+            --wa-bubble-me: #d9fdd3;
+            --wa-bubble-partner: #ffffff;
+            --clay-shadow: 8px 8px 16px #b8bcc2, -8px -8px 16px #ffffff;
+            --clay-inset: inset 4px 4px 8px #b8bcc2, inset -4px -4px 8px #ffffff;
+            --success-color: #2ed573;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+        
+        body { background-color: var(--bg-main); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* ==================== LAYOUT SCREENS ==================== */
+        .screen { display: none; height: 100vh; width: 100%; padding: 20px; padding-top: 70px; padding-bottom: 90px; overflow-y: auto; animation: fadeIn 0.3s ease-in-out; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        /* ==================== UI CLAYMORPHISM ==================== */
+        .clay-card { background: var(--bg-main); border-radius: 20px; box-shadow: var(--clay-shadow); padding: 20px; margin-bottom: 20px; position: relative; }
+        .clay-input { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 15px; background: var(--bg-main); box-shadow: var(--clay-inset); outline: none; font-size: 14px; font-weight: 600; }
+        .clay-btn { padding: 15px; border: none; border-radius: 15px; background: var(--accent); color: white; font-weight: 800; box-shadow: var(--clay-shadow); cursor: pointer; transition: 0.2s; width: 100%; margin-top: 10px; font-size: 16px; }
+        .clay-btn:active { box-shadow: var(--clay-inset); transform: scale(0.98); }
+        .clay-btn.success { background: var(--success-color); }
+
+        /* ==================== TOPBAR & SIDEBAR ==================== */
+        .topbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: var(--bg-main); box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 1000; display: none; }
+        .topbar.active { display: flex; }
+        .hamburger { font-size: 24px; cursor: pointer; color: var(--text-main); transition: 0.2s; }
+        .hamburger:active { transform: scale(0.8); }
+        
+        .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100vh; background: var(--bg-main); box-shadow: 5px 0 15px rgba(0,0,0,0.1); transition: 0.3s; z-index: 1001; padding: 20px; display: flex; flex-direction: column; }
+        .sidebar.open { left: 0; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;}
+        .close-btn { font-size: 24px; cursor: pointer; color: var(--accent); }
+        .sidebar-menu div { padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        .sidebar-menu div:hover { background: rgba(0,0,0,0.05); }
+
+        /* ==================== FLOATING NAVBAR ==================== */
+        .bottom-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: var(--bg-main); border-radius: 30px; box-shadow: var(--clay-shadow); display: none; justify-content: space-around; padding: 10px; z-index: 999; }
+        .bottom-nav.active { display: flex; }
+        .nav-item { color: #95a5a6; font-size: 22px; padding: 12px 20px; cursor: pointer; transition: 0.3s; border-radius: 20px; }
+        .nav-item.active { color: var(--accent); box-shadow: var(--clay-inset); }
+
+        /* ==================== DASHBOARD KHUSUS ==================== */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .mini-card { background: var(--bg-main); padding: 15px; border-radius: 15px; box-shadow: var(--clay-shadow); text-align: center; }
+        .mini-card i { font-size: 24px; margin-bottom: 8px; }
+        
+        /* Animasi Hati Jatuh (Ping Fitur) */
+        .heart-fall { position: fixed; top: -10vh; font-size: 24px; color: var(--accent); z-index: 9999; animation: fall 3s linear forwards; pointer-events: none; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+
+        /* Modal Perizinan Modern */
+        .perm-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; }
+        .perm-modal-overlay.active { display: flex; opacity: 1; }
+        .perm-box { background: var(--bg-main); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: var(--clay-shadow); transform: translateY(20px); transition: 0.3s; }
+        .perm-modal-overlay.active .perm-box { transform: translateY(0); }
+        .perm-list { text-align: left; margin: 20px 0; font-size: 14px; font-weight: 600; line-height: 1.8; }
+        .perm-list i { color: var(--accent); width: 25px; text-align: center; }
+
+        /* ==================== MAPS ==================== */
+        #maps-screen { padding: 0; padding-top: 60px; padding-bottom: 90px; }
+        #map { width: 100%; height: 100%; z-index: 1; }
+        .custom-map-icon { background: transparent; border: none; } 
+
+        /* ==================== CHAT WHATSAPP THEME ==================== */
+        #chat-screen { padding: 0; padding-top: 60px; padding-bottom: 80px; background: var(--bg-main); }
+        .contact-list { padding: 20px; }
+        .contact-item { display: flex; align-items: center; gap: 15px; background: var(--bg-main); padding: 15px; border-radius: 15px; box-shadow: var(--clay-shadow); cursor: pointer; }
+        .contact-item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .chat-room { display: none; height: 100%; flex-direction: column; background: var(--wa-bg); position: relative; }
+        .chat-room.active { display: flex; }
+        .chat-header { background: #f0f2f5; padding: 10px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 700; z-index: 10; }
+        .back-btn { cursor: pointer; font-size: 20px; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-size: contain; }
+        .msg { max-width: 75%; padding: 10px 15px; border-radius: 10px; font-size: 14px; font-weight: 600; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
+        .msg.me { background: var(--wa-bubble-me); align-self: flex-end; border-top-right-radius: 0; }
+        .msg.partner { background: var(--wa-bubble-partner); align-self: flex-start; border-top-left-radius: 0; }
+        .msg .time { font-size: 10px; color: #888; display: block; text-align: right; margin-top: 5px; font-weight: 400; }
+        .chat-input-area { padding: 10px; background: #f0f2f5; display: flex; gap: 10px; align-items: center; position: absolute; bottom: 0; width: 100%; z-index: 10;}
+        .chat-input-area input { flex: 1; padding: 12px 20px; border-radius: 20px; border: none; outline: none; font-size: 14px; font-weight: 600; }
+        .send-btn { background: #00a884; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+
+        /* Swal Custom Theme for Animation */
+        .custom-swal-popup { border-radius: 25px !important; background: var(--bg-main) !important; box-shadow: var(--clay-shadow) !important; font-family: 'Nunito', sans-serif; }
+    </style>
+</head>
+<body>
+
+    <!-- MODAL PERIZINAN MODERN -->
+    <div class="perm-modal-overlay" id="permModal">
+        <div class="perm-box">
+            <div style="background: var(--bg-main); box-shadow: var(--clay-shadow); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+                <i class="fa-solid fa-shield-halved" style="font-size: 35px; color: var(--accent);"></i>
+            </div>
+            <h3 style="font-weight: 800; color: var(--text-main);">Izin Diperlukan</h3>
+            <p style="font-size: 13px; font-weight: 600; color: #7f8c8d; margin-top: 5px;">Agar CoupleSync bekerja maksimal, kami membutuhkan akses fitur berikut:</p>
+            
+            <div class="perm-list">
+                <div><i class="fa-solid fa-location-dot"></i> Lokasi (Untuk Maps Real-time)</div>
+                <div style="margin-top: 8px;"><i class="fa-solid fa-battery-half"></i> Info Baterai (Untuk Dashboard)</div>
+            </div>
+
+            <button class="clay-btn" id="btnGrantPerm" style="background: var(--success-color);">Mengerti & Izinkan</button>
+        </div>
+    </div>
+
+    <!-- TOPBAR -->
+    <div class="topbar" id="topbar">
+        <div class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+        <h3 style="color: var(--accent); font-weight: 800;">CoupleSync <i class="fa-solid fa-heart"></i></h3>
+        <div style="width:24px;"></div> <!-- Spacer -->
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fa-solid fa-bars-staggered"></i> Menu</h3>
+            <div class="close-btn" onclick="toggleSidebar()"><i class="fas fa-times"></i></div>
+        </div>
+        <div class="sidebar-menu">
+            <div onclick="switchTab('home-screen'); toggleSidebar()"><i class="fas fa-home"></i> Dashboard</div>
+            <div onclick="switchTab('settings-screen'); toggleSidebar()"><i class="fas fa-cog"></i> Pengaturan</div>
+            <div id="btnSidebarLogout" style="color: var(--accent);"><i class="fas fa-sign-out-alt"></i> Logout</div>
+        </div>
+    </div>
+
+    <!-- 1. AUTH SCREEN -->
+    <div id="auth-screen" class="screen active" style="padding-top: 15vh; text-align: center;">
+        <div style="background: var(--bg-main); box-shadow: var(--clay-shadow); width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+            <i class="fa-solid fa-heart-pulse" style="font-size: 50px; color: var(--accent);"></i>
+        </div>
+        <h1 style="color: var(--text-main); font-weight: 800; letter-spacing: 1px;">CoupleSync</h1>
+        <p style="font-size: 13px; margin-bottom: 25px; font-weight: 700; color: #7f8c8d;">Track & Chat with your loved one</p>
+        
+        <div class="clay-card">
+            <input type="email" id="email" class="clay-input" placeholder="Masukkan Email">
+            <input type="password" id="password" class="clay-input" placeholder="Masukkan Password">
+            <button id="btnLogin" class="clay-btn"><i class="fa-solid fa-arrow-right-to-bracket"></i> Masuk</button>
+            <button id="btnRegister" class="clay-btn" style="background: var(--bg-main); color: var(--text-main);">
+                <i class="fa-solid fa-user-plus"></i> Daftar Akun
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. HOME SCREEN (DASHBOARD LENGKAP) -->
+    <div id="home-screen" class="screen">
+        <div class="clay-card" style="text-align: left; display: flex; align-items: center; gap: 15px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--bg-main); box-shadow: var(--clay-inset); display: flex; align-items: center; justify-content: center; font-size: 25px;">
+                🧑‍💻
+            </div>
+            <div>
+                <p style="font-size: 12px; font-weight: 700; color: #888; margin: 0;">Selamat Datang,</p>
+                <h2 style="color: var(--text-main); font-weight: 800; margin: 0;" id="userName">User</h2>
+            </div>
+        </div>
+
+        <!-- Peringatan jika belum terhubung -->
+        <div id="alertSetting" class="clay-card" style="display: none; border-left: 5px solid var(--accent);">
+            <h4 style="color: var(--accent);"><i class="fa-solid fa-triangle-exclamation"></i> Belum Terhubung</h4>
+            <p style="font-size: 13px; font-weight: 600; margin-top: 5px;">Silakan pergi ke menu <b>Settings</b> untuk menghubungkan akun dengan pasangan Anda.</p>
+        </div>
+
+        <!-- Tampil jika sudah terhubung -->
+        <div id="connectedDashboard" style="display: none;">
+            <div class="clay-card">
+                <h3 style="font-size: 16px; margin-bottom: 15px;"><i class="fa-solid fa-heart" style="color: var(--accent);"></i> Status Pasangan (Ayang)</h3>
+                
+                <div class="grid-2">
+                    <div class="mini-card">
+                        <i class="fa-solid fa-battery-half" id="partnerBatteryIcon" style="color: #27ae60;"></i>
+                        <h3 id="partnerBatteryText">--%</h3>
+                        <p style="font-size: 11px; font-weight: 700; color: #888;">Baterai HP</p>
+                    </div>
+                    <div class="mini-card">
+                        <i class="fa-solid fa-route" style="color: #3498db;"></i>
+                        <h3 id="distanceText">-- KM</h3>
+                        <p style="font-size: 11px; font-weight: 700; color: #888;">Jarak Kalian</p>
+                    </div>
+                </div>
+
+                <button id="btnSendLove" class="clay-btn" style="margin-top: 20px; font-size: 15px;">
+                    <i class="fa-solid fa-paper-plane"></i> Kirim Hati (Ping!)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MAPS SCREEN -->
+    <div id="maps-screen" class="screen">
+        <div id="map"></div>
+    </div>
+
+    <!-- 4. CHAT SCREEN (WA THEME) -->
+    <div id="chat-screen" class="screen">
+        <div class="contact-list" id="contactView">
+            <h2 style="margin-bottom: 20px; font-weight: 800;"><i class="fa-solid fa-comments"></i> Pesan</h2>
+            <div id="contactItem" class="contact-item" style="display: none;" onclick="openChatRoom()">
+                <img src="https://ui-avatars.com/api/?name=Ayang&background=ff4757&color=fff&font-family=Nunito" alt="Partner">
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 800;">Ayang <i class="fa-solid fa-heart" style="color: var(--accent); font-size: 14px;"></i></h3>
+                    <p style="font-size: 12px; color: #888; font-weight: 600;" id="lastMsgPreview">Ketuk untuk mulai chat...</p>
+                </div>
+            </div>
+            <div id="noContactMsg" style="text-align: center; color: #888; margin-top: 30px; font-weight: 600;">
+                <i class="fa-solid fa-user-xmark" style="font-size: 50px; margin-bottom: 15px; color: #bdc3c7;"></i><br>
+                Belum ada kontak.
+            </div>
+        </div>
+
+        <div class="chat-room" id="chatRoomView">
+            <div class="chat-header">
+                <i class="fas fa-arrow-left back-btn" onclick="closeChatRoom()"></i>
+                <img src="https://ui-avatars.com/api/?name=Ayang&background=ff4757&color=fff&font-family=Nunito" style="width:40px; border-radius:50%;" alt="Partner">
+                <span>Ayang <i class="fa-solid fa-heart" style="color: var(--accent);"></i></span>
+            </div>
+            <div class="chat-messages" id="chatBox"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatMsgInput" placeholder="Ketik pesan...">
+                <button class="send-btn" id="btnSendChat"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. SETTINGS SCREEN -->
+    <div id="settings-screen" class="screen">
+        <div class="clay-card">
+            <h3 style="font-size: 16px;"><i class="fa-solid fa-id-badge"></i> ID Perangkat Kamu</h3>
+            <h1 id="myShareId" style="letter-spacing: 5px; color: var(--accent); margin: 10px 0; font-weight: 800;">------</h1>
+            <button id="btnShare" class="clay-btn" style="padding: 12px; font-size: 14px;">
+                <i class="fas fa-share-alt"></i> Salin Link Pasangan
+            </button>
+        </div>
+
+        <div class="clay-card" id="pairingBox">
+            <h3 style="font-size: 16px;"><i class="fa-solid fa-link"></i> Hubungkan Pasangan</h3>
+            <p style="font-size: 12px; margin-top: 5px; font-weight: 600;">Masukkan ID pasangan di bawah ini:</p>
+            <input type="text" id="partnerIdInput" class="clay-input" placeholder="Contoh: A1B2C3" style="text-transform: uppercase; text-align: center; letter-spacing: 2px;">
+            <button id="btnConnect" class="clay-btn success">
+                <i class="fa-solid fa-plug"></i> Hubungkan
+            </button>
+        </div>
+
+        <div class="clay-card" id="unpairBox" style="display: none; border-left: 5px solid var(--success-color);">
+            <h3 style="color: var(--success-color); font-size: 16px;"><i class="fa-solid fa-circle-check"></i> Sudah Terhubung</h3>
+            <p style="font-size: 12px; font-weight: 600; margin-top: 5px;">Aplikasi aktif dan sinkron dengan pasangan.</p>
+            <button id="btnPutus" class="clay-btn" style="background: #e67e22; margin-top: 15px;">
+                <i class="fa-solid fa-link-slash"></i> Putuskan (Unpair)
+            </button>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVBAR -->
+    <div class="bottom-nav" id="bottomNav">
+        <div class="nav-item active" onclick="switchTab('home-screen', this)"><i class="fas fa-home"></i></div>
+        <div class="nav-item" onclick="switchTab('maps-screen', this)"><i class="fas fa-map-marked-alt"></i></div>
+        <div class="nav-item" onclick="switchTab('chat-screen', this)"><i class="fas fa-comment"></i></div>
+        <div class="nav-item" onclick="switchTab('settings-screen', this)"><i class="fas fa-cog"></i></div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- FIREBASE V9 MODULE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, onValue, update, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOsJ3yJxnZah3JPx78Lu3PG0ujQd0rtlo",
+            authDomain: "spotify-tets.firebaseapp.com",
+            databaseURL: "https://spotify-tets-default-rtdb.firebaseio.com",
+            projectId: "spotify-tets",
+            storageBucket: "spotify-tets.firebasestorage.app",
+            messagingSenderId: "498499181915",
+            appId: "1:498499181915:web:f07b3a4344ea657ba40e7e",
+            measurementId: "G-7NDM0ER04Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let currentUser = null, partnerUid = null, myShareId = null, chatRefId = null;
+        let map = null, myMarker = null, partnerMarker = null, watchId = null;
+        let myLat = 0, myLng = 0, partnerLat = 0, partnerLng = 0;
+        
+        // Custom Map Icons
+        const iconMe = L.divIcon({ html: '<div style="background: #3498db; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-size: 14px;"><i class="fa-solid fa-street-view"></i></div>', className: 'custom-map-icon', iconSize: [32,32], iconAnchor: [16, 16] });
+        const iconPartner = L.divIcon({ html: '<div style="background: #ff4757; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-size: 14px;"><i class="fa-solid fa-heart"></i></div>', className: 'custom-map-icon', iconSize: [32,32], iconAnchor: [16, 16] });
+
+        // ================= HELPER & ANIMASI ALERT =================
+        const showToast = (icon, title) => {
+            Swal.fire({ toast: true, position: 'top-end', icon: icon, title: title, showConfirmButton: false, timer: 2000, customClass: { popup: 'custom-swal-popup' } });
+        };
+        const showSuccessAnim = (msg) => {
+            Swal.fire({ icon: 'success', title: 'Berhasil!', text: msg, showConfirmButton: false, timer: 1500, customClass: { popup: 'custom-swal-popup' } });
+        };
+        const showErrorAnim = (msg) => {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: msg, customClass: { popup: 'custom-swal-popup' } });
+        };
+
+        // ================= UI NAVIGATION =================
+        window.switchTab = function(screenId, navElement = null) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            
+            if(navElement) {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                navElement.classList.add('active');
+            } else {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                const idx = ['home-screen', 'maps-screen', 'chat-screen', 'settings-screen'].indexOf(screenId);
+                if(idx > -1) document.querySelectorAll('.nav-item')[idx].classList.add('active');
+            }
+            if (screenId === 'maps-screen' && map) setTimeout(() => map.invalidateSize(), 300);
+        };
+        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('open');
+        window.openChatRoom = () => { document.getElementById('contactView').style.display = 'none'; document.getElementById('chatRoomView').classList.add('active'); setTimeout(() => { document.getElementById('chatBox').scrollTop = 9999; }, 100); };
+        window.closeChatRoom = () => { document.getElementById('chatRoomView').classList.remove('active'); document.getElementById('contactView').style.display = 'block'; };
+
+        // ================= AUTHENTICATION =================
+        document.getElementById('btnLogin').onclick = () => {
+            Swal.fire({ title: 'Memproses...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
+                .then(() => showSuccessAnim('Berhasil Masuk!'))
+                .catch(err => showErrorAnim('Akun tidak ditemukan atau password salah!'));
+        };
+        
+        document.getElementById('btnRegister').onclick = () => {
+            Swal.fire({ title: 'Membuat Akun...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
+                .then(() => showSuccessAnim('Akun Berhasil Dibuat!'))
+                .catch(err => showErrorAnim(err.message));
+        };
+        document.getElementById('btnSidebarLogout').onclick = () => signOut(auth);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-screen').classList.remove('active');
+                document.getElementById('topbar').classList.add('active');
+                document.getElementById('bottomNav').classList.add('active');
+                switchTab('home-screen');
+                document.getElementById('userName').innerText = user.email.split('@')[0];
+
+                const userRef = ref(db, 'users/' + user.uid);
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    myShareId = snapshot.val().shareId;
+                } else {
+                    myShareId = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    await set(userRef, { email: user.email, shareId: myShareId, partner: null });
+                }
+                document.getElementById('myShareId').innerText = myShareId;
+                
+                checkPermissions(); // Panggil modal izin modern
+                listenUserData();
+                listenPings();
+            } else {
+                currentUser = null;
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById('auth-screen').classList.add('active');
+                document.getElementById('topbar').classList.remove('active');
+                document.getElementById('bottomNav').classList.remove('active');
+                if(watchId) navigator.geolocation.clearWatch(watchId);
+            }
+        });
+
+        // ================= PERIZINAN MODERN & SENSOR =================
+        function checkPermissions() {
+            // Tampilkan custom modal
+            document.getElementById('permModal').classList.add('active');
+        }
+
+        document.getElementById('btnGrantPerm').onclick = () => {
+            document.getElementById('permModal').classList.remove('active');
+            initMap();
+            startGPS();
+            startBatteryTracker();
+        };
+
+        // ================= DASHBOARD FEATURES =================
+        function listenUserData() {
+            onValue(ref(db, 'users/' + currentUser.uid), (snap) => {
+                const data = snap.val();
+                if (data && data.partner) {
+                    partnerUid = data.partner;
+                    document.getElementById('pairingBox').style.display = 'none';
+                    document.getElementById('unpairBox').style.display = 'block';
+                    
+                    document.getElementById('alertSetting').style.display = 'none';
+                    document.getElementById('connectedDashboard').style.display = 'block';
+                    
+                    document.getElementById('noContactMsg').style.display = 'none';
+                    document.getElementById('contactItem').style.display = 'flex';
+                    
+                    chatRefId = currentUser.uid < partnerUid ? currentUser.uid+'_'+partnerUid : partnerUid+'_'+currentUser.uid;
+                    listenPartnerLocation();
+                    listenPartnerBattery();
+                    listenChat();
+                } else {
+                    partnerUid = null;
+                    document.getElementById('pairingBox').style.display = 'block';
+                    document.getElementById('unpairBox').style.display = 'none';
+                    
+                    document.getElementById('alertSetting').style.display = 'block';
+                    document.getElementById('connectedDashboard').style.display = 'none';
+                    
+                    document.getElementById('noContactMsg').style.display = 'block';
+                    document.getElementById('contactItem').style.display = 'none';
+                    if(partnerMarker && map) map.removeLayer(partnerMarker);
+                }
+            });
+        }
+
+        // Baterai Tracker (API)
+        function startBatteryTracker() {
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(battery => {
+                    const updateBattery = () => {
+                        set(ref(db, 'device/' + currentUser.uid), {
+                            level: Math.round(battery.level * 100),
+                            charging: battery.charging
+                        });
+                    };
+                    updateBattery();
+                    battery.addEventListener('levelchange', updateBattery);
+                    battery.addEventListener('chargingchange', updateBattery);
+                });
+            }
+        }
+        function listenPartnerBattery() {
+            onValue(ref(db, 'device/' + partnerUid), (snap) => {
+                const data = snap.val();
+                if (data) {
+                    const icon = document.getElementById('partnerBatteryIcon');
+                    document.getElementById('partnerBatteryText').innerText = data.level + '%';
+                    if(data.charging) {
+                        icon.className = 'fa-solid fa-bolt'; icon.style.color = '#f1c40f';
+                    } else if (data.level <= 20) {
+                        icon.className = 'fa-solid fa-battery-empty'; icon.style.color = '#e74c3c';
+                    } else {
+                        icon.className = 'fa-solid fa-battery-half'; icon.style.color = '#27ae60';
+                    }
+                }
+            });
+        }
+
+        // Hitung Jarak (Haversine)
+        function calcDistance() {
+            if(myLat && partnerLat) {
+                const R = 6371; 
+                const dLat = (partnerLat - myLat) * (Math.PI/180);
+                const dLon = (partnerLng - myLng) * (Math.PI/180); 
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(myLat * (Math.PI/180)) * Math.cos(partnerLat * (Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+                const d = R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+                document.getElementById('distanceText').innerText = d < 1 ? (d*1000).toFixed(0) + ' M' : d.toFixed(1) + ' KM';
+            }
+        }
+
+        // Fitur PING (Kirim Hati)
+        document.getElementById('btnSendLove').onclick = () => {
+            if(partnerUid) {
+                set(ref(db, 'pings/' + partnerUid), { time: Date.now() });
+                showToast('success', 'Hati Terkirim 💖');
+            }
+        };
+        function listenPings() {
+            onValue(ref(db, 'pings/' + currentUser.uid), (snap) => {
+                if(snap.val()) triggerHeartAnimation();
+            });
+        }
+        function triggerHeartAnimation() {
+            for(let i=0; i<15; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart-fall';
+                    heart.innerHTML = ['💖','💕','❤️','🥰'][Math.floor(Math.random()*4)];
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                    heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(heart);
+                    setTimeout(() => heart.remove(), 4000);
+                }, i * 200);
+            }
+        }
+
+        // ================= PAIRING SETTINGS =================
+        document.getElementById('btnConnect').onclick = () => {
+            const targetId = document.getElementById('partnerIdInput').value.toUpperCase();
+            if(!targetId) return;
+            get(ref(db, 'users')).then((snap) => {
+                let foundUid = null;
+                snap.forEach(child => { if(child.val().shareId === targetId) foundUid = child.key; });
+                if (foundUid) {
+                    update(ref(db, 'users/' + currentUser.uid), { partner: foundUid });
+                    update(ref(db, 'users/' + foundUid), { partner: currentUser.uid });
+                    showSuccessAnim('Berhasil Terhubung dengan Pasangan!');
+                } else {
+                    showErrorAnim('ID Pasangan tidak ditemukan!');
+                }
+            });
+        };
+        document.getElementById('btnPutus').onclick = () => {
+            update(ref(db, 'users/' + currentUser.uid), { partner: null });
+            update(ref(db, 'users/' + partnerUid), { partner: null });
+            showToast('info', 'Hubungan diputuskan');
+        };
+        document.getElementById('btnShare').onclick = () => {
+            const link = window.location.href.split('?')[0] + '?pair=' + myShareId;
+            navigator.clipboard.writeText(link);
+            showToast('success', 'Link & ID Berhasil Disalin');
+        };
+
+        // ================= MAPS & GEOLOCATION =================
+        function initMap() {
+            if (!map) {
+                map = L.map('map').setView([-6.200, 106.816], 13);
+                const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
+                const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+                streetLayer.addTo(map);
+                L.control.layers({"Street": streetLayer, "Satellite": satelliteLayer}).addTo(map);
+            }
+        }
+
+        function startGPS() {
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(pos => {
+                    myLat = pos.coords.latitude;
+                    myLng = pos.coords.longitude;
+                    
+                    if (!myMarker) {
+                        myMarker = L.marker([myLat, myLng], {icon: iconMe}).addTo(map).bindPopup("<b>Saya</b>");
+                        map.setView([myLat, myLng], 15);
+                    } else {
+                        myMarker.setLatLng([myLat, myLng]);
+                    }
+                    set(ref(db, 'locations/' + currentUser.uid), { lat: myLat, lng: myLng, time: Date.now() });
+                    calcDistance();
+                }, err => console.log(err), { enableHighAccuracy: true });
+            }
+        }
+
+        function listenPartnerLocation() {
+            onValue(ref(db, 'locations/' + partnerUid), (snap) => {
+                const data = snap.val();
+                if (data) {
+                    partnerLat = data.lat; partnerLng = data.lng;
+                    if (!partnerMarker) {
+                        partnerMarker = L.marker([partnerLat, partnerLng], {icon: iconPartner}).addTo(map).bindPopup("<b>Ayang</b>");
+                    } else {
+                        partnerMarker.setLatLng([partnerLat, partnerLng]);
+                    }
+                    calcDistance();
+                }
+            });
+        }
+
+        // ================= CHAT =================
+        function listenChat() {
+            const chatBox = document.getElementById('chatBox');
+            onValue(ref(db, 'chats/' + chatRefId), (snap) => {
+                chatBox.innerHTML = '';
+                let lastText = 'Mulai chat...';
+                snap.forEach(child => {
+                    const msg = child.val();
+                    const isMe = msg.sender === currentUser.uid;
+                    lastText = msg.text;
+                    const timeStr = new Date(msg.time).getHours().toString().padStart(2,'0') + ':' + new Date(msg.time).getMinutes().toString().padStart(2,'0');
+                    chatBox.innerHTML += `<div class="msg ${isMe ? 'me' : 'partner'}">${msg.text}<span class="time">${timeStr}</span></div>`;
+                });
+                document.getElementById('lastMsgPreview').innerText = lastText.length > 20 ? lastText.substring(0,20)+'...' : lastText;
+                setTimeout(() => chatBox.scrollTop = 9999, 100);
+            });
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatMsgInput');
+            if (input.value.trim() !== '' && chatRefId) {
+                push(ref(db, 'chats/' + chatRefId), { sender: currentUser.uid, text: input.value, time: Date.now() });
+                input.value = '';
+            }
+        }
+        document.getElementById('btnSendChat').onclick = sendMessage;
+        document.getElementById('chatMsgInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    </script>
+</body>
+</html>
