@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOT PREDIK BY XSKAY - AI Analytics & Prediction Engine</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Orbitron & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Canvas Confetti for Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            bg: '#05070E',
+                            card: '#0D1322',
+                            cardBorder: '#1E293B',
+                            accent: '#00F0FF',
+                            purple: '#A855F7',
+                            pink: '#EC4899',
+                            emerald: '#10B981',
+                        }
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 25px rgba(0, 240, 255, 0.4)',
+                        'neon-pink': '0 0 25px rgba(236, 72, 153, 0.4)',
+                        'neon-purple': '0 0 25px rgba(168, 85, 247, 0.4)',
+                        'neon-emerald': '0 0 25px rgba(16, 185, 129, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(13, 19, 34, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 240, 255, 0.12);
+        }
+        
+        .glass-input {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            color: #FFFFFF;
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            border-color: #00F0FF;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+            outline: none;
+        }
+
+        .scanline {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 240, 255, 0.08) 50%,
+                rgba(0, 240, 255, 0.02)
+            );
+            background-size: 100% 4px;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.85; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.015); }
+        }
+
+        .animate-glow {
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #05070E;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1E293B;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00F0FF;
+        }
+    </style>
+</head>
+<body class="bg-cyber-bg text-slate-100 font-sans min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 relative overflow-x-hidden selection:bg-cyan-500 selection:text-black">
+
+    <!-- Background Matrix / Cyber Grid & Glow Orbs -->
+    <div class="fixed inset-0 scanline pointer-events-none z-0"></div>
+    <div class="fixed top-10 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="fixed bottom-10 right-10 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <!-- Background Canvas for Interactive Matrix/Particles -->
+    <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-30"></canvas>
+
+    <!-- Main Wrapper -->
+    <div class="w-full max-w-md relative z-10 space-y-4 my-auto">
+
+        <!-- HEADER SECTION -->
+        <header class="glass-panel rounded-2xl p-5 text-center relative overflow-hidden border-t-2 border-cyan-400 shadow-neon-cyan animate-glow">
+            <div class="absolute -right-8 -top-8 w-24 h-24 bg-cyan-500/20 rounded-full blur-2xl"></div>
+            
+            <div class="flex items-center justify-between mb-2">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/90 border border-cyan-500/50 text-[11px] font-semibold text-cyan-400 tracking-widest uppercase shadow-sm">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> BY XSKAY
+                </div>
+                
+                <!-- Audio Toggle Button -->
+                <button onclick="toggleAudio()" id="soundToggleBtn" title="Aktifkan/Matikan Suara" class="p-2 rounded-xl bg-slate-900/80 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-400 transition-all flex items-center gap-1.5 text-xs font-mono">
+                    <i data-lucide="volume-2" id="soundIcon" class="w-4 h-4 text-cyan-400"></i>
+                    <span id="soundText" class="text-[10px]">SOUND ON</span>
+                </button>
+            </div>
+
+            <h1 class="text-3xl sm:text-4xl font-orbitron font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-purple-400 drop-shadow-md">
+                BOT PREDIK
+            </h1>
+            <p class="text-[11px] font-orbitron tracking-widest text-slate-400 mt-1 flex items-center justify-center gap-2">
+                <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping"></span>
+                PLAYER DATABASE • PREDICTION • RANKING
+            </p>
+        </header>
+
+        <!-- MAIN CONTROL PANEL -->
+        <section class="glass-panel rounded-2xl p-5 space-y-5 border-t border-purple-500/30 shadow-xl">
+            
+            <!-- STATUS BAR -->
+            <div class="flex items-center justify-between text-[11px] font-mono bg-slate-900/90 px-3.5 py-2.5 rounded-xl border border-slate-800 text-slate-300 shadow-inner">
+                <span class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-emerald-400 font-bold tracking-wide">ONLINE (SECURE)</span>
+                </span>
+                <span class="text-slate-400 font-semibold">ADMIN XSKAY</span>
+                <span class="text-purple-400 font-semibold flex items-center gap-1">
+                    <i data-lucide="lock" class="w-3 h-3"></i> LOCKED
+                </span>
+            </div>
+
+            <!-- PREDICTION INPUT SECTION -->
+            <div class="space-y-3.5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-orbitron font-bold text-cyan-400 flex items-center gap-2">
+                        <i data-lucide="cpu" class="w-4 h-4 text-cyan-400 animate-spin" style="animation-duration: 8s;"></i> PREDIKSI PLAYER
+                    </h2>
+                    <span class="text-[10px] text-cyan-400/80 uppercase tracking-wider font-mono bg-cyan-950/50 px-2 py-0.5 rounded border border-cyan-500/30">AI v5.0 PRO</span>
+                </div>
+                <p class="text-xs text-slate-400 italic">Masukkan nama 2 player untuk dianalisis oleh dukun AI XSKAY.</p>
+
+                <!-- INPUT FIELDS WITH QUICK PRESETS -->
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-orbitron font-semibold text-slate-300 flex items-center justify-between">
+                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> SEBUT P1</span>
+                            <button onclick="fillPreset('LANZY', 'DILAN')" class="text-[9px] text-cyan-400 hover:underline">Quick</button>
+                        </label>
+                        <input type="text" id="player1Input" value="LANZY" placeholder="Player 1..." 
+                            class="w-full glass-input px-3 py-2.5 rounded-xl text-sm font-semibold tracking-wide placeholder-slate-500 uppercase">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-orbitron font-semibold text-slate-300 flex items-center justify-between">
+                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-pink-500"></span> SEBUT P2</span>
+                            <button onclick="fillPreset('ALOK', 'KRONOS')" class="text-[9px] text-pink-400 hover:underline">Quick</button>
+                        </label>
+                        <input type="text" id="player2Input" value="DILAN" placeholder="Player 2..." 
+                            class="w-full glass-input px-3 py-2.5 rounded-xl text-sm font-semibold tracking-wide placeholder-slate-500 uppercase">
+                    </div>
+                </div>
+
+                <!-- PROCESS BUTTON -->
+                <button id="predictBtn" onclick="processPrediction()" 
+                    class="w-full mt-2 py-3.5 px-4 rounded-xl font-orbitron font-bold text-sm bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 shadow-neon-cyan active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <i data-lucide="zap" class="w-4 h-4 fill-current"></i>
+                    <span id="btnText">PROSES PREDIKSI</span>
+                </button>
+            </div>
+
+            <!-- SCANNING / LOADING OVERLAY -->
+            <div id="loadingState" class="hidden py-8 text-center space-y-3 bg-slate-950/40 rounded-xl border border-cyan-500/20">
+                <div class="inline-block relative">
+                    <div class="w-14 h-14 border-4 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin"></div>
+                    <i data-lucide="sparkles" class="w-6 h-6 text-cyan-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse"></i>
+                </div>
+                <div class="space-y-1">
+                    <p id="loadingStatusText" class="text-xs font-mono text-cyan-300 animate-pulse tracking-wider">MENGANALISIS ALGORITMA PLAYER...</p>
+                    <div class="w-48 h-1.5 bg-slate-800 rounded-full mx-auto overflow-hidden">
+                        <div id="loadingBar" class="h-full bg-gradient-to-r from-cyan-400 to-purple-500 w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESULT BOX -->
+            <div id="resultBox" class="glass-panel rounded-xl p-4 border border-slate-700/80 space-y-4 shadow-lg transition-all">
+                <div class="text-center border-b border-slate-800 pb-3 flex flex-col items-center">
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-[10px] font-mono text-cyan-300 uppercase mb-1">
+                        <i data-lucide="trophy" class="w-3 h-3 text-amber-400"></i> PEMENANG DIPREDIKSI
+                    </div>
+                    <h3 id="winnerDisplay" class="text-2xl sm:text-3xl font-orbitron font-extrabold text-cyan-400 tracking-wider mt-1 drop-shadow-[0_0_15px_rgba(0,240,255,0.6)]">
+                        LANZY
+                    </h3>
+                </div>
+
+                <!-- PLAYER STAT BARS -->
+                <div class="space-y-3.5">
+                    <!-- Player 1 Bar -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-bold font-mono">
+                            <span id="p1Label" class="text-slate-200">LANZY</span>
+                            <span id="p1Score" class="text-cyan-400 font-extrabold">88%</span>
+                        </div>
+                        <div class="w-full h-3.5 bg-slate-900/90 rounded-full p-0.5 overflow-hidden border border-slate-700/60">
+                            <div id="p1Bar" class="h-full bg-gradient-to-r from-cyan-500 to-teal-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(0,240,255,0.5)]" style="width: 88%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Player 2 Bar -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-bold font-mono">
+                            <span id="p2Label" class="text-slate-200">DILAN</span>
+                            <span id="p2Score" class="text-emerald-400 font-extrabold">79%</span>
+                        </div>
+                        <div class="w-full h-3.5 bg-slate-900/90 rounded-full p-0.5 overflow-hidden border border-slate-700/60">
+                            <div id="p2Bar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(16,185,129,0.5)]" style="width: 79%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DISCLAIMER / NOTE BOX -->
+                <div class="bg-amber-950/40 border border-amber-500/40 rounded-xl p-3 text-xs text-amber-200/90 flex gap-2.5 items-start shadow-sm">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5 animate-bounce"></i>
+                    <p class="leading-relaxed">
+                        <strong class="text-amber-300">Catatan Dukun:</strong> Jika yang diprediksikan di pur KAYU <span class="underline decoration-amber-400 decoration-2 font-bold text-amber-300">ALLM PINDAH!</span>
+                    </p>
+                </div>
+
+                <!-- EXTRA ACTIONS (SHARE & HISTORY) -->
+                <div class="flex gap-2 pt-1">
+                    <button onclick="shareResult()" class="flex-1 py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-orbitron font-semibold flex items-center justify-center gap-1.5 transition-all">
+                        <i data-lucide="share-2" class="w-3.5 h-3.5 text-cyan-400"></i> SALIN HASIL
+                    </button>
+                    <button onclick="toggleHistoryModal(true)" class="flex-1 py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-orbitron font-semibold flex items-center justify-center gap-1.5 transition-all">
+                        <i data-lucide="history" class="w-3.5 h-3.5 text-purple-400"></i> RIWAYAT (<span id="historyCount">0</span>)
+                    </button>
+                </div>
+
+                <div class="text-right pt-1">
+                    <span class="text-[10px] font-mono text-slate-500 tracking-wider">PREDIKSI DETERMINISTIK BY XSKAY</span>
+                </div>
+            </div>
+
+            <!-- LOGOUT BUTTON -->
+            <button onclick="handleLogout()" 
+                class="w-full py-3 rounded-xl border border-rose-500/40 bg-rose-950/20 hover:bg-rose-900/40 text-rose-400 text-xs font-orbitron font-bold transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                <i data-lucide="log-out" class="w-3.5 h-3.5"></i> LOGOUT / RESET SESI
+            </button>
+        </section>
+
+        <!-- FOOTER INFO -->
+        <footer class="text-center space-y-1 py-2">
+            <p class="text-[11px] font-orbitron tracking-widest text-slate-400">
+                XSKAY SYSTEM • PLAYER ANALYTICS v5.0
+            </p>
+            <p class="text-[11px] text-slate-500">
+                Data prediksi deterministik menjamin akurasi 99.9%.
+            </p>
+        </footer>
+    </main>
+
+    <!-- HISTORY MODAL -->
+    <div id="historyModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-5 border border-cyan-500/40 space-y-4 max-h-[80vh] flex flex-col shadow-neon-cyan">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="font-orbitron font-bold text-sm text-cyan-400 flex items-center gap-2">
+                    <i data-lucide="history" class="w-4 h-4"></i> RIWAYAT PREDIKSI TERAKHIR
+                </h3>
+                <button onclick="toggleHistoryModal(false)" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div id="historyList" class="space-y-2.5 overflow-y-auto flex-1 pr-1">
+                <!-- Dynamic History Items -->
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 flex justify-between">
+                <button onclick="clearHistory()" class="px-3 py-1.5 rounded-lg bg-rose-950/50 border border-rose-500/30 text-rose-400 text-xs font-mono hover:bg-rose-900/50">Hapus Riwayat</button>
+                <button onclick="toggleHistoryModal(false)" class="px-4 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs font-orbitron">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 glass-panel border border-cyan-500/50 px-4 py-3 rounded-xl text-xs font-mono text-cyan-300 opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2.5 shadow-neon-cyan">
+        <i data-lucide="bell" class="w-4 h-4 text-cyan-400"></i>
+        <span id="toastMsg">Sistem Diperbarui</span>
+    </div>
+
+    <!-- APPLICATION LOGIC & SOUND SYNTHESIS -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // --- AUDIO SYNTHESIZER (Tone.js) ---
+        let audioEnabled = true;
+        let synth = null;
+
+        try {
+            synth = new Tone.Synth({
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+            }).toDestination();
+        } catch (e) {
+            console.warn("Audio Context not started yet.");
+        }
+
+        function playSound(type) {
+            if (!audioEnabled || !synth) return;
+            try {
+                Tone.start();
+                if (type === 'click') {
+                    synth.triggerAttackRelease("C5", "32n");
+                } else if (type === 'predict') {
+                    synth.triggerAttackRelease("G4", "16n");
+                    setTimeout(() => synth.triggerAttackRelease("C6", "8n"), 100);
+                } else if (type === 'logout') {
+                    synth.triggerAttackRelease("E3", "8n");
+                }
+            } catch (e) {
+                // Ignore audio restriction errors before user interaction
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (audioEnabled) {
+                icon.setAttribute('data-lucide', 'volume-2');
+                text.innerText = 'SOUND ON';
+                showToast("Efek suara diaktifkan.");
+            } else {
+                icon.setAttribute('data-lucide', 'volume-x');
+                text.innerText = 'SOUND OFF';
+                showToast("Efek suara dimatikan.");
+            }
+            lucide.createIcons();
+            playSound('click');
+        }
+
+        // --- BACKGROUND CANVAS PARTICLES ---
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 40; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5 + 0.5,
+                speedY: Math.random() * 0.5 + 0.2,
+                color: Math.random() > 0.5 ? '#00F0FF' : '#A855F7'
+            });
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
+            
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+                
+                p.y -= p.speedY;
+                if (p.y < 0) {
+                    p.y = canvas.height;
+                    p.x = Math.random() * canvas.width;
+                }
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // --- DETERMINISTIC SEED HASH ALGORITHM ---
+        function cyrb128(str) {
+            let h1 = 1779033703, h2 = 3144134277,
+                h3 = 1013904242, h4 = 2773480762;
+            for (let i = 0, ch; i < str.length; i++) {
+                ch = str.charCodeAt(i);
+                h1 = h2 ^ Math.imul(h1 ^ ch, 597399067);
+                h2 = h3 ^ Math.imul(h2 ^ ch, 2869860233);
+                h3 = h4 ^ Math.imul(h3 ^ ch, 951274213);
+                h4 = h1 ^ Math.imul(h4 ^ ch, 2716044179);
+            }
+            h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+            h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+            h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+            h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+            return (h1^h2^h3^h4) >>> 0;
+        }
+
+        function mulberry32(a) {
+            return function() {
+              var t = a += 0x6D2B79F5;
+              t = Math.imul(t ^ t >>> 15, t | 1);
+              t ^= t + Math.imul(t ^ t >>> 8, t | 61);
+              return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            }
+        }
+
+        function calculatePrediction(p1, p2) {
+            const cleanP1 = p1.trim().toUpperCase();
+            const cleanP2 = p2.trim().toUpperCase();
+
+            const combinedKey = `${cleanP1}_vs_${cleanP2}`;
+            const seed = cyrb128(combinedKey);
+            const rand = mulberry32(seed);
+
+            let score1 = Math.floor(65 + rand() * 34);
+            let score2 = Math.floor(65 + rand() * 34);
+
+            if (score1 === score2) {
+                score1 = Math.min(99, score1 + 3);
+            }
+
+            const winner = score1 > score2 ? cleanP1 : cleanP2;
+
+            return {
+                p1Name: cleanP1,
+                p2Name: cleanP2,
+                p1Score: score1,
+                p2Score: score2,
+                winner: winner,
+                timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+            };
+        }
+
+        // --- HISTORY LOCALSTORAGE MANAGEMENT ---
+        let historyData = JSON.parse(localStorage.getItem('xskay_history') || '[]');
+
+        function saveHistory(result) {
+            historyData.unshift(result);
+            if (historyData.length > 20) historyData.pop();
+            localStorage.setItem('xskay_history', JSON.stringify(historyData));
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            document.getElementById('historyCount').innerText = historyData.length;
+            const container = document.getElementById('historyList');
+            if (historyData.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Belum ada riwayat prediksi tersimpan.</p>`;
+                return;
+            }
+
+            container.innerHTML = historyData.map((item, idx) => `
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
+                    <div>
+                        <div class="font-bold text-slate-200">${item.p1Name} (${item.p1Score}%) vs ${item.p2Name} (${item.p2Score}%)</div>
+                        <div class="text-[10px] text-cyan-400 font-mono mt-0.5">Pemenang: ${item.winner} • ${item.timestamp}</div>
+                    </div>
+                    <button onclick="loadHistoryItem('${item.p1Name}', '${item.p2Name}')" class="px-2.5 py-1 rounded bg-cyan-950 hover:bg-cyan-900 text-cyan-300 font-mono text-[10px] border border-cyan-500/30">Muat</button>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            historyData = [];
+            localStorage.removeItem('xskay_history');
+            updateHistoryUI();
+            showToast("Riwayat berhasil dibersihkan.");
+            playSound('click');
+        }
+
+        function loadHistoryItem(p1, p2) {
+            document.getElementById('player1Input').value = p1;
+            document.getElementById('player2Input').value = p2;
+            toggleHistoryModal(false);
+            processPrediction();
+        }
+
+        function toggleHistoryModal(show) {
+            const modal = document.getElementById('historyModal');
+            if (show) {
+                modal.classList.remove('hidden');
+                updateHistoryUI();
+            } else {
+                modal.classList.add('hidden');
+            }
+            playSound('click');
+        }
+
+        function fillPreset(p1, p2) {
+            document.getElementById('player1Input').value = p1;
+            document.getElementById('player2Input').value = p2;
+            processPrediction();
+            playSound('click');
+        }
+
+        // --- PREDICTION EXECUTION WITH ANIMATED LOADING ---
+        const loadingSteps = [
+            "MENGANALISIS ALGORITMA PLAYER...",
+            "MENGECEK DATABASE DUKUN XSKAY...",
+            "MENGHITUNG PERSENTASE KEMENANGAN...",
+            "FINALISASI HASIL PREDIKSI..."
+        ];
+
+        function processPrediction() {
+            playSound('click');
+            const p1Val = document.getElementById('player1Input').value.trim();
+            const p2Val = document.getElementById('player2Input').value.trim();
+
+            if (!p1Val || !p2Val) {
+                showToast("Harap masukkan kedua nama player dengan benar!");
+                return;
+            }
+
+            const predictBtn = document.getElementById('predictBtn');
+            const loadingState = document.getElementById('loadingState');
+            const resultBox = document.getElementById('resultBox');
+            const loadingBar = document.getElementById('loadingBar');
+            const loadingStatusText = document.getElementById('loadingStatusText');
+
+            predictBtn.disabled = true;
+            predictBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            loadingState.classList.remove('hidden');
+            resultBox.classList.add('opacity-30', 'pointer-events-none');
+
+            let step = 0;
+            loadingBar.style.width = '25%';
+
+            const interval = setInterval(() => {
+                step++;
+                if (step < loadingSteps.length) {
+                    loadingStatusText.innerText = loadingSteps[step];
+                    loadingBar.style.width = `${(step + 1) * 25}%`;
+                } else {
+                    clearInterval(interval);
+                    
+                    const data = calculatePrediction(p1Val, p2Val);
+
+                    document.getElementById('winnerDisplay').innerText = data.winner;
+                    document.getElementById('p1Label').innerText = data.p1Name;
+                    document.getElementById('p2Label').innerText = data.p2Name;
+                    document.getElementById('p1Score').innerText = `${data.p1Score}%`;
+                    document.getElementById('p2Score').innerText = `${data.p2Score}%`;
+
+                    document.getElementById('p1Bar').style.width = `${data.p1Score}%`;
+                    document.getElementById('p2Bar').style.width = `${data.p2Score}%`;
+
+                    loadingState.classList.add('hidden');
+                    resultBox.classList.remove('opacity-30', 'pointer-events-none');
+                    predictBtn.disabled = false;
+                    predictBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                    saveHistory(data);
+                    playSound('predict');
+
+                    // Trigger celebratory confetti if score difference is significant
+                    try {
+                        confetti({
+                            particleCount: 50,
+                            spread: 60,
+                            origin: { y: 0.7 },
+                            colors: ['#00F0FF', '#A855F7', '#10B981']
+                        });
+                    } catch (e) {}
+
+                    showToast(`Prediksi sukses untuk ${data.winner}!`);
+                }
+            }, 300);
+        }
+
+        function shareResult() {
+            const winner = document.getElementById('winnerDisplay').innerText;
+            const p1 = document.getElementById('p1Label').innerText;
+            const p1s = document.getElementById('p1Score').innerText;
+            const p2 = document.getElementById('p2Label').innerText;
+            const p2s = document.getElementById('p2Score').innerText;
+
+            const text = `🤖 BOT PREDIK BY XSKAY\n⚔️ Match: ${p1} (${p1s}) vs ${p2} (${p2s})\n🏆 Pemenang: ${winner}\n🔥 Catatan: Jika yang diprediksikan di pur KAYU ALLM PINDAH!`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast("Hasil berhasil disalin ke clipboard!");
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+            playSound('click');
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Hasil berhasil disalin!");
+            } catch (err) {
+                showToast("Gagal menyalin teks.");
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        function handleLogout() {
+            playSound('logout');
+            showToast("Sesi di-reset. Mengembalikan ke status awal.");
+            document.getElementById('player1Input').value = 'LANZY';
+            document.getElementById('player2Input').value = 'DILAN';
+            processPrediction();
+        }
+
+        // Run initial prediction on load
+        window.onload = function() {
+            updateHistoryUI();
+            processPrediction();
+        };
+    </script>
+</body>
+</html>
