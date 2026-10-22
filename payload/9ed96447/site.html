@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Veil VPN</title>
+<style>
+:root{
+  --bg:#e7f0ef;--surface:#fbfdfc;--ink:#0f2a2e;--muted:#52696d;--line:#cfdedd;
+  --accent:#0e6b6b;--glow:#d9891a;--glow-soft:#f6e3c0;--off:#8a9ea1;--note-bg:#f6e3c0;--note-ink:#4d3000;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1a1f;--surface:#122930;--ink:#e6f1f0;--muted:#97b0b3;--line:#21404a;
+    --accent:#5fc4c0;--glow:#f0a840;--glow-soft:#3a2c12;--off:#5d777c;--note-bg:#3a2c12;--note-ink:#f6e3c0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1a1f;--surface:#122930;--ink:#e6f1f0;--muted:#97b0b3;--line:#21404a;
+  --accent:#5fc4c0;--glow:#f0a840;--glow-soft:#3a2c12;--off:#5d777c;--note-bg:#3a2c12;--note-ink:#f6e3c0;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.app{max-width:460px;margin:0 auto;padding:18px 16px 32px}
+h1{font:600 20px/1.2 Georgia,"Times New Roman",serif;margin:0 0 14px;letter-spacing:.2px}
+.note{background:var(--note-bg);color:var(--note-ink);border-radius:12px;padding:10px 12px;font-size:13.5px;margin-bottom:22px}
+.hero{text-align:center;margin-bottom:22px}
+.power{
+  width:176px;height:176px;border-radius:50%;border:0;cursor:pointer;position:relative;
+  background:var(--surface);color:var(--off);
+  box-shadow:0 0 0 6px var(--line),0 10px 28px rgba(15,42,46,.14);
+  transition:box-shadow .35s,color .35s,background .35s;
+}
+.power svg{width:64px;height:64px}
+.power:focus-visible{outline:3px solid var(--accent);outline-offset:6px}
+.power.busy{color:var(--accent);box-shadow:0 0 0 6px var(--accent),0 10px 28px rgba(15,42,46,.14);animation:pulse 1s ease-in-out infinite}
+.power.on{color:var(--glow);background:var(--glow-soft);box-shadow:0 0 0 6px var(--glow),0 0 44px var(--glow-soft)}
+@keyframes pulse{50%{box-shadow:0 0 0 12px var(--line),0 10px 28px rgba(15,42,46,.14)}}
+@media (prefers-reduced-motion:reduce){.power.busy{animation:none}}
+.status{font:600 28px/1.15 Georgia,"Times New Roman",serif;margin:20px 0 4px}
+.sub{color:var(--muted);font-size:14px;min-height:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.stat{background:var(--surface);border-radius:14px;padding:12px 10px;text-align:center}
+.stat b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted)}
+h2{font-size:15px;margin:0 0 8px;font-weight:600}
+.list{background:var(--surface);border-radius:14px;overflow:hidden;margin-bottom:20px}
+.srv{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;border-top:1px solid var(--line)}
+.srv:first-child{border-top:0}
+.srv:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.srv .flag{font-size:22px}
+.srv .name{flex:1}
+.srv .name small{display:block;color:var(--muted);font-size:12.5px;word-break:break-all}
+.srv .ping{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.srv .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--off)}
+.srv[aria-checked="true"] .dot{border-color:var(--glow);background:radial-gradient(var(--glow) 45%,transparent 50%)}
+.row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:14px;padding:13px 14px;margin-bottom:8px}
+.row small{display:block;color:var(--muted);font-size:12.5px}
+.sw{width:50px;height:30px;border-radius:15px;border:0;background:var(--off);position:relative;cursor:pointer;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw[aria-checked="true"]{background:var(--accent)}
+.sw[aria-checked="true"]::after{transform:translateX(20px)}
+.sw:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+details{background:var(--surface);border-radius:14px;padding:13px 14px;margin-top:12px}
+summary{cursor:pointer;font-weight:600;font-size:15px}
+textarea{width:100%;min-height:150px;margin:12px 0 8px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+.btn{border:0;border-radius:10px;padding:11px 16px;background:var(--accent);color:var(--bg);font:inherit;font-weight:600;cursor:pointer}
+.btn:focus-visible{outline:3px solid var(--glow);outline-offset:2px}
+.msg{font-size:13.5px;color:var(--muted);margin-top:10px}
+.fine{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+</style>
+</head>
+<body>
+<main class="app">
+  <h1>Veil</h1>
+  <p class="note">This is an interface demo. A web page can’t route your device’s traffic, so connecting here is simulated. Pair this design with a real WireGuard server and a native app shell to make it live.</p>
+
+  <section class="hero" aria-live="polite">
+    <button class="power" id="power" aria-label="Connect">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>
+    </button>
+    <div class="status" id="status">Not protected</div>
+    <div class="sub" id="sub">Tap to connect to Netherlands</div>
+  </section>
+
+  <section class="stats" aria-label="Connection stats">
+    <div class="stat"><b id="time">00:00:00</b><span>Connected</span></div>
+    <div class="stat"><b id="down">0.0</b><span>Down Mbps</span></div>
+    <div class="stat"><b id="up">0.0</b><span>Up Mbps</span></div>
+  </section>
+
+  <h2>Location</h2>
+  <div class="list" id="list" role="radiogroup" aria-label="Server location"></div>
+
+  <div class="row">
+    <div>Kill switch<small>Block traffic if the VPN drops</small></div>
+    <button class="sw" id="kill" role="switch" aria-checked="true" aria-label="Kill switch"></button>
+  </div>
+  <div class="row">
+    <div>Connect on launch<small>Start the tunnel when the app opens</small></div>
+    <button class="sw" id="auto" role="switch" aria-checked="false" aria-label="Connect on launch"></button>
+  </div>
+
+  <details>
+    <summary>Use my own WireGuard server</summary>
+    <textarea id="cfg" spellcheck="false" aria-label="WireGuard config" placeholder="[Interface]&#10;Address = 10.8.0.2/32&#10;DNS = 1.1.1.1&#10;&#10;[Peer]&#10;Endpoint = vpn.example.com:51820"></textarea>
+    <p class="fine">The page reads the endpoint and address only. Your private key is never displayed or stored.</p>
+    <button class="btn" id="load">Add server</button>
+    <div class="msg" id="msg"></div>
+  </details>
+</main>
+
+<script>
+(function(){
+  var servers=[
+    {id:"nl",flag:"\uD83C\uDDF3\uD83C\uDDF1",name:"Netherlands",ping:24},
+    {id:"us",flag:"\uD83C\uDDFA\uD83C\uDDF8",name:"United States",ping:88},
+    {id:"sg",flag:"\uD83C\uDDF8\uD83C\uDDEC",name:"Singapore",ping:171},
+    {id:"jp",flag:"\uD83C\uDDEF\uD83C\uDDF5",name:"Japan",ping:143}
+  ];
+  var st={on:false,busy:false,sel:"nl",t0:0,vip:"10.8.0.2",down:0,up:0};
+  var $=function(i){return document.getElementById(i)};
+  var timer=null;
+
+  function cur(){for(var i=0;i<servers.length;i++)if(servers[i].id===st.sel)return servers[i];return servers[0]}
+  function pad(n){return n<10?"0"+n:""+n}
+
+  function renderList(){
+    var box=$("list");box.textContent="";
+    servers.forEach(function(s){
+      var b=document.createElement("button");
+      b.className="srv";b.setAttribute("role","radio");
+      b.setAttribute("aria-checked",s.id===st.sel?"true":"false");
+      var f=document.createElement("span");f.className="flag";f.textContent=s.flag;
+      var n=document.createElement("span");n.className="name";n.textContent=s.name;
+      if(s.endpoint){var sm=document.createElement("small");sm.textContent=s.endpoint;n.appendChild(sm)}
+      var p=document.createElement("span");p.className="ping";p.textContent=s.ping?s.ping+" ms":"your server";
+      var d=document.createElement("span");d.className="dot";
+      b.appendChild(f);b.appendChild(n);b.appendChild(p);b.appendChild(d);
+      b.addEventListener("click",function(){
+        st.sel=s.id;renderList();
+        if(st.on){reconnect()}else{paint()}
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function paint(){
+    var pw=$("power");
+    pw.className="power"+(st.busy?" busy":"")+(st.on?" on":"");
+    pw.setAttribute("aria-label",st.on?"Disconnect":"Connect");
+    var s=cur();
+    if(st.busy){$("status").textContent="Connecting\u2026";$("sub").textContent="Opening a tunnel to "+s.name}
+    else if(st.on){$("status").textContent="Protected";$("sub").textContent=s.name+" \u2022 virtual IP "+st.vip}
+    else{$("status").textContent="Not protected";$("sub").textContent="Tap to connect to "+s.name}
+  }
+
+  function tick(){
+    if(!st.on)return;
+    var sec=Math.floor((Date.now()-st.t0)/1000);
+    $("time").textContent=pad(Math.floor(sec/3600))+":"+pad(Math.floor(sec/60)%60)+":"+pad(sec%60);
+    st.down=Math.max(8,st.down*.7+(40+Math.random()*60)*.3);
+    st.up=Math.max(2,st.up*.7+(8+Math.random()*28)*.3);
+    $("down").textContent=st.down.toFixed(1);
+    $("up").textContent=st.up.toFixed(1);
+  }
+
+  function resetStats(){$("time").textContent="00:00:00";$("down").textContent="0.0";$("up").textContent="0.0";st.down=40;st.up=12}
+
+  function connect(){
+    if(st.busy)return;
+    st.busy=true;st.on=false;paint();
+    setTimeout(function(){
+      st.busy=false;st.on=true;st.t0=Date.now();resetStats();paint();
+      clearInterval(timer);timer=setInterval(tick,1000);tick();
+    },1300);
+  }
+  function disconnect(){
+    st.on=false;st.busy=false;clearInterval(timer);resetStats();paint();
+  }
+  function reconnect(){clearInterval(timer);st.on=false;connect()}
+
+  $("power").addEventListener("click",function(){st.on?disconnect():connect()});
+
+  ["kill","auto"].forEach(function(id){
+    var el=$(id);
+    el.addEventListener("click",function(){
+      el.setAttribute("aria-checked",el.getAttribute("aria-checked")==="true"?"false":"true");
+    });
+  });
+
+  function parse(txt){
+    var o={};
+    txt.split(/\r?\n/).forEach(function(l){
+      var m=l.match(/^\s*([A-Za-z]+)\s*=\s*(.+?)\s*$/);
+      if(m)o[m[1].toLowerCase()]=m[2];
+    });
+    return o;
+  }
+
+  $("load").addEventListener("click",function(){
+    var o=parse($("cfg").value),msg=$("msg");
+    if(!o.endpoint||o.endpoint.indexOf(":")<0){
+      msg.textContent="No Endpoint line found. Add one like Endpoint = vpn.example.com:51820.";
+      return;
+    }
+    var host=o.endpoint.replace(/:\d+$/,"");
+    servers=servers.filter(function(s){return s.id!=="custom"});
+    servers.unshift({id:"custom",flag:"\uD83D\uDDA5\uFE0F",name:"My server",ping:0,endpoint:o.endpoint});
+    st.vip=o.address?o.address.split(",")[0].replace(/\/\d+$/,""):"10.8.0.2";
+    st.sel="custom";
+    renderList();
+    msg.textContent="Added "+host+". It appears first in the location list.";
+    if(st.on)reconnect();else paint();
+  });
+
+  renderList();paint();
+})();
+</script>
+</body>
+</html>
