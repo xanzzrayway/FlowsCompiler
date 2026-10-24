@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEON BASS 3D</title>
+<style>
+:root{--cyan:#00f5ff;--pink:#ff00c8;--purple:#8a2bff}
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;color:white;
+ font-family:Arial,sans-serif;
+ background:radial-gradient(ellipse at top,#20205a,#080916 55%,#02030a);
+}
+.wrap{max-width:950px;margin:auto;padding:18px}
+header{text-align:center;padding:20px 0}
+.logo{font-size:clamp(32px,8vw,60px);font-weight:1000;
+ text-shadow:0 0 10px var(--cyan),0 0 28px var(--pink)}
+.sub{color:#aab4e8;letter-spacing:3px;font-size:11px}
+.panel{
+ background:linear-gradient(145deg,#171a33ee,#080a18ee);
+ border:1px solid #00f5ff66;border-radius:20px;
+ padding:18px;margin:15px 0;
+ box-shadow:0 0 24px #00f5ff16,inset 0 0 25px #8a2bff12;
+}
+.visual{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center}
+.speaker{
+ min-height:270px;display:flex;justify-content:center;
+ align-items:center;gap:14px;perspective:700px;overflow:hidden
+}
+.boxspeaker{
+ width:43%;max-width:150px;aspect-ratio:3/4;
+ border:2px solid var(--cyan);border-radius:17px;
+ background:linear-gradient(145deg,#303750,#05050d);
+ box-shadow:0 0 20px var(--cyan),inset 0 0 20px #00f5ff22;
+ display:flex;flex-direction:column;align-items:center;
+ justify-content:space-evenly;padding:10px;
+ transform-style:preserve-3d;
+ animation:idle 2s ease-in-out infinite alternate;
+}
+.cone{
+ width:82%;aspect-ratio:1;border-radius:50%;
+ border:5px solid var(--pink);
+ background:radial-gradient(circle,#05050a 0 13%,#aaa 15% 20%,
+ #222438 23% 55%,#05050a 59%);
+ box-shadow:0 0 15px var(--pink),inset 0 0 14px var(--cyan);
+ transform:translateZ(10px);
+}
+.cone.small{width:42%;border-color:var(--cyan)}
+@keyframes idle{
+ from{transform:rotateY(-5deg) translateY(0)}
+ to{transform:rotateY(5deg) translateY(-5px)}
+}
+.speaker.beat .boxspeaker{
+ animation:bounce .13s ease-in-out infinite alternate;
+}
+.speaker.beat .cone{animation:thump .12s ease-in-out infinite alternate}
+@keyframes bounce{
+ from{transform:translateY(0) rotateY(-4deg) scale(1)}
+ to{transform:translateY(-10px) rotateY(4deg) scale(1.035)}
+}
+@keyframes thump{
+ from{transform:translateZ(10px) scale(.85)}
+ to{transform:translateZ(25px) scale(1.12)}
+}
+h2{font-size:16px;color:var(--cyan)}
+.visualizer{height:110px;display:flex;align-items:center;gap:4px}
+.bar{
+ flex:1;height:8%;min-width:2px;border-radius:8px;
+ background:linear-gradient(to top,var(--purple),var(--pink),var(--cyan));
+ box-shadow:0 0 9px var(--cyan)
+}
+.track{background:#080b19;padding:12px;border-radius:12px;overflow-wrap:anywhere}
+.status{color:var(--cyan);font-size:12px;margin-top:6px}
+.controls{display:flex;flex-wrap:wrap;gap:9px}
+button,.filelabel{
+ padding:12px 14px;border:1px solid #00f5ff99;
+ background:#111a32;color:white;border-radius:12px;
+ font-weight:bold;cursor:pointer
+}
+button:active{transform:scale(.96)}
+.primary{background:linear-gradient(100deg,#00a8bd,#7b20d9)}
+input[type=file]{display:none}
+input[type=range]{width:100%;accent-color:var(--cyan)}
+.row{display:flex;justify-content:space-between;gap:8px;margin:16px 0 8px}
+.value{color:var(--pink);font-weight:bold}
+select{background:#0c1023;color:white;padding:10px;border-radius:10px}
+.note{font-size:12px;color:#aab4d0;line-height:1.6}
+footer{text-align:center;color:#7780a8;font-size:12px;padding:20px}
+@media(max-width:600px){
+ .visual{grid-template-columns:1fr}
+ .speaker{min-height:220px}
+ .panel{padding:14px}
+ .boxspeaker{max-width:135px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div class="logo">NEON BASS</div>
+ <div class="sub">3D SOUND SYSTEM • MOBILE DJ</div>
+</header>
+
+<section class="panel visual">
+ <div class="speaker" id="speaker">
+  <div class="boxspeaker"><div class="cone"></div><div class="cone small"></div></div>
+  <div class="boxspeaker"><div class="cone"></div><div class="cone small"></div></div>
+ </div>
+ <div>
+  <h2>⚡ LIVE BASS VISUALIZER</h2>
+  <div class="visualizer" id="visualizer"></div>
+  <div class="track">
+   <strong id="trackname">Belum ada musik</strong>
+   <div class="status" id="status">Pilih file audio untuk mulai</div>
+  </div>
+ </div>
+</section>
+
+<section class="panel">
+ <h2>🎵 PEMUTAR MUSIK</h2>
+ <div class="controls">
+  <label class="filelabel" for="file">＋ Pilih Audio</label>
+  <input id="file" type="file" accept="audio/*">
+  <button class="primary" id="play">▶ Putar</button>
+  <button id="pause">Ⅱ Jeda</button>
+  <button id="stop">■ Stop</button>
+  <button id="bassBtn">💥 Bass Boost: OFF</button>
+ </div>
+ <audio id="audio" preload="metadata"></audio>
+ <div class="row"><label>Progress</label><span id="time" class="value">00:00 / 00:00</span></div>
+ <input id="seek" type="range" min="0" max="1000" value="0">
+ <div class="row"><label>🔊 Volume</label><span id="volVal" class="value">80%</span></div>
+ <input id="volume" type="range" min="0" max="100" value="80">
+ <p class="note">Musik diputar langsung dari perangkat kamu.</p>
+</section>
+
+<section class="panel">
+ <h2>⚙️ PENGATURAN AUDIO</h2>
+ <div class="row"><label>Bass Boost</label><span id="bassVal" class="value">+8 dB</span></div>
+ <input id="bass" type="range" min="0" max="18" value="8">
+ <div class="row"><label>Treble</label><span id="trebleVal" class="value">0 dB</span></div>
+ <input id="treble" type="range" min="-10" max="10" value="0">
+ <div class="row"><label>Warna Neon</label></div>
+ <select id="theme">
+  <option value="cyan">Cyber Cyan</option>
+  <option value="pink">Hot Pink</option>
+  <option value="green">Laser Green</option>
+  <option value="purple">Ultra Violet</option>
+ </select>
+</section>
+<footer>NEON BASS 3D • Feel the bass 🔊</footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const audio=$('audio'),speaker=$('speaker');
+let ctx,source,low,high,analyser,data,boost=false,url=null;
+
+for(let i=0;i<36;i++){
+ const b=document.createElement('div');
+ b.className='bar';$('visualizer').appendChild(b);
+}
+const bars=[...document.querySelectorAll('.bar')];
+
+function setup(){
+ if(ctx)return;
+ const AC=window.AudioContext||window.webkitAudioContext;
+ if(!AC){$('status').textContent='Browser tidak mendukung efek audio';return}
+ ctx=new AC();
+ source=ctx.createMediaElementSource(audio);
+ low=ctx.createBiquadFilter();
+ low.type='lowshelf';low.frequency.value=120;
+ high=ctx.createBiquadFilter();
+ high.type='highshelf';high.frequency.value=3500;
+ analyser=ctx.createAnalyser();analyser.fftSize=256;
+ data=new Uint8Array(analyser.frequencyBinCount);
+ source.connect(low);low.connect(high);
+ high.connect(analyser);analyser.connect(ctx.destination);
+ updateEQ();
+}
+
+function updateEQ(){
+ if(low)low.gain.value=boost?Number($('bass').value):0;
+ if(high)high.gain.value=Number($('treble').value);
+}
+
+function animate(){
+ requestAnimationFrame(animate);
+ if(analyser){
+  analyser.getByteFrequencyData(data);
+  let bass=0;
+  for(let i=0;i<8;i++)bass+=data[i];
+  bass/=8*255;
+  bars.forEach((b,i)=>{
+   const v=data[Math.floor(i*data.length/bars.length)]/255;
+   b.style.height=(5+v*95)+'%';
+  });
+  speaker.classList.toggle('beat',!audio.paused&&bass>.12);
+ }else{
+  bars.forEach((b,i)=>{
+   b.style.height=(8+Math.abs(Math.sin(Date.now()/220+i*.7))*25)+'%';
+  });
+  speaker.classList.remove('beat');
+ }
+}
+animate();
+
+$('file').addEventListener('change',()=>{
+ const f=$('file').files[0];if(!f)return;
+ if(url)URL.revokeObjectURL(url);
+ url=URL.createObjectURL(f);audio.src=url;
+ $('trackname').textContent=f.name;
+ $('status').textContent='Audio siap diputar';
+ audio.load();
+});
+
+$('play').onclick=async()=>{
+ if(!audio.src){$('file').click();return}
+ setup();
+ if(ctx&&ctx.state==='suspended')await ctx.resume();
+ audio.play().then(()=>{
+  $('status').textContent='Sedang diputar';
+ }).catch(()=>{$('status').textContent='Tekan Putar kembali'});
+};
+$('pause').onclick=()=>{
+ audio.pause();$('status').textContent='Musik dijeda';
+};
+$('stop').onclick=()=>{
+ audio.pause();audio.currentTime=0;
+ $('status').textContent='Musik dihentikan';
+};
+$('bassBtn').onclick=()=>{
+ boost=!boost;
+ $('bassBtn').textContent='💥 Bass Boost: '+(boost?'ON':'OFF');
+ updateEQ();
+};
+$('volume').oninput=e=>{
+ audio.volume=e.target.value/100;
+ $('volVal').textContent=e.target.value+'%';
+};
+audio.volume=.8;
+$('bass').oninput=e=>{
+ $('bassVal').textContent='+'+e.target.value+' dB';updateEQ();
+};
+$('treble').oninput=e=>{
+ const v=Number(e.target.value);
+ $('trebleVal').textContent=(v>0?'+':'')+v+' dB';updateEQ();
+};
+$('seek').oninput=e=>{
+ if(audio.duration)audio.currentTime=e.target.value/1000*audio.duration;
+};
+audio.ontimeupdate=()=>{
+ if(!audio.duration)return;
+ $('seek').value=audio.currentTime/audio.duration*1000;
+ $('time').textContent=fmt(audio.currentTime)+' / '+fmt(audio.duration);
+};
+audio.onended=()=>{$('status').textContent='Musik selesai'};
+function fmt(s){
+ if(!Number.isFinite(s))return'00:00';
+ return String(Math.floor(s/60)).padStart(2,'0')+':'+
+ String(Math.floor(s%60)).padStart(2,'0');
+}
+const themes={
+ cyan:['#00f5ff','#ff00c8','#8a2bff'],
+ pink:['#ff00c8','#00f5ff','#8a2bff'],
+ green:['#39ff14','#00f5ff','#ff00c8'],
+ purple:['#a855ff','#ff00c8','#00f5ff']
+};
+$('theme').onchange=e=>{
+ const c=themes[e.target.value];
+ document.documentElement.style.setProperty('--cyan',c[0]);
+ document.documentElement.style.setProperty('--pink',c[1]);
+ document.documentElement.style.setProperty('--purple',c[2]);
+};
+</script>
+</body>
+</html>
