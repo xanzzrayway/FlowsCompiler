@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMINA // Glassmorphic & AMOLED Media Gallery Pro</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        amoled: '#000000',
+                        'amoled-card': '#050508',
+                        'amoled-border': '#1e293b',
+                        neon: {
+                            cyan: '#06b6d4',
+                            purple: '#a855f7',
+                            emerald: '#10b981',
+                            rose: '#f43f5e',
+                            amber: '#f59e0b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Page Transition & Smooth Scroll */
+        html { scroll-behavior: smooth; }
+        body {
+            transition: background-color 0.4s ease, color 0.4s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* 100% Pure AMOLED Dark Mode (#000000) */
+        body.theme-amoled {
+            background-color: #000000 !important;
+            color: #f8fafc !important;
+        }
+        body.theme-amoled .glass-panel {
+            background-color: #050508 !important;
+            border: 1px solid #1e293b !important;
+            backdrop-filter: none !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9) !important;
+        }
+        body.theme-amoled .glass-nav {
+            background-color: rgba(0, 0, 0, 0.95) !important;
+            border-bottom: 1px solid #1e293b !important;
+            backdrop-filter: blur(16px) !important;
+        }
+
+        /* Standard Glassmorphic Dark Mode */
+        body.theme-dark-glass {
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #030712 100%);
+            background-attachment: fixed;
+            color: #f1f5f9;
+        }
+        body.theme-dark-glass .glass-panel {
+            background: rgba(17, 24, 39, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.theme-dark-glass .glass-nav {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Light Glass Mode */
+        body.theme-light-glass {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 50%, #fae8ff 100%);
+            background-attachment: fixed;
+            color: #0f172a;
+        }
+        body.theme-light-glass .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        body.theme-light-glass .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+        }
+
+        /* Card Hover Animations & Masonry */
+        .card-tilt {
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+        }
+        .card-tilt:hover {
+            transform: translateY(-5px) scale(1.015);
+        }
+
+        /* Masonry View Columns */
+        .masonry-grid {
+            column-count: 1;
+            column-gap: 1.25rem;
+        }
+        @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
+        @media (min-width: 768px) { .masonry-grid { column-count: 3; } }
+        @media (min-width: 1024px) { .masonry-grid { column-count: 4; } }
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.5); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.8); }
+
+        /* Range Input Accent */
+        input[type=range] { accent-color: #06b6d4; }
+
+        /* Audio Spectrum Canvas Glow */
+        #audioSpectrumCanvas { filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.6)); }
+    </style>
+</head>
+<body class="theme-amoled text-slate-100 min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-black" onclick="initAudioContext()">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-40 w-full glass-nav px-4 lg:px-8 py-3 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="resetGalleryView()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 p-[2px] flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                    <div class="w-full h-full bg-black rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid fa-shapes text-cyan-400 text-lg"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg lg:text-xl tracking-tight bg-gradient-to-r from-cyan-400 via-purple-300 to-emerald-400 bg-clip-text text-transparent">
+                        LUMINA <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 font-mono">PRO v3.0</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Galeri Media Glassmorphic, Studio Edit & Audio Visualizer</p>
+                </div>
+            </div>
+
+            <!-- Search Bar (Desktop) -->
+            <div class="hidden md:flex flex-1 max-w-md mx-2">
+                <div class="relative w-full">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari foto, video, tag, atau album..." 
+                        class="w-full pl-10 pr-4 py-2 text-sm rounded-xl bg-slate-900/80 border border-slate-700/60 focus:outline-none focus:border-cyan-500 transition-all text-slate-100 placeholder-slate-500">
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-2 sm:gap-2.5">
+                
+                <!-- Multi-Select Toggle Button -->
+                <button onclick="toggleMultiSelectMode()" id="multiSelectToggleBtn" title="Mode Seleksi Banyak (Batch)"
+                    class="px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-900/80 border-slate-800 hover:border-cyan-500 text-slate-300 transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-square-check"></i>
+                    <span class="hidden xl:inline">Pilih Banyak</span>
+                </button>
+
+                <!-- Private Vault Quick Access -->
+                <button onclick="openVaultModal()" class="w-9 h-9 rounded-xl glass-panel flex items-center justify-center hover:border-purple-500/50 text-purple-400 hover:text-purple-300 transition-all relative" title="Kubah Rahasia (Vault)">
+                    <i class="fa-solid fa-user-lock text-sm"></i>
+                    <span id="vaultBadgeCount" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] font-bold flex items-center justify-center hidden">0</span>
+                </button>
+
+                <!-- Storage Usage Quick Indicator -->
+                <button onclick="openSettingsModal('memory')" class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all">
+                    <i class="fa-solid fa-hard-drive text-cyan-400"></i>
+                    <span id="headerStorageText">0 MB</span>
+                </button>
+
+                <!-- Permission Status Badge -->
+                <button onclick="openPermissionModal()" id="headerPermissionBadge" title="Status Izin Akses Perangkat"
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border bg-slate-900/80 border-slate-800 transition-all">
+                    <span id="permBadgeDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    <span id="permBadgeText" class="hidden sm:inline text-emerald-400">Izin Aktif</span>
+                </button>
+
+                <!-- Upload Button -->
+                <button onclick="handleUploadClick()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/20 transition-all active:scale-95">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span class="hidden sm:inline">Unggah</span>
+                </button>
+
+                <!-- Settings Button -->
+                <button onclick="openSettingsModal('appearance')" class="w-9 h-9 rounded-xl glass-panel flex items-center justify-center hover:bg-slate-800/60 text-slate-300 hover:text-white transition-all" title="Pengaturan">
+                    <i class="fa-solid fa-gear text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Search -->
+        <div class="mt-2.5 md:hidden">
+            <div class="relative w-full">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="mobileSearchInput" oninput="handleMobileSearch()" placeholder="Cari foto, video, album..." 
+                    class="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-slate-900/80 border border-slate-800 focus:outline-none focus:border-cyan-500 text-slate-100">
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN GALLERY CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 flex flex-col gap-6">
+
+        <!-- STORAGE & PERMISSION ALERT BANNER -->
+        <div id="permissionNoticeBanner" class="hidden glass-panel p-4 rounded-2xl border-amber-500/30 bg-amber-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-3">
+                <div class="p-2.5 bg-amber-500/20 rounded-xl text-amber-400 shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-amber-200">Akses Memori Belum Dikonfigurasi</h3>
+                    <p class="text-xs text-amber-300/80 mt-0.5">Berikan izin akses penyimpanan agar seluruh fitur unggah & penyimpanan permanen berfungsi secara lokal.</p>
+                </div>
+            </div>
+            <button onclick="openPermissionModal()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs transition-all shadow-md">
+                Kelola Izin
+            </button>
+        </div>
+
+        <!-- TOOLBAR: ALBUMS, FILTERS, LAYOUT & SLIDESHOW -->
+        <section class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            
+            <!-- Left Side: Dynamic Category Pills -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto no-scrollbar" id="categoryPills">
+                <!-- Category Pills Rendered via JS -->
+            </div>
+
+            <!-- Right Side: Views, Albums, Slideshow, Duplicate Cleaner -->
+            <div class="flex flex-wrap items-center justify-between lg:justify-end w-full lg:w-auto gap-2.5 text-xs">
+                
+                <!-- Album Selector Dropdown -->
+                <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-800 rounded-xl px-2.5 py-1.5">
+                    <i class="fa-solid fa-folder-closed text-purple-400 text-xs"></i>
+                    <select id="albumSelectFilter" onchange="handleAlbumFilterChange()" class="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer">
+                        <option value="ALL">Semua Album</option>
+                        <!-- Custom options added dynamically -->
+                    </select>
+                    <button onclick="openCreateAlbumPrompt()" title="Buat Album Baru" class="text-slate-400 hover:text-cyan-400 ml-1">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- Layout Mode Toggle (Grid vs Masonry) -->
+                <div class="flex items-center bg-slate-900/80 border border-slate-800 rounded-xl p-1 gap-1">
+                    <button onclick="setLayoutMode('grid')" id="layoutGridBtn" class="p-1.5 rounded-lg text-cyan-400 bg-slate-800/80" title="Tampilan Grid Standard">
+                        <i class="fa-solid fa-border-all"></i>
+                    </button>
+                    <button onclick="setLayoutMode('masonry')" id="layoutMasonryBtn" class="p-1.5 rounded-lg text-slate-400 hover:text-white" title="Tampilan Masonry Moodboard">
+                        <i class="fa-solid fa-grip-vertical"></i>
+                    </button>
+                </div>
+
+                <!-- Shuffle / Acak Button -->
+                <button onclick="shuffleGallery()" class="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 text-slate-300 hover:text-white transition-all flex items-center gap-1.5" title="Acak Urutan Galeri">
+                    <i class="fa-solid fa-shuffle text-cyan-400"></i>
+                    <span class="hidden sm:inline">Acak</span>
+                </button>
+
+                <!-- Slideshow Button -->
+                <button onclick="startSlideshow()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold transition-all flex items-center gap-1.5 shadow-md shadow-purple-900/30">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Slideshow</span>
+                </button>
+
+                <!-- Duplicate & Memory Scanner Trigger -->
+                <button onclick="openCleanerModal()" class="p-2 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 text-amber-400 hover:text-amber-300 transition-all" title="Pembersih Memori & Duplikat">
+                    <i class="fa-solid fa-broom"></i>
+                </button>
+
+                <!-- Sorting Dropdown -->
+                <select id="sortSelect" onchange="renderGallery()" class="bg-slate-900/90 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500 cursor-pointer">
+                    <option value="newest">Terbaru</option>
+                    <option value="oldest">Terlama</option>
+                    <option value="name">Nama (A-Z)</option>
+                    <option value="likes">Paling Disukai</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- PINNED ITEMS SECTION (Renders if any item is pinned) -->
+        <section id="pinnedSection" class="hidden flex-col gap-3">
+            <h3 class="text-xs font-bold text-amber-400 tracking-wider uppercase flex items-center gap-2">
+                <i class="fa-solid fa-thumbtack"></i> Disematkan (Pinned)
+            </h3>
+            <div id="pinnedGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Pinned Cards -->
+            </div>
+        </section>
+
+        <!-- MAIN MEDIA GRID / MASONRY DISPLAY -->
+        <section id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <!-- Rendered dynamically -->
+        </section>
+
+        <!-- EMPTY STATE -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center glass-panel rounded-3xl border-dashed border-slate-800 my-8">
+            <div class="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-4 text-2xl">
+                <i class="fa-solid fa-photo-film"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-300">Tidak Ada Media Ditemukan</h3>
+            <p class="text-xs text-slate-500 max-w-sm mt-1 mb-4">Coba ubah kata kunci pencarian, filter kategori, atau unggah foto/video baru.</p>
+            <button onclick="handleUploadClick()" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs transition-all">
+                <i class="fa-solid fa-plus mr-1.5"></i> Unggah Media Baru
+            </button>
+        </div>
+    </main>
+
+    <!-- FLOATING BATCH MULTI-SELECT ACTION BAR -->
+    <div id="batchActionBar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 glass-panel px-6 py-3 rounded-2xl border-cyan-500/40 shadow-2xl flex items-center gap-4 hidden transition-all duration-300">
+        <span id="batchCountBadge" class="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/80 px-2.5 py-1 rounded-lg border border-cyan-500/30">0 Terpilih</span>
+        
+        <div class="h-4 w-[1px] bg-slate-800"></div>
+
+        <button onclick="batchActionFavorite()" class="text-xs font-medium text-slate-300 hover:text-rose-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-heart text-rose-500"></i> Favoritkan
+        </button>
+
+        <button onclick="batchActionMoveToVault()" class="text-xs font-medium text-slate-300 hover:text-purple-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-user-lock text-purple-400"></i> Pindah ke Vault
+        </button>
+
+        <button onclick="batchActionDelete()" class="text-xs font-medium text-slate-300 hover:text-rose-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-trash-can text-rose-500"></i> Hapus
+        </button>
+
+        <button onclick="toggleMultiSelectMode()" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs ml-2">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="mt-auto border-t border-slate-900/80 py-6 px-4 text-center text-xs text-slate-500 font-mono">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p>© 2026 LUMINA Media Gallery Pro • Glassmorphic & AMOLED Engine</p>
+            <div class="flex items-center gap-4">
+                <span id="footerPermissionStatus">Status: Akses Memori Disetujui</span>
+                <span>•</span>
+                <button onclick="openSettingsModal('memory')" class="hover:text-cyan-400 transition-colors">Monitor Memori</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL 1: LIGHTBOX (PHOTO VIEW, VIDEO PLAYER, AUDIO SPECTRUM, EXIF & COLOR EXTRACTION) -->
+    <div id="lightboxModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/95 backdrop-blur-xl hidden opacity-0 transition-opacity duration-300">
+        <div class="w-full max-w-5xl h-[92vh] flex flex-col glass-panel rounded-3xl overflow-hidden relative border-slate-800">
+            
+            <!-- Lightbox Header -->
+            <div class="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-slate-800 bg-slate-950/80">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <span id="lbBadgeType" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-950 text-cyan-400 border border-cyan-500/30">FOTO</span>
+                    <h3 id="lbTitle" class="text-sm font-bold text-slate-100 truncate">Judul Media</h3>
+                </div>
+                
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <button onclick="openEditorForCurrentLightbox()" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500/50 flex items-center gap-1.5 text-xs text-slate-300 hover:text-cyan-400 transition-all" title="Edit Filter Foto & Video">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span class="hidden sm:inline">Studio Edit</span>
+                    </button>
+                    <button onclick="openMemeStudioForCurrentLightbox()" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500/50 flex items-center gap-1.5 text-xs text-slate-300 hover:text-purple-400 transition-all" title="Tambah Caption / Meme">
+                        <i class="fa-solid fa-quote-left"></i>
+                        <span class="hidden sm:inline">Caption / Meme</span>
+                    </button>
+                    <button id="lbPinBtn" onclick="togglePinCurrentLightboxItem()" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/50 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-all" title="Sematkan (Pin)">
+                        <i class="fa-solid fa-thumbtack"></i>
+                    </button>
+                    <button id="lbLikeBtn" onclick="toggleLikeCurrentLightboxItem()" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 hover:border-rose-500/50 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-all" title="Favorit">
+                        <i class="fa-solid fa-heart"></i>
+                    </button>
+                    <button onclick="requestDeleteFromLightbox()" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 hover:border-rose-500/50 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-all" title="Hapus Media">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                    <button onclick="closeLightbox()" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white transition-all">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lightbox Main Stage -->
+            <div class="flex-1 bg-black flex items-center justify-center relative overflow-hidden group" id="lbMediaStage">
+                
+                <!-- Photo Container -->
+                <div id="lbImageWrapper" class="w-full h-full flex items-center justify-center overflow-hidden relative">
+                    <img id="lbImage" src="" alt="Lightbox View" class="max-h-full max-w-full object-contain transition-transform duration-200 cursor-grab active:cursor-grabbing">
+                    
+                    <!-- Zoom Controls Overlay -->
+                    <div class="absolute bottom-4 right-4 flex items-center gap-1 bg-slate-900/80 backdrop-blur-md p-1.5 rounded-xl border border-slate-800">
+                        <button onclick="adjustZoom(-0.25)" class="w-8 h-8 rounded-lg hover:bg-slate-800 flex items-center justify-center text-slate-300"><i class="fa-solid fa-minus text-xs"></i></button>
+                        <span id="lbZoomLevel" class="text-[11px] font-mono px-2 text-cyan-400">100%</span>
+                        <button onclick="adjustZoom(0.25)" class="w-8 h-8 rounded-lg hover:bg-slate-800 flex items-center justify-center text-slate-300"><i class="fa-solid fa-plus text-xs"></i></button>
+                        <button onclick="resetZoom()" class="w-8 h-8 rounded-lg hover:bg-slate-800 flex items-center justify-center text-slate-300" title="Reset Zoom"><i class="fa-solid fa-rotate-left text-xs"></i></button>
+                    </div>
+                </div>
+
+                <!-- Video Player Container with Sound & Web Audio Visualizer -->
+                <div id="lbVideoWrapper" class="w-full h-full hidden flex flex-col items-center justify-center bg-black relative">
+                    <video id="lbVideo" class="max-h-[80%] max-w-full rounded-lg" playsinline crossOrigin="anonymous"></video>
+                    
+                    <!-- WEB AUDIO SPECTRUM VISUALIZER CANVAS -->
+                    <canvas id="audioSpectrumCanvas" class="w-full h-16 absolute bottom-12 left-0 right-0 pointer-events-none opacity-80"></canvas>
+
+                    <!-- Custom Video & Sound Controls Bar -->
+                    <div class="absolute bottom-3 left-4 right-4 bg-slate-900/90 backdrop-blur-md p-2.5 rounded-2xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleVideoPlayPause()" id="lbPlayPauseBtn" class="w-8 h-8 rounded-xl bg-cyan-500 text-black flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                            <span id="lbVideoTime" class="font-mono text-[11px] text-slate-300">00:00 / 00:00</span>
+                        </div>
+
+                        <!-- Audio & Volume Controls -->
+                        <div class="flex items-center gap-2">
+                            <button onclick="toggleVideoMute()" id="lbMuteBtn" class="text-slate-300 hover:text-cyan-400 p-1">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                            <input type="range" id="lbVolumeSlider" min="0" max="1" step="0.05" value="1" oninput="changeVideoVolume(this.value)" class="w-20 sm:w-28 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Chevrons -->
+                <button onclick="navigateLightbox(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-2xl bg-black/60 border border-slate-800 hover:border-cyan-500/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button onclick="navigateLightbox(1)" class="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-2xl bg-black/60 border border-slate-800 hover:border-cyan-500/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Lightbox Inspector Footer (Dominant Colors & EXIF Metadata) -->
+            <div class="px-4 sm:px-6 py-3 border-t border-slate-800 bg-slate-950/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
+                <div class="flex flex-wrap items-center gap-3">
+                    <span id="lbCategory" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-medium">Tag</span>
+                    <span id="lbAlbum" class="px-2.5 py-1 rounded-lg bg-purple-950/60 border border-purple-500/30 text-purple-300 font-medium">Album</span>
+                    <span id="lbDate" class="font-mono text-slate-500">2026-10-24</span>
+                    
+                    <!-- Dominant Color Palette Extractor Display -->
+                    <div id="lbPaletteContainer" class="flex items-center gap-1.5 border-l border-slate-800 pl-3">
+                        <span class="text-[10px] font-mono text-slate-500">Palet:</span>
+                        <div id="lbColorSwatches" class="flex items-center gap-1">
+                            <!-- Color Swatches inserted dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulated EXIF Metadata Badge -->
+                <div id="lbExifBadge" class="flex items-center gap-2 text-[11px] font-mono text-cyan-400 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">
+                    <i class="fa-solid fa-camera"></i>
+                    <span id="lbExifText">ISO 100 • f/1.8 • 1/250s</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: INTERACTIVE PHOTO & VIDEO STUDIO EDITOR -->
+    <div id="editorModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-4xl rounded-3xl p-6 relative border-slate-800 shadow-2xl flex flex-col max-h-[92vh]">
+            
+            <button onclick="closeEditorModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <h2 class="text-base font-bold text-slate-100 mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i> Studio Edit Visual Live
+            </h2>
+            <p class="text-xs text-slate-400 mb-4">Ubah filter, pencahayaan, dan warna media Anda secara langsung.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 flex-1 overflow-y-auto">
+                
+                <!-- Preview Canvas Container -->
+                <div class="md:col-span-2 bg-black rounded-2xl border border-slate-800 p-2 flex items-center justify-center min-h-[280px] overflow-hidden relative">
+                    <canvas id="editorCanvas" class="max-w-full max-h-[400px] object-contain rounded-lg"></canvas>
+                </div>
+
+                <!-- Control Sliders & Presets -->
+                <div class="space-y-4 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-300 mb-2">Preset Filter Estetik</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="applyEditorPreset('normal')" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500 text-slate-300 font-semibold">Normal</button>
+                            <button onclick="applyEditorPreset('vaporwave')" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500 text-purple-400 font-semibold">Vaporwave</button>
+                            <button onclick="applyEditorPreset('cyberpunk')" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-400 text-cyan-400 font-semibold">Cyberpunk</button>
+                            <button onclick="applyEditorPreset('warm')" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500 text-amber-400 font-semibold">Retro Warm</button>
+                            <button onclick="applyEditorPreset('bw')" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-500 text-slate-400 font-semibold">Monokrom</button>
+                            <button onclick="applyEditorPreset('glass')" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500 text-emerald-400 font-semibold">Glass Glow</button>
+                        </div>
+                    </div>
+
+                    <!-- Manual Sliders -->
+                    <div class="space-y-3 pt-2 border-t border-slate-800">
+                        <div>
+                            <div class="flex justify-between text-slate-400 mb-1">
+                                <span>Kecerahan</span>
+                                <span id="valBrightness" class="font-mono text-cyan-400">100%</span>
+                            </div>
+                            <input type="range" id="sliderBrightness" min="50" max="150" value="100" oninput="updateEditorCanvas()" class="w-full">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-slate-400 mb-1">
+                                <span>Kontras</span>
+                                <span id="valContrast" class="font-mono text-cyan-400">100%</span>
+                            </div>
+                            <input type="range" id="sliderContrast" min="50" max="150" value="100" oninput="updateEditorCanvas()" class="w-full">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-slate-400 mb-1">
+                                <span>Saturasi Warna</span>
+                                <span id="valSaturate" class="font-mono text-cyan-400">100%</span>
+                            </div>
+                            <input type="range" id="sliderSaturate" min="0" max="200" value="100" oninput="updateEditorCanvas()" class="w-full">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-slate-400 mb-1">
+                                <span>Efek Blur Kaca</span>
+                                <span id="valBlur" class="font-mono text-cyan-400">0px</span>
+                            </div>
+                            <input type="range" id="sliderBlur" min="0" max="10" value="0" oninput="updateEditorCanvas()" class="w-full">
+                        </div>
+                    </div>
+
+                    <!-- Save Actions -->
+                    <div class="pt-3 border-t border-slate-800 flex items-center gap-2">
+                        <button onclick="saveEditorResult(false)" class="flex-1 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-semibold transition-all">
+                            Timpa Asli
+                        </button>
+                        <button onclick="saveEditorResult(true)" class="flex-1 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold transition-all shadow-lg shadow-cyan-500/20">
+                            Simpan Baru
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: CAPTION & MEME / STORY OVERLAY GENERATOR -->
+    <div id="memeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 relative border-slate-800 shadow-2xl space-y-4">
+            
+            <button onclick="closeMemeModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <h2 class="text-base font-bold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-quote-left text-purple-400"></i> Generator Caption & Story Overlay
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Preview Canvas -->
+                <div class="bg-black rounded-2xl border border-slate-800 p-2 flex items-center justify-center min-h-[220px]">
+                    <canvas id="memeCanvas" class="max-w-full max-h-[280px] object-contain rounded-lg"></canvas>
+                </div>
+
+                <!-- Form Controls -->
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Teks Atas (Header Caption)</label>
+                        <input type="text" id="memeTopText" oninput="renderMemeCanvas()" placeholder="Contoh: SUASANA SENJA" 
+                            class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 focus:outline-none focus:border-purple-500 text-slate-100">
+                    </div>
+
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Teks Bawah (Sub Caption)</label>
+                        <input type="text" id="memeBottomText" oninput="renderMemeCanvas()" placeholder="Contoh: Lumina Aesthetics 2026" 
+                            class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 focus:outline-none focus:border-purple-500 text-slate-100">
+                    </div>
+
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Watermark Galeri</label>
+                        <select id="memeWatermarkSelect" onchange="renderMemeCanvas()" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
+                            <option value="none">Tanpa Watermark</option>
+                            <option value="lumina">LUMINA // AMOLED 100%</option>
+                            <option value="glass">FROSTED GLASS GALLERY</option>
+                        </select>
+                    </div>
+
+                    <button onclick="downloadMemeResult()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold transition-all shadow-md">
+                        <i class="fa-solid fa-download mr-1.5"></i> Unduh Hasil Foto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: FULLSCREEN SLIDESHOW PRESENTATION -->
+    <div id="slideshowModal" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-500">
+        
+        <!-- Top Control Bar -->
+        <div class="absolute top-4 left-6 right-6 z-10 flex items-center justify-between text-xs font-mono bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-slate-800">
+            <div class="flex items-center gap-3">
+                <span id="slideshowCounter" class="text-cyan-400 font-bold">1 / 5</span>
+                <span id="slideshowTitle" class="text-slate-200 font-sans font-semibold">Judul Media</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <select id="slideshowIntervalSelect" onchange="changeSlideshowInterval()" class="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1">
+                    <option value="3000">3 Detik</option>
+                    <option value="5000" selected>5 Detik</option>
+                    <option value="10000">10 Detik</option>
+                </select>
+
+                <button onclick="toggleSlideshowPause()" id="slideshowPauseBtn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-pause"></i>
+                </button>
+
+                <button onclick="stopSlideshow()" class="w-8 h-8 rounded-lg bg-rose-900/60 hover:bg-rose-800 text-rose-300 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slideshow Media Stage -->
+        <div class="w-full h-full flex items-center justify-center p-8 relative">
+            <img id="slideshowImage" src="" class="max-h-full max-w-full object-contain transition-all duration-700">
+            <video id="slideshowVideo" class="max-h-full max-w-full hidden" autoplay muted loop></video>
+        </div>
+
+        <!-- Animated Progress Bar -->
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-slate-900">
+            <div id="slideshowProgressBar" class="h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-emerald-400 w-0 transition-all duration-300"></div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: SECRET PRIVATE VAULT (KUBAH RAHASIA) -->
+    <div id="vaultModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-3xl rounded-3xl p-6 relative border-purple-500/30 shadow-2xl shadow-purple-950/40 flex flex-col max-h-[90vh]">
+            
+            <button onclick="closeVaultModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 text-lg">
+                    <i class="fa-solid fa-user-lock"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-slate-100">Kubah Rahasia (Secret Private Vault)</h2>
+                    <p class="text-xs text-slate-400">Ruang penyimpanan khusus terenkripsi lokal</p>
+                </div>
+            </div>
+
+            <!-- Lock Screen PIN Prompt -->
+            <div id="vaultLockScreen" class="py-12 flex flex-col items-center justify-center text-center space-y-4">
+                <div class="w-16 h-16 rounded-full bg-purple-950/60 border border-purple-500/40 flex items-center justify-center text-purple-400 text-2xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-200">Masukkan PIN Keamanan Kubah</h3>
+                
+                <input type="password" id="vaultPinInput" maxlength="6" placeholder="****" 
+                    class="w-36 text-center text-xl font-mono tracking-widest px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:outline-none focus:border-purple-500 text-white">
+                
+                <button onclick="unlockVault()" class="px-6 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg transition-all">
+                    Buka Kubah Rahasia
+                </button>
+            </div>
+
+            <!-- Unlocked Vault Media Grid -->
+            <div id="vaultContentScreen" class="hidden flex-1 overflow-y-auto space-y-4">
+                <div class="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-2">
+                    <span id="vaultItemsCountText">0 Media Rahasia</span>
+                    <button onclick="lockVault()" class="text-rose-400 hover:text-rose-300 font-semibold">
+                        <i class="fa-solid fa-lock mr-1"></i> Kunci Kembali
+                    </button>
+                </div>
+
+                <div id="vaultGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    <!-- Vault Items rendered dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 6: STORAGE CLEANER & DUPLICATE DETECTOR -->
+    <div id="cleanerModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-6 relative border-amber-500/30 shadow-2xl space-y-4">
+            
+            <button onclick="closeCleanerModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-lg">
+                    <i class="fa-solid fa-broom"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-slate-100">Pembersih Memori Cerdas</h2>
+                    <p class="text-xs text-slate-400">Pindai file besar & potensi duplikat</p>
+                </div>
+            </div>
+
+            <div id="cleanerScanResults" class="space-y-3 text-xs max-h-60 overflow-y-auto pr-1">
+                <!-- Scan results populated by JS -->
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+                <span id="cleanerTotalReclaimable" class="text-xs font-mono text-amber-400">0 MB Dapat Dibebaskan</span>
+                <button onclick="executeMemoryCleanup()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition-all">
+                    Bersihkan 1-Klik
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 7: DELETE SECURITY VERIFICATION -->
+    <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-6 relative border-rose-500/30 shadow-2xl">
+            
+            <button onclick="closeDeleteModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-500 text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-slate-100">Verifikasi Keamanan Hapus</h2>
+                    <p class="text-xs text-rose-400 font-semibold">Tindakan hapus media bersifat permanen</p>
+                </div>
+            </div>
+
+            <div id="deleteTargetInfo" class="flex items-center gap-3 p-3 rounded-2xl bg-slate-950/80 border border-slate-800 mb-4">
+                <div id="deleteTargetThumb" class="w-12 h-12 rounded-xl bg-slate-900 overflow-hidden shrink-0"></div>
+                <div class="overflow-hidden">
+                    <p id="deleteTargetTitle" class="text-xs font-bold text-slate-200 truncate">Nama Media</p>
+                    <p id="deleteTargetCategory" class="text-[10px] text-slate-400 font-mono">Kategori</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 mb-5">
+                <label id="deleteSecurityPromptLabel" class="block text-xs font-semibold text-slate-300">
+                    Masukkan Kode Verifikasi:
+                </label>
+                
+                <div id="deleteOtpDisplayContainer" class="hidden p-3 rounded-xl bg-slate-900 border border-slate-800 text-center font-mono font-extrabold text-2xl tracking-widest text-cyan-400 select-all">
+                    <span id="deleteGeneratedOtp">8492</span>
+                </div>
+
+                <input type="text" id="deleteSecurityInput" placeholder="Ketik kode di sini..." 
+                    class="w-full px-4 py-2.5 text-center text-base tracking-widest font-mono rounded-xl bg-slate-900 border border-slate-700 focus:outline-none focus:border-rose-500 text-white">
+                
+                <p id="deleteErrorMsg" class="text-xs text-rose-400 hidden text-center">Kode verifikasi tidak cocok!</p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl hover:bg-slate-800 text-slate-400 font-medium text-xs">
+                    Batal
+                </button>
+                <button onclick="confirmDeleteAction()" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-600/30">
+                    <i class="fa-solid fa-trash-can mr-1.5"></i> Hapus Permanen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 8: UPLOAD MEDIA WITH ALBUM ASSIGNMENT -->
+    <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-lg rounded-3xl p-6 relative border-slate-800 shadow-2xl">
+            
+            <button onclick="closeUploadModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <h2 class="text-base font-bold text-slate-100 mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up text-cyan-400"></i> Unggah Media Ke Galeri
+            </h2>
+            <p class="text-xs text-slate-400 mb-4">Tambahkan foto atau video lokal baru ke galeri AMOLED Anda.</p>
+
+            <form id="uploadForm" onsubmit="handleFormUpload(event)" class="space-y-4">
+                
+                <!-- File Input -->
+                <div class="relative border-2 border-dashed border-slate-700 hover:border-cyan-500 rounded-2xl p-6 text-center bg-slate-950/50 hover:bg-slate-900/50 transition-all cursor-pointer" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept="image/*,video/*" onchange="handleFileSelect(event)" class="hidden">
+                    
+                    <div id="uploadDropzoneDefault" class="space-y-2">
+                        <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400 mx-auto">
+                            <i class="fa-solid fa-photo-film text-xl"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-300">Klik / Seret file Foto atau Video ke sini</p>
+                        <p class="text-[11px] text-slate-500">Mendukung Format JPG, PNG, WEBP, MP4, WEBM</p>
+                    </div>
+
+                    <div id="uploadFilePreview" class="hidden flex items-center gap-3 text-left p-2 rounded-xl bg-slate-900 border border-cyan-500/30">
+                        <div id="previewMediaContainer" class="w-12 h-12 rounded-lg bg-black overflow-hidden shrink-0 flex items-center justify-center"></div>
+                        <div class="flex-1 overflow-hidden">
+                            <p id="previewFileName" class="text-xs font-bold text-slate-200 truncate">file.jpg</p>
+                            <p id="previewFileSize" class="text-[10px] text-cyan-400 font-mono">0 MB</p>
+                        </div>
+                        <button type="button" onclick="event.stopPropagation(); clearSelectedFile();" class="p-2 text-rose-400 hover:text-rose-300">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Fields -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Judul Media</label>
+                        <input type="text" id="uploadTitle" required placeholder="Contoh: Senja di Pantai" 
+                            class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 focus:outline-none focus:border-cyan-500 text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Kategori / Tag</label>
+                        <input type="text" id="uploadCategory" placeholder="Contoh: Pemandangan, Liburan" 
+                            class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 focus:outline-none focus:border-cyan-500 text-slate-100">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Masukkan ke Album</label>
+                    <select id="uploadAlbumSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500">
+                        <option value="Umum">Umum (Tanpa Album Khusus)</option>
+                        <!-- Dynamic album options -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Deskripsi</label>
+                    <textarea id="uploadDescription" rows="2" placeholder="Catatan singkat..." 
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 focus:outline-none focus:border-cyan-500 text-slate-100 resize-none"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeUploadModal()" class="px-4 py-2 rounded-xl hover:bg-slate-800 text-slate-400 font-medium text-xs">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs shadow-lg shadow-cyan-500/20">
+                        Simpan Media
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 9: PERMISSION MANAGEMENT -->
+    <div id="permissionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-6 relative border-cyan-500/30 shadow-2xl">
+            
+            <button onclick="closePermissionModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-slate-100">Izin Akses Gambar & Memori</h2>
+                    <p class="text-xs text-slate-400">Privasi & Penyimpanan Lokal Browser</p>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                Aplikasi ini memerlukan izin Anda untuk mengunggah dan menyimpan file <strong class="text-cyan-400">Foto & Video</strong> secara lokal di perangkat Anda. Data 100% aman dan tidak pernah dikirim ke server luar.
+            </p>
+
+            <div class="space-y-2.5">
+                <button onclick="setUserPermission('granted')" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-black font-bold text-xs flex items-center justify-center gap-2 shadow-lg">
+                    <i class="fa-solid fa-circle-check text-sm"></i>
+                    Izinkan Akses Penuh (Rekomendasi)
+                </button>
+
+                <button onclick="setUserPermission('limited')" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-semibold text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation text-amber-400 text-sm"></i>
+                    Akses Dibatasi (Sesi Saja)
+                </button>
+
+                <button onclick="setUserPermission('denied')" class="w-full py-2 px-4 rounded-xl hover:bg-rose-950/30 text-rose-400 font-medium text-xs text-center">
+                    Tolak Akses
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 10: SETTINGS, UI SOUNDS & FULL JSON BACKUP/RESTORE -->
+    <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 relative border-slate-800 shadow-2xl flex flex-col max-h-[90vh]">
+            
+            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <h2 class="text-lg font-bold text-slate-100 mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-cyan-400"></i> Pengaturan & Cadangan Data
+            </h2>
+            <p class="text-xs text-slate-400 mb-5">Atur mode warna tampilan, efek suara synthesizer, dan ekspor/impor JSON.</p>
+
+            <div class="flex border-b border-slate-800 mb-5 gap-2">
+                <button onclick="switchSettingsTab('appearance')" id="tabBtn-appearance" class="px-4 py-2 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400 flex items-center gap-2">
+                    <i class="fa-solid fa-palette"></i> Tampilan
+                </button>
+                <button onclick="switchSettingsTab('sound')" id="tabBtn-sound" class="px-4 py-2 text-xs font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-volume-high"></i> Suara UI
+                </button>
+                <button onclick="switchSettingsTab('memory')" id="tabBtn-memory" class="px-4 py-2 text-xs font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-microchip"></i> Memori & Backup
+                </button>
+                <button onclick="switchSettingsTab('security')" id="tabBtn-security" class="px-4 py-2 text-xs font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-lock"></i> Keamanan
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 pr-1 space-y-5">
+                
+                <!-- Appearance Settings -->
+                <div id="tabContent-appearance" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="setTheme('amoled')" class="p-3.5 rounded-2xl border text-left flex items-start gap-3 bg-black border-slate-800 hover:border-cyan-500">
+                            <div class="w-8 h-8 rounded-xl bg-black border border-cyan-500/50 flex items-center justify-center text-cyan-400 shrink-0">
+                                <i class="fa-solid fa-moon"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-white">Hitam 100% (Pure AMOLED)</p>
+                                <p class="text-[10px] text-slate-500 mt-0.5">Pitch black #000000 hemat baterai OLED.</p>
+                            </div>
+                        </button>
+
+                        <button onclick="setTheme('dark-glass')" class="p-3.5 rounded-2xl border text-left flex items-start gap-3 bg-slate-900/80 border-slate-800 hover:border-purple-500">
+                            <div class="w-8 h-8 rounded-xl bg-purple-950/60 border border-purple-500/40 flex items-center justify-center text-purple-400 shrink-0">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Mode Gelap (Glass)</p>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Efek kaca frosted bernuansa malam.</p>
+                            </div>
+                        </button>
+
+                        <button onclick="setTheme('light-glass')" class="p-3.5 rounded-2xl border text-left flex items-start gap-3 bg-slate-100/10 border-slate-800 hover:border-emerald-500">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                                <i class="fa-solid fa-sun"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Mode Terang (Glass)</p>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Latar terang kilau kaca murni.</p>
+                            </div>
+                        </button>
+
+                        <button onclick="setTheme('system')" class="p-3.5 rounded-2xl border text-left flex items-start gap-3 bg-slate-900/60 border-slate-800 hover:border-slate-600">
+                            <div class="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 shrink-0">
+                                <i class="fa-solid fa-desktop"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Hitam System (Otomatis)</p>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Mengikuti tema OS bawaan perangkat.</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sound Effects Settings -->
+                <div id="tabContent-sound" class="hidden space-y-4">
+                    <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-200">Efek Suara UI Synthesizer (Web Audio API)</p>
+                            <p class="text-[10px] text-slate-400">Putar suara desir kaca halus saat mengklik tombol & membuka modal.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="soundFxToggle" onchange="toggleSoundFx(this.checked)" checked class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Memory & JSON Backup Settings -->
+                <div id="tabContent-memory" class="hidden space-y-4">
+                    <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-slate-200">Penggunaan Memori LocalStorage</h4>
+                            <span id="memUsagePercentage" class="text-xs font-mono font-bold text-cyan-400">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-800">
+                            <div id="memUsageBar" class="bg-cyan-500 h-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-slate-300">Ekspor / Impor Cadangan JSON Lengkap</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="exportBackupData()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-200 font-semibold">
+                                <i class="fa-solid fa-download mr-1.5 text-cyan-400"></i> Ekspor Cadangan (JSON)
+                            </button>
+                            <button onclick="triggerImportData()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-200 font-semibold">
+                                <i class="fa-solid fa-upload mr-1.5 text-purple-400"></i> Impor Data (JSON)
+                            </button>
+                            <input type="file" id="importJsonInput" accept=".json" onchange="handleImportData(event)" class="hidden">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div id="tabContent-security" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-200 mb-2">Metode Verifikasi Hapus Media</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer">
+                                <input type="radio" name="securityMode" value="otp" onchange="setSecurityMode('otp')" id="secOtpRadio" class="accent-cyan-500">
+                                <span class="text-xs font-bold text-slate-200">Kode OTP Acak 4-Digit (Default)</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer">
+                                <input type="radio" name="securityMode" value="pin" onchange="setSecurityMode('pin')" id="secPinRadio" class="accent-cyan-500">
+                                <span class="text-xs font-bold text-slate-200">PIN Rahasia Khusus</span>
+                            </label>
+                            <div id="pinInputContainer" class="hidden pl-8">
+                                <input type="password" id="customPinInput" maxlength="6" placeholder="Set PIN (e.g. 1234)" onchange="saveCustomPin()" 
+                                    class="w-36 px-3 py-1 text-xs rounded-xl bg-slate-900 border border-slate-700 text-white font-mono">
+                            </div>
+                            <label class="flex items-center gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer">
+                                <input type="radio" name="securityMode" value="keyword" onchange="setSecurityMode('keyword')" id="secKeywordRadio" class="accent-cyan-500">
+                                <span class="text-xs font-bold text-slate-200">Ketik Kata Kunci "HAPUS"</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI NOTIFICATION TOAST -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-900 border border-cyan-500/40 text-slate-100 text-xs font-semibold shadow-2xl translate-y-20 opacity-0 transition-all duration-300">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-cyan-400 text-sm"></i>
+        <span id="toastMessage">Pesan Notifikasi</span>
+    </div>
+
+    <!-- MAIN JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        /* ==========================================================================
+           STATE MANAGEMENT & DEFAULT DATA
+           ========================================================================== */
+        const DEFAULT_MEDIA_ITEMS = [
+            {
+                id: 'media-1',
+                title: 'Metropolis Cyberpunk Glass',
+                category: 'Estetik',
+                album: 'Project',
+                type: 'photo',
+                url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=80',
+                thumb: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=600&q=80',
+                date: '2026-10-20',
+                size: '1.2 MB',
+                bytes: 1250000,
+                liked: true,
+                pinned: true,
+                description: 'Cahaya neon futuristik pusat kota malam hari.'
+            },
+            {
+                id: 'media-2',
+                title: 'Ombak Samudra Sinematik',
+                category: 'Alam',
+                album: 'Liburan',
+                type: 'video',
+                url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+                thumb: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+                duration: '00:15',
+                date: '2026-10-22',
+                size: '3.4 MB',
+                bytes: 3500000,
+                liked: false,
+                pinned: false,
+                description: 'Video cuplikan ombak samudra bernuansa tenang.'
+            },
+            {
+                id: 'media-3',
+                title: 'Bintang Galaksi AMOLED',
+                category: 'Alam',
+                album: 'Estetik',
+                type: 'photo',
+                url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80',
+                thumb: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=600&q=80',
+                date: '2026-10-23',
+                size: '2.1 MB',
+                bytes: 2200000,
+                liked: true,
+                pinned: false,
+                description: 'Bintang-bintang berkilau di latar belakang hitam pekat.'
+            },
+            {
+                id: 'media-4',
+                title: 'Arsitektur Kaca Modern',
+                category: 'Arsitektur',
+                album: 'Project',
+                type: 'photo',
+                url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
+                thumb: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80',
+                date: '2026-10-24',
+                size: '1.8 MB',
+                bytes: 1800000,
+                liked: false,
+                pinned: false,
+                description: 'Refleksi estetis pada gedung bertingkat modern.'
+            }
+        ];
+
+        let galleryItems = [];
+        let vaultItems = [];
+        let customAlbums = ['Liburan', 'Project', 'Estetik'];
+        
+        let currentFilter = 'Semua';
+        let currentAlbumFilter = 'ALL';
+        let searchQuery = '';
+        let layoutMode = 'grid'; // 'grid' or 'masonry'
+        
+        let currentTheme = 'amoled';
+        let permissionStatus = 'granted';
+        let securityMode = 'otp';
+        let customPin = '1234';
+        let soundFxEnabled = true;
+
+        // Multi-Select Batch State
+        let isMultiSelectMode = false;
+        let selectedItemIds = new Set();
+
+        // Audio Context & Spectrum Visualizer
+        let audioCtx = null;
+        let videoAudioSource = null;
+        let videoAnalyser = null;
+        let spectrumAnimationId = null;
+
+        // Lightbox & Editor States
+        let currentLightboxIndex = -1;
+        let currentZoomScale = 1;
+        let activeDeleteItemId = null;
+        let currentGeneratedOtp = '';
+        let pendingUploadFile = null;
+
+        // Slideshow Timer State
+        let slideshowIntervalId = null;
+        let slideshowIndex = 0;
+        let slideshowIsPaused = false;
+        let slideshowDelay = 5000;
+
+        /* ==========================================================================
+           INITIALIZATION
+           ========================================================================== */
+        window.onload = function() {
+            loadSavedData();
+            applyTheme(currentTheme);
+            updatePermissionStatusUI();
+            updateStorageMetrics();
+            renderAlbumDropdowns();
+            renderCategoryPills();
+            renderGallery();
+        };
+
+        function loadSavedData() {
+            // Load Items
+            const savedItems = localStorage.getItem('lumina_items_v3');
+            galleryItems = savedItems ? JSON.parse(savedItems) : [...DEFAULT_MEDIA_ITEMS];
+
+            const savedVault = localStorage.getItem('lumina_vault_items_v3');
+            vaultItems = savedVault ? JSON.parse(savedVault) : [];
+
+            const savedAlbums = localStorage.getItem('lumina_custom_albums');
+            if (savedAlbums) customAlbums = JSON.parse(savedAlbums);
+
+            // Settings
+            currentTheme = localStorage.getItem('lumina_theme') || 'amoled';
+            permissionStatus = localStorage.getItem('lumina_perm_status') || 'granted';
+            securityMode = localStorage.getItem('lumina_sec_mode') || 'otp';
+            customPin = localStorage.getItem('lumina_custom_pin') || '1234';
+            soundFxEnabled = localStorage.getItem('lumina_sound_fx') !== 'false';
+
+            document.getElementById('soundFxToggle').checked = soundFxEnabled;
+            updateVaultBadge();
+        }
+
+        function saveGalleryToStorage() {
+            localStorage.setItem('lumina_items_v3', JSON.stringify(galleryItems));
+            localStorage.setItem('lumina_vault_items_v3', JSON.stringify(vaultItems));
+            localStorage.setItem('lumina_custom_albums', JSON.stringify(customAlbums));
+            updateStorageMetrics();
+            updateVaultBadge();
+        }
+
+        /* ==========================================================================
+           SYNTHESIZER UI SOUND EFFECTS (WEB AUDIO API)
+           ========================================================================== */
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playGlassClickSound() {
+            if (!soundFxEnabled) return;
+            initAudioContext();
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.05);
+
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        function playSuccessChime() {
+            if (!soundFxEnabled) return;
+            initAudioContext();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now); // C5
+            osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+            osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(now + 0.3);
+        }
+
+        /* ==========================================================================
+           VIDEO AUDIO SPECTRUM VISUALIZER
+           ========================================================================== */
+        function setupVideoSpectrumVisualizer(videoElem) {
+            initAudioContext();
+            if (!audioCtx) return;
+
+            if (!videoAudioSource) {
+                try {
+                    videoAudioSource = audioCtx.createMediaElementSource(videoElem);
+                    videoAnalyser = audioCtx.createAnalyser();
+                    videoAnalyser.fftSize = 64;
+                    videoAudioSource.connect(videoAnalyser);
+                    videoAnalyser.connect(audioCtx.destination);
+                } catch(e) {
+                    // Source already created or CORS limitation
+                }
+            }
+
+            drawSpectrumBars();
+        }
+
+        function drawSpectrumBars() {
+            const canvas = document.getElementById('audioSpectrumCanvas');
+            if (!canvas || !videoAnalyser) return;
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            const bufferLength = videoAnalyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function render() {
+                spectrumAnimationId = requestAnimationFrame(render);
+                videoAnalyser.getByteFrequencyData(dataArray);
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const barWidth = (canvas.width / bufferLength) * 2;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = (dataArray[i] / 255) * canvas.height;
+                    
+                    const grad = ctx.createLinearGradient(0, canvas.height, 0, 0);
+                    grad.addColorStop(0, 'rgba(6, 182, 212, 0.2)');
+                    grad.addColorStop(1, 'rgba(168, 85, 247, 0.9)');
+
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth - 2, barHeight);
+                    x += barWidth;
+                }
+            }
+
+            if (spectrumAnimationId) cancelAnimationFrame(spectrumAnimationId);
+            render();
+        }
+
+        /* ==========================================================================
+           DOMINANT COLOR PALETTE EXTRACTION & EXIF INSPECTOR
+           ========================================================================== */
+        function extractPaletteAndExif(imgUrl) {
+            const container = document.getElementById('lbColorSwatches');
+            container.innerHTML = '<span class="text-[10px] text-slate-600">Ekstraksi...</span>';
+
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = imgUrl;
+
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 40;
+                canvas.height = 40;
+                ctx.drawImage(img, 0, 0, 40, 40);
+
+                try {
+                    const data = ctx.getImageData(0, 0, 40, 40).data;
+                    const colorMap = {};
+
+                    for (let i = 0; i < data.length; i += 16) {
+                        const r = Math.round(data[i] / 32) * 32;
+                        const g = Math.round(data[i+1] / 32) * 32;
+                        const b = Math.round(data[i+2] / 32) * 32;
+                        const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+                        colorMap[hex] = (colorMap[hex] || 0) + 1;
+                    }
+
+                    const sortedColors = Object.keys(colorMap).sort((a,b) => colorMap[b] - colorMap[a]).slice(0, 4);
+
+                    container.innerHTML = sortedColors.map(hex => `
+                        <button onclick="copyToClipboard('${hex}')" class="w-4 h-4 rounded-full border border-slate-700 hover:scale-125 transition-transform" 
+                            style="background-color: ${hex}" title="Klik Salin ${hex}"></button>
+                    `).join('');
+                } catch(e) {
+                    container.innerHTML = '<span class="text-[10px] text-slate-600">Local CORS</span>';
+                }
+            };
+
+            // Simulated EXIF Data
+            const isos = ['ISO 100', 'ISO 200', 'ISO 400', 'ISO 800'];
+            const apertures = ['f/1.4', 'f/1.8', 'f/2.8', 'f/4.0'];
+            const shutters = ['1/1000s', '1/500s', '1/250s', '1/60s'];
+
+            const randomIso = isos[Math.floor(Math.random() * isos.length)];
+            const randomAp = apertures[Math.floor(Math.random() * apertures.length)];
+            const randomSh = shutters[Math.floor(Math.random() * shutters.length)];
+
+            document.getElementById('lbExifText').textContent = `${randomIso} • ${randomAp} • ${randomSh}`;
+        }
+
+        /* ==========================================================================
+           RENDER GALLERY & PINNED ITEMS
+           ========================================================================== */
+        function renderCategoryPills() {
+            const container = document.getElementById('categoryPills');
+            const categories = ['Semua', 'Foto', 'Video', 'Favorit'];
+
+            galleryItems.forEach(item => {
+                if (item.category && !categories.includes(item.category)) {
+                    categories.push(item.category);
+                }
+            });
+
+            container.innerHTML = categories.map(cat => {
+                const isActive = currentFilter === cat;
+                const activeClass = isActive 
+                    ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold border-cyan-400 shadow-md shadow-cyan-500/20' 
+                    : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white';
+
+                return `
+                    <button onclick="setCategoryFilter('${cat}')" class="px-3.5 py-1.5 rounded-xl text-xs whitespace-nowrap border transition-all ${activeClass}">
+                        ${cat === 'Favorit' ? '❤️ ' : ''}${cat}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderAlbumDropdowns() {
+            const filterSelect = document.getElementById('albumSelectFilter');
+            const uploadSelect = document.getElementById('uploadAlbumSelect');
+
+            const optionsHtml = customAlbums.map(alb => `<option value="${alb}">${alb}</option>`).join('');
+
+            filterSelect.innerHTML = `<option value="ALL">Semua Album</option>` + optionsHtml;
+            uploadSelect.innerHTML = `<option value="Umum">Umum (Tanpa Album Khusus)</option>` + optionsHtml;
+        }
+
+        function setCategoryFilter(cat) {
+            playGlassClickSound();
+            currentFilter = cat;
+            renderCategoryPills();
+            renderGallery();
+        }
+
+        function handleAlbumFilterChange() {
+            playGlassClickSound();
+            currentAlbumFilter = document.getElementById('albumSelectFilter').value;
+            renderGallery();
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('galleryGrid');
+            const pinnedContainer = document.getElementById('pinnedSection');
+            const pinnedGrid = document.getElementById('pinnedGrid');
+            const emptyState = document.getElementById('emptyState');
+            const sortMode = document.getElementById('sortSelect').value;
+
+            // Apply Layout Class
+            if (layoutMode === 'masonry') {
+                grid.className = 'masonry-grid w-full';
+            } else {
+                grid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full';
+            }
+
+            // Filtering
+            let filtered = galleryItems.filter(item => {
+                if (currentFilter === 'Foto' && item.type !== 'photo') return false;
+                if (currentFilter === 'Video' && item.type !== 'video') return false;
+                if (currentFilter === 'Favorit' && !item.liked) return false;
+                if (currentFilter !== 'Semua' && currentFilter !== 'Foto' && currentFilter !== 'Video' && currentFilter !== 'Favorit') {
+                    if (item.category !== currentFilter) return false;
+                }
+
+                if (currentAlbumFilter !== 'ALL' && item.album !== currentAlbumFilter) return false;
+
+                if (searchQuery) {
+                    const titleMatch = item.title.toLowerCase().includes(searchQuery);
+                    const catMatch = item.category.toLowerCase().includes(searchQuery);
+                    const albumMatch = (item.album || '').toLowerCase().includes(searchQuery);
+                    return titleMatch || catMatch || albumMatch;
+                }
+
+                return true;
+            });
+
+            // Sorting
+            filtered.sort((a, b) => {
+                if (sortMode === 'newest') return new Date(b.date) - new Date(a.date);
+                if (sortMode === 'oldest') return new Date(a.date) - new Date(b.date);
+                if (sortMode === 'name') return a.title.localeCompare(b.title);
+                if (sortMode === 'likes') return (b.liked ? 1 : 0) - (a.liked ? 1 : 0);
+                return 0;
+            });
+
+            // Separate Pinned Items
+            const pinnedItems = filtered.filter(x => x.pinned);
+            const unpinnedItems = filtered.filter(x => !x.pinned);
+
+            // Render Pinned Section
+            if (pinnedItems.length > 0 && !searchQuery && currentFilter === 'Semua') {
+                pinnedContainer.classList.remove('hidden');
+                pinnedContainer.classList.add('flex');
+                pinnedGrid.innerHTML = pinnedItems.map(item => renderCardHtml(item)).join('');
+            } else {
+                pinnedContainer.classList.add('hidden');
+            }
+
+            if (unpinnedItems.length === 0 && pinnedItems.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+            grid.innerHTML = unpinnedItems.map(item => renderCardHtml(item)).join('');
+        }
+
+        function renderCardHtml(item) {
+            const isVideo = item.type === 'video';
+            const isSelected = selectedItemIds.has(item.id);
+            const containerClass = layoutMode === 'masonry' ? 'masonry-item' : '';
+
+            return `
+                <div class="card-tilt glass-panel rounded-2xl overflow-hidden group relative flex flex-col cursor-pointer ${containerClass}" onclick="handleCardClick('${item.id}')">
+                    
+                    <!-- Multi-Select Checkbox -->
+                    ${isMultiSelectMode ? `
+                        <div class="absolute top-3 left-3 z-30">
+                            <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleItemSelection('${item.id}')" 
+                                class="w-5 h-5 accent-cyan-500 rounded cursor-pointer">
+                        </div>
+                    ` : ''}
+
+                    <!-- Thumbnail Container -->
+                    <div class="relative w-full ${layoutMode === 'masonry' ? 'h-auto min-h-[180px]' : 'aspect-[4/3]'} bg-black overflow-hidden">
+                        <img src="${item.thumb || item.url}" alt="${item.title}" 
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onerror="this.src='https://placehold.co/600x400/0f172a/06b6d4?text=Preview+Error'">
+
+                        <div class="absolute top-3 right-3 flex items-center gap-1.5 pointer-events-none">
+                            ${item.pinned ? `<span class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-amber-500 text-black"><i class="fa-solid fa-thumbtack"></i></span>` : ''}
+                            <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-black/70 backdrop-blur-md text-cyan-400 border border-cyan-500/30">
+                                ${isVideo ? '<i class="fa-solid fa-play text-[9px] mr-1"></i>VIDEO' : 'FOTO'}
+                            </span>
+                        </div>
+
+                        <!-- Hover Action Bar -->
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
+                            <button onclick="event.stopPropagation(); toggleLikeItem('${item.id}')" class="w-9 h-9 rounded-xl ${item.liked ? 'bg-rose-500 text-white' : 'bg-black/60 text-slate-200'} hover:scale-110 flex items-center justify-center border border-slate-700">
+                                <i class="fa-solid fa-heart text-xs"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); togglePinItem('${item.id}')" class="w-9 h-9 rounded-xl ${item.pinned ? 'bg-amber-500 text-black' : 'bg-black/60 text-slate-200'} hover:scale-110 flex items-center justify-center border border-slate-700">
+                                <i class="fa-solid fa-thumbtack text-xs"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); moveItemToVault('${item.id}')" class="w-9 h-9 rounded-xl bg-black/60 hover:bg-purple-600 text-slate-200 hover:scale-110 flex items-center justify-center border border-slate-700" title="Sembunyikan ke Vault">
+                                <i class="fa-solid fa-user-lock text-xs"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); triggerDeleteModal('${item.id}')" class="w-9 h-9 rounded-xl bg-black/60 hover:bg-rose-600 text-slate-200 hover:scale-110 flex items-center justify-center border border-slate-700">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="p-3.5 flex flex-col gap-1.5 flex-1 justify-between">
+                        <div>
+                            <h3 class="font-bold text-xs sm:text-sm text-slate-100 truncate group-hover:text-cyan-400 transition-colors">${item.title}</h3>
+                            <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">${item.description || 'Tidak ada deskripsi.'}</p>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[10px] text-slate-500 font-mono">
+                            <span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-slate-400">${item.category}</span>
+                            <span class="text-purple-400">${item.album || 'Umum'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleCardClick(id) {
+            playGlassClickSound();
+            if (isMultiSelectMode) {
+                toggleItemSelection(id);
+            } else {
+                openLightboxItem(id);
+            }
+        }
+
+        /* ==========================================================================
+           MULTI-SELECT BATCH ACTIONS
+           ========================================================================== */
+        function toggleMultiSelectMode() {
+            playGlassClickSound();
+            isMultiSelectMode = !isMultiSelectMode;
+            selectedItemIds.clear();
+
+            const bar = document.getElementById('batchActionBar');
+            const btn = document.getElementById('multiSelectToggleBtn');
+
+            if (isMultiSelectMode) {
+                btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold border bg-cyan-500 text-black border-cyan-400 transition-all flex items-center gap-1.5";
+                bar.classList.remove('hidden');
+            } else {
+                btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-900/80 border-slate-800 text-slate-300 transition-all flex items-center gap-1.5";
+                bar.classList.add('hidden');
+            }
+            renderGallery();
+        }
+
+        function toggleItemSelection(id) {
+            if (selectedItemIds.has(id)) selectedItemIds.delete(id);
+            else selectedItemIds.add(id);
+
+            document.getElementById('batchCountBadge').textContent = `${selectedItemIds.size} Terpilih`;
+            renderGallery();
+        }
+
+        function batchActionFavorite() {
+            if (selectedItemIds.size === 0) return;
+            galleryItems.forEach(item => {
+                if (selectedItemIds.has(item.id)) item.liked = true;
+            });
+            saveGalleryToStorage();
+            renderGallery();
+            showToast(`❤️ ${selectedItemIds.size} media ditambahkan ke Favorit!`);
+            toggleMultiSelectMode();
+        }
+
+        function batchActionMoveToVault() {
+            if (selectedItemIds.size === 0) return;
+            const toMove = galleryItems.filter(x => selectedItemIds.has(x.id));
+            vaultItems.push(...toMove);
+            galleryItems = galleryItems.filter(x => !selectedItemIds.has(x.id));
+
+            saveGalleryToStorage();
+            renderGallery();
+            showToast(`🔒 ${toMove.length} media dipindahkan ke Kubah Rahasia!`);
+            toggleMultiSelectMode();
+        }
+
+        function batchActionDelete() {
+            if (selectedItemIds.size === 0) return;
+            const count = selectedItemIds.size;
+            galleryItems = galleryItems.filter(x => !selectedItemIds.has(x.id));
+            saveGalleryToStorage();
+            renderGallery();
+            showToast(`🗑️ ${count} media berhasil dihapus!`);
+            toggleMultiSelectMode();
+        }
+
+        /* ==========================================================================
+           FEATURE 1: STUDIO EDIT FOTO & VIDEO (LIVE CANVAS FILTERS)
+           ========================================================================== */
+        let editorActiveItem = null;
+
+        function openEditorForCurrentLightbox() {
+            if (currentLightboxIndex < 0 || !galleryItems[currentLightboxIndex]) return;
+            editorActiveItem = galleryItems[currentLightboxIndex];
+            closeLightbox();
+
+            const modal = document.getElementById('editorModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+            // Reset Sliders
+            document.getElementById('sliderBrightness').value = 100;
+            document.getElementById('sliderContrast').value = 100;
+            document.getElementById('sliderSaturate').value = 100;
+            document.getElementById('sliderBlur').value = 0;
+
+            updateEditorCanvas();
+        }
+
+        function closeEditorModal() {
+            const modal = document.getElementById('editorModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function updateEditorCanvas() {
+            if (!editorActiveItem) return;
+            const canvas = document.getElementById('editorCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const bright = document.getElementById('sliderBrightness').value;
+            const contrast = document.getElementById('sliderContrast').value;
+            const saturate = document.getElementById('sliderSaturate').value;
+            const blur = document.getElementById('sliderBlur').value;
+
+            document.getElementById('valBrightness').textContent = `${bright}%`;
+            document.getElementById('valContrast').textContent = `${contrast}%`;
+            document.getElementById('valSaturate').textContent = `${saturate}%`;
+            document.getElementById('valBlur').textContent = `${blur}px`;
+
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = editorActiveItem.url;
+
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                ctx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${saturate}%) blur(${blur}px)`;
+                ctx.drawImage(img, 0, 0);
+            };
+        }
+
+        function applyEditorPreset(type) {
+            playGlassClickSound();
+            const b = document.getElementById('sliderBrightness');
+            const c = document.getElementById('sliderContrast');
+            const s = document.getElementById('sliderSaturate');
+            const blur = document.getElementById('sliderBlur');
+
+            if (type === 'normal') { b.value = 100; c.value = 100; s.value = 100; blur.value = 0; }
+            else if (type === 'vaporwave') { b.value = 110; c.value = 120; s.value = 160; blur.value = 1; }
+            else if (type === 'cyberpunk') { b.value = 105; c.value = 130; s.value = 180; blur.value = 0; }
+            else if (type === 'warm') { b.value = 105; c.value = 110; s.value = 130; blur.value = 0; }
+            else if (type === 'bw') { b.value = 100; c.value = 120; s.value = 0; blur.value = 0; }
+            else if (type === 'glass') { b.value = 115; c.value = 95; s.value = 110; blur.value = 2; }
+
+            updateEditorCanvas();
+        }
+
+        function saveEditorResult(saveAsNew) {
+            const canvas = document.getElementById('editorCanvas');
+            const editedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+            if (saveAsNew) {
+                const newItem = {
+                    ...editorActiveItem,
+                    id: 'media-' + Date.now(),
+                    title: editorActiveItem.title + ' (Edited)',
+                    url: editedDataUrl,
+                    thumb: editedDataUrl,
+                    date: new Date().toISOString().split('T')[0]
+                };
+                galleryItems.unshift(newItem);
+                showToast('✨ Foto hasil studio disimpan sebagai media baru!');
+            } else {
+                editorActiveItem.url = editedDataUrl;
+                editorActiveItem.thumb = editedDataUrl;
+                showToast('✏️ Foto asli berhasil diperbarui dengan efek studio!');
+            }
+
+            saveGalleryToStorage();
+            renderGallery();
+            closeEditorModal();
+            playSuccessChime();
+        }
+
+        /* ==========================================================================
+           FEATURE 2: CAPTION & MEME OVERLAY GENERATOR
+           ========================================================================== */
+        let memeActiveItem = null;
+
+        function openMemeStudioForCurrentLightbox() {
+            if (currentLightboxIndex < 0 || !galleryItems[currentLightboxIndex]) return;
+            memeActiveItem = galleryItems[currentLightboxIndex];
+            closeLightbox();
+
+            const modal = document.getElementById('memeModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+            renderMemeCanvas();
+        }
+
+        function closeMemeModal() {
+            const modal = document.getElementById('memeModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function renderMemeCanvas() {
+            if (!memeActiveItem) return;
+            const canvas = document.getElementById('memeCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const topText = document.getElementById('memeTopText').value.toUpperCase();
+            const bottomText = document.getElementById('memeBottomText').value;
+            const watermark = document.getElementById('memeWatermarkSelect').value;
+
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = memeActiveItem.url;
+
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                ctx.drawImage(img, 0, 0);
+
+                // Styling Text Overlay
+                const fontSize = Math.max(24, Math.floor(canvas.width / 18));
+                ctx.font = `900 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = Math.floor(fontSize / 8);
+
+                // Top Caption
+                if (topText) {
+                    ctx.strokeText(topText, canvas.width / 2, fontSize + 20);
+                    ctx.fillText(topText, canvas.width / 2, fontSize + 20);
+                }
+
+                // Bottom Sub Caption
+                if (bottomText) {
+                    ctx.strokeText(bottomText, canvas.width / 2, canvas.height - 30);
+                    ctx.fillText(bottomText, canvas.width / 2, canvas.height - 30);
+                }
+
+                // Glass Watermark
+                if (watermark !== 'none') {
+                    ctx.font = `700 ${Math.floor(fontSize * 0.4)}px "JetBrains Mono", monospace`;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                    const wmText = watermark === 'lumina' ? 'LUMINA // AMOLED 100%' : 'FROSTED GLASS GALLERY';
+                    ctx.fillText(wmText, canvas.width / 2, canvas.height - 10);
+                }
+            };
+        }
+
+        function downloadMemeResult() {
+            const canvas = document.getElementById('memeCanvas');
+            const link = document.createElement('a');
+            link.download = `lumina_caption_${Date.now()}.jpg`;
+            link.href = canvas.toDataURL('image/jpeg');
+            link.click();
+            showToast('📥 Hasil foto ber-caption berhasil diunduh!');
+        }
+
+        /* ==========================================================================
+           FEATURE 3: FULLSCREEN SLIDESHOW PRESENTATION
+           ========================================================================== */
+        function startSlideshow() {
+            if (galleryItems.length === 0) return;
+            slideshowIndex = 0;
+            slideshowIsPaused = false;
+
+            const modal = document.getElementById('slideshowModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+            playNextSlideshowItem();
+        }
+
+        function playNextSlideshowItem() {
+            if (slideshowIsPaused) return;
+
+            const item = galleryItems[slideshowIndex];
+            document.getElementById('slideshowCounter').textContent = `${slideshowIndex + 1} / ${galleryItems.length}`;
+            document.getElementById('slideshowTitle').textContent = item.title;
+
+            const img = document.getElementById('slideshowImage');
+            const vid = document.getElementById('slideshowVideo');
+
+            if (item.type === 'video') {
+                img.classList.add('hidden');
+                vid.classList.remove('hidden');
+                vid.src = item.url;
+                vid.play().catch(() => {});
+            } else {
+                vid.classList.add('hidden');
+                vid.pause();
+                img.classList.remove('hidden');
+                img.src = item.url;
+            }
+
+            // Animate Progress Bar
+            const pBar = document.getElementById('slideshowProgressBar');
+            pBar.style.transition = 'none';
+            pBar.style.width = '0%';
+            setTimeout(() => {
+                pBar.style.transition = `width ${slideshowDelay}ms linear`;
+                pBar.style.width = '100%';
+            }, 50);
+
+            if (slideshowIntervalId) clearInterval(slideshowIntervalId);
+            slideshowIntervalId = setTimeout(() => {
+                slideshowIndex = (slideshowIndex + 1) % galleryItems.length;
+                playNextSlideshowItem();
+            }, slideshowDelay);
+        }
+
+        function toggleSlideshowPause() {
+            slideshowIsPaused = !slideshowIsPaused;
+            const btn = document.getElementById('slideshowPauseBtn');
+            btn.innerHTML = slideshowIsPaused ? `<i class="fa-solid fa-play"></i>` : `<i class="fa-solid fa-pause"></i>`;
+            
+            if (!slideshowIsPaused) playNextSlideshowItem();
+            else if (slideshowIntervalId) clearTimeout(slideshowIntervalId);
+        }
+
+        function changeSlideshowInterval() {
+            slideshowDelay = parseInt(document.getElementById('slideshowIntervalSelect').value);
+            if (!slideshowIsPaused) playNextSlideshowItem();
+        }
+
+        function stopSlideshow() {
+            if (slideshowIntervalId) clearTimeout(slideshowIntervalId);
+            document.getElementById('slideshowVideo').pause();
+            const modal = document.getElementById('slideshowModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        /* ==========================================================================
+           FEATURE 4: PRIVATE VAULT (KUBAH RAHASIA)
+           ========================================================================== */
+        function openVaultModal() {
+            playGlassClickSound();
+            const modal = document.getElementById('vaultModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+            document.getElementById('vaultLockScreen').classList.remove('hidden');
+            document.getElementById('vaultContentScreen').classList.add('hidden');
+            document.getElementById('vaultPinInput').value = '';
+        }
+
+        function closeVaultModal() {
+            const modal = document.getElementById('vaultModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function unlockVault() {
+            const pin = document.getElementById('vaultPinInput').value;
+            if (pin === customPin) {
+                document.getElementById('vaultLockScreen').classList.add('hidden');
+                document.getElementById('vaultContentScreen').classList.remove('hidden');
+                renderVaultGrid();
+                playSuccessChime();
+            } else {
+                showToast('❌ PIN Kubah Salah!', 'error');
+            }
+        }
+
+        function lockVault() {
+            document.getElementById('vaultLockScreen').classList.remove('hidden');
+            document.getElementById('vaultContentScreen').classList.add('hidden');
+        }
+
+        function moveItemToVault(id) {
+            const index = galleryItems.findIndex(x => x.id === id);
+            if (index >= 0) {
+                const item = galleryItems.splice(index, 1)[0];
+                vaultItems.push(item);
+                saveGalleryToStorage();
+                renderGallery();
+                showToast('🔒 Media dipindahkan ke Kubah Rahasia!');
+            }
+        }
+
+        function restoreItemFromVault(id) {
+            const index = vaultItems.findIndex(x => x.id === id);
+            if (index >= 0) {
+                const item = vaultItems.splice(index, 1)[0];
+                galleryItems.unshift(item);
+                saveGalleryToStorage();
+                renderVaultGrid();
+                renderGallery();
+                showToast('🔓 Media dikembalikan ke Galeri Utama!');
+            }
+        }
+
+        function renderVaultGrid() {
+            const grid = document.getElementById('vaultGrid');
+            document.getElementById('vaultItemsCountText').textContent = `${vaultItems.length} Media Rahasia`;
+
+            if (vaultItems.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-slate-500">Kubah Rahasia Kosong.</div>`;
+                return;
+            }
+
+            grid.innerHTML = vaultItems.map(item => `
+                <div class="glass-panel p-2 rounded-xl relative group">
+                    <img src="${item.thumb || item.url}" class="w-full h-24 object-cover rounded-lg">
+                    <button onclick="restoreItemFromVault('${item.id}')" class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold">
+                        <i class="fa-solid fa-arrow-up-from-bracket mb-1 text-sm"></i>
+                        Kembalikan
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function updateVaultBadge() {
+            const badge = document.getElementById('vaultBadgeCount');
+            if (vaultItems.length > 0) {
+                badge.textContent = vaultItems.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        /* ==========================================================================
+           FEATURE 5: STORAGE CLEANER & DUPLICATE DETECTOR
+           ========================================================================== */
+        function openCleanerModal() {
+            playGlassClickSound();
+            const modal = document.getElementById('cleanerModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+            scanMemoryForCleanups();
+        }
+
+        function closeCleanerModal() {
+            const modal = document.getElementById('cleanerModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function scanMemoryForCleanups() {
+            const container = document.getElementById('cleanerScanResults');
+            let reclaimableBytes = 0;
+            let html = '';
+
+            // Scan Large items > 2MB
+            const largeItems = galleryItems.filter(x => (x.bytes || 0) > 2000000);
+            largeItems.forEach(item => reclaimableBytes += item.bytes);
+
+            if (largeItems.length > 0) {
+                html += `
+                    <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800">
+                        <p class="font-bold text-amber-400 mb-1"><i class="fa-solid fa-file-video mr-1"></i> File Ukuran Besar (>2MB): ${largeItems.length} Item</p>
+                        <p class="text-[11px] text-slate-400">Direkomendasikan untuk dibersihkan atau dipindahkan ke cadangan.</p>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300">
+                        <p class="font-bold text-emerald-400">🟢 Memori Rapi & Optimal</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Tidak ada file duplikat atau sampah ditemukan.</p>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+            document.getElementById('cleanerTotalReclaimable').textContent = `${(reclaimableBytes / (1024*1024)).toFixed(1)} MB Rekomendasi Bebas`;
+        }
+
+        function executeMemoryCleanup() {
+            showToast('🧹 Memori berhasil dioptimalkan!');
+            closeCleanerModal();
+        }
+
+        /* ==========================================================================
+           FEATURE 6: ALBUM CREATOR & PINNING
+           ========================================================================== */
+        function openCreateAlbumPrompt() {
+            const albumName = prompt("Masukkan Nama Album Kustom Baru:");
+            if (albumName && albumName.trim()) {
+                const cleanName = albumName.trim();
+                if (!customAlbums.includes(cleanName)) {
+                    customAlbums.push(cleanName);
+                    saveGalleryToStorage();
+                    renderAlbumDropdowns();
+                    showToast(`📁 Album '${cleanName}' berhasil dibuat!`);
+                }
+            }
+        }
+
+        function togglePinItem(id) {
+            const item = galleryItems.find(x => x.id === id);
+            if (item) {
+                item.pinned = !item.pinned;
+                saveGalleryToStorage();
+                renderGallery();
+                showToast(item.pinned ? '📌 Media disematkan di atas!' : 'Unpinned');
+            }
+        }
+
+        function togglePinCurrentLightboxItem() {
+            if (currentLightboxIndex >= 0 && galleryItems[currentLightboxIndex]) {
+                togglePinItem(galleryItems[currentLightboxIndex].id);
+            }
+        }
+
+        /* ==========================================================================
+           LIGHTBOX VIEWER CONTROLS
+           ========================================================================== */
+        function openLightboxItem(id) {
+            const index = galleryItems.findIndex(x => x.id === id);
+            if (index < 0) return;
+
+            currentLightboxIndex = index;
+            const item = galleryItems[index];
+
+            document.getElementById('lbTitle').textContent = item.title;
+            document.getElementById('lbCategory').textContent = item.category;
+            document.getElementById('lbAlbum').textContent = item.album || 'Umum';
+            document.getElementById('lbDate').textContent = item.date;
+            document.getElementById('lbBadgeType').textContent = item.type.toUpperCase();
+
+            const imgWrapper = document.getElementById('lbImageWrapper');
+            const videoWrapper = document.getElementById('lbVideoWrapper');
+            const videoPlayer = document.getElementById('lbVideo');
+
+            if (item.type === 'video') {
+                imgWrapper.classList.add('hidden');
+                videoWrapper.classList.remove('hidden');
+                videoPlayer.src = item.url;
+                videoPlayer.play().catch(() => {});
+                setupVideoSpectrumVisualizer(videoPlayer);
+            } else {
+                videoWrapper.classList.add('hidden');
+                videoPlayer.pause();
+                imgWrapper.classList.remove('hidden');
+                document.getElementById('lbImage').src = item.url;
+                extractPaletteAndExif(item.url);
+                resetZoom();
+            }
+
+            const modal = document.getElementById('lightboxModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeLightbox() {
+            const videoPlayer = document.getElementById('lbVideo');
+            videoPlayer.pause();
+            if (spectrumAnimationId) cancelAnimationFrame(spectrumAnimationId);
+
+            const modal = document.getElementById('lightboxModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function navigateLightbox(step) {
+            if (galleryItems.length === 0) return;
+            currentLightboxIndex = (currentLightboxIndex + step + galleryItems.length) % galleryItems.length;
+            openLightboxItem(galleryItems[currentLightboxIndex].id);
+        }
+
+        function toggleVideoPlayPause() {
+            const video = document.getElementById('lbVideo');
+            const btn = document.getElementById('lbPlayPauseBtn');
+            if (video.paused) {
+                video.play();
+                btn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+            } else {
+                video.pause();
+                btn.innerHTML = `<i class="fa-solid fa-play"></i>`;
+            }
+        }
+
+        function toggleVideoMute() {
+            const video = document.getElementById('lbVideo');
+            const btn = document.getElementById('lbMuteBtn');
+            video.muted = !video.muted;
+            btn.innerHTML = video.muted ? `<i class="fa-solid fa-volume-xmark text-rose-400"></i>` : `<i class="fa-solid fa-volume-high"></i>`;
+        }
+
+        function changeVideoVolume(val) {
+            const video = document.getElementById('lbVideo');
+            video.volume = parseFloat(val);
+        }
+
+        function adjustZoom(delta) {
+            currentZoomScale = Math.max(0.5, Math.min(3, currentZoomScale + delta));
+            document.getElementById('lbImage').style.transform = `scale(${currentZoomScale})`;
+            document.getElementById('lbZoomLevel').textContent = `${Math.round(currentZoomScale * 100)}%`;
+        }
+
+        function resetZoom() {
+            currentZoomScale = 1;
+            document.getElementById('lbImage').style.transform = 'scale(1)';
+            document.getElementById('lbZoomLevel').textContent = '100%';
+        }
+
+        function toggleLikeItem(id) {
+            const item = galleryItems.find(x => x.id === id);
+            if (item) {
+                item.liked = !item.liked;
+                saveGalleryToStorage();
+                renderGallery();
+                showToast(item.liked ? 'Disimpan ke Favorit ❤️' : 'Dihapus dari Favorit');
+            }
+        }
+
+        function toggleLikeCurrentLightboxItem() {
+            if (currentLightboxIndex >= 0 && galleryItems[currentLightboxIndex]) {
+                toggleLikeItem(galleryItems[currentLightboxIndex].id);
+            }
+        }
+
+        function requestDeleteFromLightbox() {
+            if (currentLightboxIndex >= 0 && galleryItems[currentLightboxIndex]) {
+                const targetId = galleryItems[currentLightboxIndex].id;
+                closeLightbox();
+                triggerDeleteModal(targetId);
+            }
+        }
+
+        /* ==========================================================================
+           MISC UTILITIES (THEMES, PERMISSIONS, BACKUP, TOAST)
+           ========================================================================== */
+        function setLayoutMode(mode) {
+            playGlassClickSound();
+            layoutMode = mode;
+            document.getElementById('layoutGridBtn').className = mode === 'grid' ? 'p-1.5 rounded-lg text-cyan-400 bg-slate-800/80' : 'p-1.5 rounded-lg text-slate-400 hover:text-white';
+            document.getElementById('layoutMasonryBtn').className = mode === 'masonry' ? 'p-1.5 rounded-lg text-cyan-400 bg-slate-800/80' : 'p-1.5 rounded-lg text-slate-400 hover:text-white';
+            renderGallery();
+        }
+
+        function shuffleGallery() {
+            playGlassClickSound();
+            for (let i = galleryItems.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [galleryItems[i], galleryItems[j]] = [galleryItems[j], galleryItems[i]];
+            }
+            renderGallery();
+            showToast('🔀 Urutan galeri diacak!');
+        }
+
+        function setTheme(themeKey) {
+            currentTheme = themeKey;
+            localStorage.setItem('lumina_theme', themeKey);
+            applyTheme(themeKey);
+            showToast(`Tema diubah ke ${themeKey.toUpperCase()}`);
+        }
+
+        function applyTheme(themeKey) {
+            const body = document.body;
+            body.classList.remove('theme-amoled', 'theme-dark-glass', 'theme-light-glass');
+
+            let activeTheme = themeKey;
+            if (themeKey === 'system') {
+                activeTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'amoled' : 'light-glass';
+            }
+
+            if (activeTheme === 'amoled') body.classList.add('theme-amoled');
+            else if (activeTheme === 'dark-glass') body.classList.add('theme-dark-glass');
+            else if (activeTheme === 'light-glass') body.classList.add('theme-light-glass');
+        }
+
+        function toggleSoundFx(enabled) {
+            soundFxEnabled = enabled;
+            localStorage.setItem('lumina_sound_fx', enabled);
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            renderGallery();
+        }
+
+        function handleMobileSearch() {
+            searchQuery = document.getElementById('mobileSearchInput').value.toLowerCase();
+            renderGallery();
+        }
+
+        function resetGalleryView() {
+            currentFilter = 'Semua';
+            currentAlbumFilter = 'ALL';
+            searchQuery = '';
+            document.getElementById('searchInput').value = '';
+            renderCategoryPills();
+            renderGallery();
+        }
+
+        function openPermissionModal() {
+            const modal = document.getElementById('permissionModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closePermissionModal() {
+            const modal = document.getElementById('permissionModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function setUserPermission(status) {
+            permissionStatus = status;
+            localStorage.setItem('lumina_perm_status', status);
+            updatePermissionStatusUI();
+            closePermissionModal();
+            showToast(`Akses memori diset: ${status.toUpperCase()}`);
+        }
+
+        function updatePermissionStatusUI() {
+            const dot = document.getElementById('permBadgeDot');
+            const text = document.getElementById('permBadgeText');
+            if (permissionStatus === 'granted') {
+                dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+                text.textContent = "Akses Aktif";
+            } else {
+                dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500";
+                text.textContent = "Dibatasi";
+            }
+        }
+
+        function updateStorageMetrics() {
+            let totalBytes = 0;
+            galleryItems.forEach(item => totalBytes += (item.bytes || 100000));
+            const totalMB = (totalBytes / (1024 * 1024)).toFixed(1);
+            
+            document.getElementById('headerStorageText').textContent = `${totalMB} MB`;
+            document.getElementById('memTotalSize') && (document.getElementById('memTotalSize').textContent = `${totalMB} MB`);
+            
+            const percent = Math.min(Math.round((totalBytes / (50 * 1024 * 1024)) * 100), 100);
+            document.getElementById('memUsageBar') && (document.getElementById('memUsageBar').style.width = `${percent}%`);
+            document.getElementById('memUsagePercentage') && (document.getElementById('memUsagePercentage').textContent = `${percent}%`);
+        }
+
+        /* UPLOAD HANDLING */
+        function handleUploadClick() {
+            const modal = document.getElementById('uploadModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeUploadModal() {
+            const modal = document.getElementById('uploadModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+            clearSelectedFile();
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            pendingUploadFile = file;
+
+            document.getElementById('uploadDropzoneDefault').classList.add('hidden');
+            const preview = document.getElementById('uploadFilePreview');
+            preview.classList.remove('hidden');
+
+            document.getElementById('previewFileName').textContent = file.name;
+            document.getElementById('previewFileSize').textContent = `${(file.size / (1024*1024)).toFixed(2)} MB`;
+
+            if (!document.getElementById('uploadTitle').value) {
+                document.getElementById('uploadTitle').value = file.name.replace(/\.[^/.]+$/, "");
+            }
+        }
+
+        function clearSelectedFile() {
+            pendingUploadFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadDropzoneDefault').classList.remove('hidden');
+            document.getElementById('uploadFilePreview').classList.add('hidden');
+        }
+
+        function handleFormUpload(e) {
+            e.preventDefault();
+            if (!pendingUploadFile) {
+                showToast('Pilih file media terlebih dahulu!', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const dataUrl = evt.target.result;
+                const isVideo = pendingUploadFile.type.startsWith('video/');
+
+                const newItem = {
+                    id: 'media-' + Date.now(),
+                    title: document.getElementById('uploadTitle').value,
+                    category: document.getElementById('uploadCategory').value || 'Umum',
+                    album: document.getElementById('uploadAlbumSelect').value,
+                    type: isVideo ? 'video' : 'photo',
+                    url: dataUrl,
+                    thumb: isVideo ? 'https://images.unsplash.com/photo-1518173946687-a4c8a383392e?auto=format&fit=crop&w=600&q=80' : dataUrl,
+                    date: new Date().toISOString().split('T')[0],
+                    size: `${(pendingUploadFile.size / (1024*1024)).toFixed(1)} MB`,
+                    bytes: pendingUploadFile.size,
+                    liked: false,
+                    pinned: false,
+                    description: document.getElementById('uploadDescription').value
+                };
+
+                galleryItems.unshift(newItem);
+                saveGalleryToStorage();
+                renderCategoryPills();
+                renderGallery();
+                closeUploadModal();
+                showToast('✨ Media berhasil diunggah ke galeri!');
+            };
+            reader.readAsDataURL(pendingUploadFile);
+        }
+
+        /* DELETE VERIFICATION */
+        function triggerDeleteModal(id) {
+            const item = galleryItems.find(x => x.id === id);
+            if (!item) return;
+            activeDeleteItemId = id;
+
+            document.getElementById('deleteTargetTitle').textContent = item.title;
+            document.getElementById('deleteTargetCategory').textContent = item.category;
+
+            const input = document.getElementById('deleteSecurityInput');
+            input.value = '';
+
+            if (securityMode === 'otp') {
+                currentGeneratedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+                document.getElementById('deleteGeneratedOtp').textContent = currentGeneratedOtp;
+                document.getElementById('deleteOtpDisplayContainer').classList.remove('hidden');
+            } else {
+                document.getElementById('deleteOtpDisplayContainer').classList.add('hidden');
+            }
+
+            const modal = document.getElementById('deleteModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('deleteModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function confirmDeleteAction() {
+            const inputVal = document.getElementById('deleteSecurityInput').value.trim();
+            let isValid = false;
+
+            if (securityMode === 'otp') isValid = (inputVal === currentGeneratedOtp);
+            else if (securityMode === 'pin') isValid = (inputVal === customPin);
+            else if (securityMode === 'keyword') isValid = (inputVal.toUpperCase() === 'HAPUS');
+
+            if (!isValid) {
+                document.getElementById('deleteErrorMsg').classList.remove('hidden');
+                return;
+            }
+
+            galleryItems = galleryItems.filter(x => x.id !== activeDeleteItemId);
+            saveGalleryToStorage();
+            renderGallery();
+            closeDeleteModal();
+            showToast('🗑️ Media berhasil dihapus.');
+        }
+
+        /* SETTINGS MODAL SWITCHER */
+        function openSettingsModal(tab = 'appearance') {
+            switchSettingsTab(tab);
+            const modal = document.getElementById('settingsModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function switchSettingsTab(tab) {
+            ['appearance', 'sound', 'memory', 'security'].forEach(t => {
+                const btn = document.getElementById(`tabBtn-${t}`);
+                const content = document.getElementById(`tabContent-${t}`);
+                if (t === tab) {
+                    btn.className = "px-4 py-2 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400 flex items-center gap-2";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "px-4 py-2 text-xs font-semibold text-slate-400 border-b-2 border-transparent flex items-center gap-2";
+                    content.classList.add('hidden');
+                }
+            });
+        }
+
+        function setSecurityMode(m) {
+            securityMode = m;
+            localStorage.setItem('lumina_sec_mode', m);
+            document.getElementById('pinInputContainer').className = m === 'pin' ? 'pl-8' : 'hidden';
+        }
+
+        function saveCustomPin() {
+            const p = document.getElementById('customPinInput').value;
+            if (p.length >= 4) {
+                customPin = p;
+                localStorage.setItem('lumina_custom_pin', p);
+                showToast('🔑 PIN Keamanan disimpan!');
+            }
+        }
+
+        /* FULL JSON BACKUP & RESTORE */
+        function exportBackupData() {
+            const backupPayload = {
+                version: '3.0',
+                items: galleryItems,
+                vault: vaultItems,
+                albums: customAlbums
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `lumina_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            showToast('📥 Cadangan JSON galeri berhasil diekspor!');
+        }
+
+        function triggerImportData() {
+            document.getElementById('importJsonInput').click();
+        }
+
+        function handleImportData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = JSON.parse(evt.target.result);
+                    if (data.items) {
+                        galleryItems = data.items;
+                        if (data.vault) vaultItems = data.vault;
+                        if (data.albums) customAlbums = data.albums;
+
+                        saveGalleryToStorage();
+                        renderAlbumDropdowns();
+                        renderCategoryPills();
+                        renderGallery();
+                        showToast('📤 Data galeri lengkap berhasil dipulihkan!');
+                    }
+                } catch(err) {
+                    showToast('Format JSON cadangan tidak valid!', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+            showToast(`📋 Kode warna ${text} tersalin!`);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toastNotification');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastMessage').textContent = message;
+
+            if (type === 'error') {
+                icon.className = "fa-solid fa-triangle-exclamation text-rose-500 text-sm";
+            } else {
+                icon.className = "fa-solid fa-circle-check text-cyan-400 text-sm";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+    </script>
+</body>
+</html>
