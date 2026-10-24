@@ -1,0 +1,253 @@
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Green Glow Effects */
+        .btn-glow {
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+            transform: translateY(-2px);
+        }
+        .btn-glow:active {
+            transform: translateY(0);
+        }
+
+        .focus-glow:focus {
+            outline: none;
+            border-color: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Custom Scrollbar (dipakai di box gelap seperti Log Output) */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #22c55e;
+        }
+
+        /* Scrollbar disembunyikan total (dipakai di box terang seperti Perizinan) */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Permission Box Glow & Style when Checked */
+        .perm-box {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .perm-box:has(input:checked) {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.15);
+        }
+        .perm-box:has(input:checked) .perm-icon {
+            background-color: #22c55e;
+            color: #ffffff;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Screen transitions */
+        .screen {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .screen.hidden {
+            display: none;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+/* Popup Pilihan Bahasa/Negara */
+#lang-modal {
+    animation: langModalIn 0.15s ease-out;
+    transform-origin: top right;
+}
+@keyframes langModalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Loading Screen */
+.loading-logo-pulse {
+    animation: logoPulse 1.4s ease-in-out infinite;
+}
+@keyframes logoPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.08); opacity: 0.85; }
+}
+#loading-progress-bar {
+    transition: width 3s linear;
+}
+#loading-screen.loading-hide {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease-out;
+}
+
+/* ======================================================================
+   TEMA LIQUID GLASS (Mode UI: Baru)
+   Semua aturan di bawah ini CUMA aktif kalau <html> punya class "ui-mode-new".
+   Mode "Lama" (tanpa class ini) = tampilan asli persis seperti sebelumnya.
+   ====================================================================== */
+
+html.ui-mode-new body {
+    background:
+        radial-gradient(circle at 15% 20%, rgba(34, 197, 94, 0.16), transparent 45%),
+        radial-gradient(circle at 85% 15%, rgba(99, 102, 241, 0.14), transparent 45%),
+        radial-gradient(circle at 20% 85%, rgba(16, 185, 129, 0.12), transparent 45%),
+        radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.12), transparent 45%),
+        linear-gradient(135deg, #eef2f7 0%, #f3f6fb 50%, #eefaf3 100%);
+    background-attachment: fixed;
+    position: relative;
+}
+
+/* Blob dekoratif blur bergerak pelan buat efek "liquid" di background */
+html.ui-mode-new body::before,
+html.ui-mode-new body::after {
+    content: '';
+    position: fixed;
+    border-radius: 9999px;
+    filter: blur(90px);
+    z-index: -1;
+    pointer-events: none;
+    will-change: transform;
+}
+html.ui-mode-new body::before {
+    width: 420px;
+    height: 420px;
+    background: rgba(34, 197, 94, 0.28);
+    top: -140px;
+    left: -120px;
+    animation: liquidBlobFloat1 18s ease-in-out infinite;
+}
+html.ui-mode-new body::after {
+    width: 380px;
+    height: 380px;
+    background: rgba(99, 102, 241, 0.22);
+    bottom: -120px;
+    right: -100px;
+    animation: liquidBlobFloat2 22s ease-in-out infinite;
+}
+@keyframes liquidBlobFloat1 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(60px, 40px); }
+}
+@keyframes liquidBlobFloat2 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-50px, -30px); }
+}
+
+/* Kartu utama (login, compiler, upgrade) jadi kaca transparan blur */
+html.ui-mode-new .screen {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow:
+        0 8px 32px rgba(15, 23, 42, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Toolbar atas jadi kaca */
+html.ui-mode-new #app-toolbar {
+    background: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Semua modal (riwayat, kontak, pengaturan, buat baru, edit) jadi kaca */
+html.ui-mode-new #history-modal > div,
+html.ui-mode-new #contact-modal > div,
+html.ui-mode-new #settings-modal > div,
+html.ui-mode-new #create-modal > div,
+html.ui-mode-new #edit-modal > div {
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+        0 20px 50px rgba(15, 23, 42, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Popup pilihan bahasa */
+html.ui-mode-new #lang-modal {
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Tombol-tombol kecil (bahasa, settings, pill upgrade) jadi glassy */
+html.ui-mode-new #lang-trigger-btn,
+html.ui-mode-new #settings-trigger-btn {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Box perizinan & input jadi lebih glassy */
+html.ui-mode-new #permissions-box,
+html.ui-mode-new input[type="text"],
+html.ui-mode-new input[type="url"] {
+    background: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+html.ui-mode-new .perm-item {
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Daftar riwayat & item lainnya */
+html.ui-mode-new #history-list > div {
+    background: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(8px);
+}
+
+/* Kartu limit harian & upload ikon */
+html.ui-mode-new .bg-white {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+/* Log Output tetap gelap (kebacaan log), cukup dikasih border kaca halus */
+html.ui-mode-new #log-output {
+    background: rgba(15, 23, 42, 0.85) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Sheen halus di tombol hijau utama, nambah kesan "kaca" */
+html.ui-mode-new .btn-glow {
+    position: relative;
+    overflow: hidden;
+}
+html.ui-mode-new .btn-glow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 55%);
+    pointer-events: none;
+}

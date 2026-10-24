@@ -1,0 +1,69 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Semua nilai ini dikirim dari GitHub Actions lewat parameter -P
+// (lihat .github/workflows/build-apk.yml), dengan default aman untuk build lokal.
+def pAppName      = project.findProperty('appName')      ?: 'Flows App'
+def pAppId        = project.findProperty('appId')        ?: 'com.flowscompiler.generated'
+def pVersionName  = project.findProperty('versionName')  ?: '1.0.0'
+def pVersionCode  = (project.findProperty('versionCode') ?: '1').toString().toInteger()
+def pTargetUrl    = project.findProperty('targetUrl')    ?: 'https://example.com'
+def pLoadLocal    = (project.findProperty('loadLocal')   ?: 'false').toString().toBoolean()
+
+def pStoreFile     = project.findProperty('storeFile')     ?: 'debug.keystore'
+def pStorePassword = project.findProperty('storePassword') ?: 'android'
+def pKeyAlias      = project.findProperty('keyAliasName')  ?: 'androiddebugkey'
+def pKeyPassword   = project.findProperty('keyPasswordVal')?: 'android'
+
+android {
+    namespace 'com.flowscompiler.template'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId pAppId
+        minSdk 21
+        targetSdk 34
+        versionCode pVersionCode
+        versionName pVersionName
+
+        // Nilai ini menimpa resource string bawaan di res/values/strings.xml
+        resValue "string", "app_name", pAppName
+        resValue "string", "target_url", pTargetUrl
+        buildConfigField "boolean", "LOAD_LOCAL", pLoadLocal.toString()
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(pStoreFile)
+            storePassword pStorePassword
+            keyAlias pKeyAlias
+            keyPassword pKeyPassword
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+configurations.all {
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+}
