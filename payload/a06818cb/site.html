@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML to APK Converter Studio & Hub - LongNeyy Tools</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            cyan: '#00f2fe',
+                            violet: '#7928ca',
+                            dark: '#0B0F19',
+                            card: '#111827',
+                            border: '#1F2937'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- JSZip & FileSaver for Client-side ZIP Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #060913;
+            color: #E5E7EB;
+        }
+        .neon-glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.25);
+        }
+        .neon-glow-violet {
+            box-shadow: 0 0 20px rgba(121, 40, 202, 0.25);
+        }
+        .neon-text-gradient {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #7928ca 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0F19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1F2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+        .phone-frame {
+            border: 12px solid #1f293d;
+            border-radius: 36px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#060913] text-gray-100 antialiased selection:bg-cyan-500 selection:text-black">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="border-b border-gray-800 bg-[#0B0F19]/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-violet-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-file-zipper"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-wide flex items-center gap-2">
+                        <span>HTML to APK Studio</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 font-mono">v2.5 ZIP Edition</span>
+                    </h1>
+                    <p class="text-xs text-gray-400">Developed by <span class="text-cyan-400 font-semibold">LongNeyy Tools</span></p>
+                </div>
+            </div>
+
+            <!-- Header Action Quick Links -->
+            <div class="flex items-center space-x-3">
+                <button onclick="openModal('guideModal')" class="hidden sm:flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 transition duration-200">
+                    <i class="fa-solid fa-book-open text-cyan-400"></i> Hướng dẫn 3 bước
+                </button>
+                <a href="https://www.webintoapp.com" target="_blank" rel="noopener" class="text-xs font-semibold px-3 py-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-rocket"></i> WebIntoApp <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP WRAPPER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT/CENTER COLUMN: EDITOR & APP CONFIG (8 COLS) -->
+        <div class="lg:col-span-7 flex flex-col space-y-6">
+
+            <!-- CONFIGURATION CARD -->
+            <div class="bg-[#111827] border border-gray-800 rounded-2xl p-5 shadow-xl">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-800">
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-[#7928ca] fa-sliders text-violet-400"></i> Cấu hình Android App Manifest
+                    </h2>
+                    <span class="text-xs text-gray-400">Thông tin xuất gói .ZIP</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- App Name -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Tên ứng dụng (App Name)</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-mobile-screen absolute left-3 top-2.5 text-gray-500 text-xs"></i>
+                            <input type="text" id="appName" value="LongNeyy APK" class="w-full bg-[#0B0F19] border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-cyan-500 transition" placeholder="VD: Game Hay Offline">
+                        </div>
+                    </div>
+
+                    <!-- Package Name -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Package ID (Độc nhất)</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-box absolute left-3 top-2.5 text-gray-500 text-xs"></i>
+                            <input type="text" id="appPackage" value="com.longneyy.html2apk" class="w-full bg-[#0B0F19] border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-cyan-500 transition font-mono" placeholder="com.mycompany.myapp">
+                        </div>
+                    </div>
+
+                    <!-- Version Code / Name -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Phiên bản (Version)</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-code-branch absolute left-3 top-2.5 text-gray-500 text-xs"></i>
+                            <input type="text" id="appVersion" value="1.0.0" class="w-full bg-[#0B0F19] border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-cyan-500 transition font-mono">
+                        </div>
+                    </div>
+
+                    <!-- App Orientation -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Hướng màn hình (Orientation)</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-arrows-rotate absolute left-3 top-2.5 text-gray-500 text-xs"></i>
+                            <select id="appOrientation" class="w-full bg-[#0B0F19] border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-cyan-500 transition appearance-none">
+                                <option value="portrait">Dọc (Portrait)</option>
+                                <option value="landscape">Ngang (Landscape)</option>
+                                <option value="unspecified">Tự động xoay (Auto)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOURCE CODE EDITOR CARD -->
+            <div class="bg-[#111827] border border-gray-800 rounded-2xl p-5 shadow-xl flex-1 flex flex-col min-h-[420px]">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-gray-800">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-code text-cyan-400"></i>
+                        <h2 class="text-base font-bold text-white">Mã nguồn HTML / CSS / JS</h2>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <!-- File Upload Button -->
+                        <label class="cursor-pointer text-xs bg-gray-800 hover:bg-gray-700 text-cyan-400 border border-gray-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-medium transition">
+                            <i class="fa-solid fa-file-arrow-up"></i>
+                            <span>Chọn file .html</span>
+                            <input type="file" id="htmlFileInput" accept=".html,.htm" class="hidden">
+                        </label>
+
+                        <!-- Load Preset Template -->
+                        <button onclick="loadSampleTemplate()" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-medium transition">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Mẫu Demo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Code Area -->
+                <div class="flex-1 relative font-mono text-xs">
+                    <textarea id="htmlCodeInput" spellcheck="false" class="w-full h-full min-h-[280px] bg-[#070A12] border border-gray-800 rounded-xl p-4 text-gray-200 focus:outline-none focus:border-cyan-500/80 transition resize-none leading-relaxed" placeholder="Dán mã HTML/CSS/JS của bạn vào đây hoặc chọn file .html từ thiết bị..."></textarea>
+                </div>
+
+                <!-- DOWNLOAD ZIP BUTTON & ACTIONS -->
+                <div class="mt-4 pt-3 border-t border-gray-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="text-xs text-gray-400 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i> Tự động tạo cấu trúc Android WebView / Cordova
+                    </div>
+
+                    <button onclick="generateAndDownloadZIP()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-violet-600 text-white font-bold text-sm shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-zipper text-lg"></i>
+                        <span>Tải bộ .ZIP Build APK</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: LIVE SIMULATOR & STEP GUIDES (5 COLS) -->
+        <div class="lg:col-span-5 flex flex-col space-y-6">
+
+            <!-- MOBILE SIMULATOR PREVIEW -->
+            <div class="bg-[#111827] border border-gray-800 rounded-2xl p-5 shadow-xl flex flex-col items-center">
+                <div class="w-full flex items-center justify-between mb-4 pb-3 border-b border-gray-800">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-mobile-retro text-cyan-400"></i> Live Preview Simulator
+                    </h3>
+                    <button onclick="updatePreview()" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-2.5 py-1 rounded border border-gray-700 flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-right"></i> Làm mới
+                    </button>
+                </div>
+
+                <!-- Phone Frame Container -->
+                <div class="w-[280px] sm:w-[310px] h-[520px] bg-black phone-frame relative overflow-hidden flex flex-col">
+                    <!-- Phone Speaker & Camera Notch -->
+                    <div class="w-full h-5 bg-[#1f293d] flex items-center justify-center z-20">
+                        <div class="w-12 h-1.5 bg-gray-700 rounded-full"></div>
+                    </div>
+
+                    <!-- App Content WebView Screen -->
+                    <iframe id="livePreviewFrame" class="w-full flex-1 bg-white border-0" title="Live Preview"></iframe>
+
+                    <!-- Phone Home Bar -->
+                    <div class="w-full h-4 bg-[#1f293d] flex items-center justify-center z-20">
+                        <div class="w-20 h-1 bg-gray-500 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK GUIDE CARD -->
+            <div class="bg-[#111827] border border-gray-800 rounded-2xl p-5 shadow-xl">
+                <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-violet-400"></i> 3 Bước Đóng Gói Thành APK
+                </h3>
+
+                <ol class="space-y-3 text-xs text-gray-300">
+                    <li class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">1</span>
+                        <span>Nhập mã HTML & bấm <strong>"Tải bộ .ZIP Build APK"</strong> để nhận file nén cấu trúc chuẩn.</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">2</span>
+                        <span>Truy cập <strong>WebIntoApp.com</strong> (hoặc ứng dụng Spck Editor / PWABuilder).</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">3</span>
+                        <span>Tải file <strong>.zip</strong> vừa xuất lên hệ thống để đóng gói thành file <strong>.APK</strong> và cài vào điện thoại!</span>
+                    </li>
+                </ol>
+
+                <div class="mt-4 pt-3 border-t border-gray-800 text-center">
+                    <button onclick="openModal('guideModal')" class="text-xs text-cyan-400 hover:underline font-medium inline-flex items-center gap-1">
+                        Xem hướng dẫn chi tiết từng công cụ <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-800 bg-[#0B0F19] py-6 mt-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-500">
+            <p class="mb-1">© 2026 <strong>LongNeyy Tools</strong>. HTML to APK Converter Studio & Hub.</p>
+            <p>Tự động đóng gói mã web thành gói .ZIP tương thích hoàn toàn với WebView, PhoneGap, Cordova & Android Studio.</p>
+        </div>
+    </footer>
+
+    <!-- MODAL: DETAILED INSTRUCTIONS -->
+    <div id="guideModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#111827] border border-gray-800 rounded-2xl max-w-2xl w-full p-6 max-h-[85vh] overflow-y-auto shadow-2xl relative">
+            <button onclick="closeModal('guideModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2 border-b border-gray-800 pb-3">
+                <i class="fa-solid fa-book-open text-cyan-400"></i> Hướng Dẫn Chi Tiết Build APK Từ File .ZIP
+            </h2>
+
+            <div class="space-y-6 text-xs sm:text-sm text-gray-300">
+
+                <!-- Method 1 -->
+                <div class="bg-[#0B0F19] border border-gray-800 p-4 rounded-xl">
+                    <h3 class="font-bold text-cyan-400 text-sm mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-globe"></i> Cách 1: Sử dụng WebIntoApp (Nhanh nhất & Tự động)
+                    </h3>
+                    <ol class="list-decimal list-inside space-y-1.5 text-gray-300">
+                        <li>Sau khi bấm nút **"Tải bộ .ZIP Build APK"**, bạn nhận được file `.zip`.</li>
+                        <li>Mở trang web <a href="https://www.webintoapp.com" target="_blank" class="text-cyan-400 underline">WebIntoApp.com</a>.</li>
+                        <li>Chọn mục **"HTML / JS / CSS to App"** (hoặc chọn Upload File Zip).</li>
+                        <li>Tải file `.zip` vừa tạo lên, đặt tên App và Icon.</li>
+                        <li>Bấm **"Make App"**, chờ 1-2 phút rồi tải file `.apk` trực tiếp về điện thoại cài đặt!</li>
+                    </ol>
+                </div>
+
+                <!-- Method 2 -->
+                <div class="bg-[#0B0F19] border border-gray-800 p-4 rounded-xl">
+                    <h3 class="font-bold text-violet-400 text-sm mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-mobile-screen-button"></i> Cách 2: Tự Build Trực Tiếp Trên Android (Spck Editor)
+                    </h3>
+                    <ol class="list-decimal list-inside space-y-1.5 text-gray-300">
+                        <li>Tải ứng dụng **Spck Editor** trên Google Play Store.</li>
+                        <li>Giải nén file `.zip` vừa xuất.</li>
+                        <li>Mở Spck Editor -> Chọn `Import Zip` hoặc mở thư mục đã giải nén.</li>
+                        <li>Vào mục **Build / Export Options** chọn **Export as APK**.</li>
+                    </ol>
+                </div>
+
+                <!-- Method 3 -->
+                <div class="bg-[#0B0F19] border border-gray-800 p-4 rounded-xl">
+                    <h3 class="font-bold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-laptop-code"></i> Cách 3: Build Native bằng Android Studio
+                    </h3>
+                    <p class="mb-2 text-gray-400">Trong file `.zip` xuất ra đã tích hợp sẵn mã nguồn Native Android (`MainActivity.java` & `AndroidManifest.xml`):</p>
+                    <ol class="list-decimal list-inside space-y-1.5 text-gray-300">
+                        <li>Giải nén file `.zip`.</li>
+                        <li>Nạp thư mục vào dự án Android Studio WebView.</li>
+                        <li>Nội dung web nằm ở thư mục `/assets/` hoặc `/www/index.html`.</li>
+                        <li>Bấm **Build > Build APK(s)** trong Android Studio.</li>
+                    </ol>
+                </div>
+
+            </div>
+
+            <div class="mt-6 text-right">
+                <button onclick="closeModal('guideModal')" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 text-white font-medium text-xs rounded-lg transition">
+                    Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Default Sample App Code Template
+        const defaultSampleHTML = `<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LongNeyy Demo App</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            max-width: 80%;
+        }
+        h1 { color: #00f2fe; margin-bottom: 10px; font-size: 24px; }
+        p { color: #cbd5e1; font-size: 14px; line-height: 1.6; }
+        button {
+            background: linear-gradient(90deg, #00f2fe, #7928ca);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(0,242,254,0.4);
+            transition: transform 0.2s;
+        }
+        button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📱 LongNeyy APK Demo</h1>
+        <p>Ứng dụng HTML của bạn đã sẵn sàng chuyển đổi sang APK!</p>
+        <button onclick="showMessage()">Thử tương tác</button>
+        <p id="msg" style="margin-top: 15px; font-weight: bold; color: #4facfe;"></p>
+    </div>
+
+    <script>
+        function showMessage() {
+            document.getElementById('msg').innerText = "🎉 Ứng dụng chạy mượt mà trên WebView Android!";
+        }
+    <\/script>
+</body>
+</html>`;
+
+        // Initialize editor content
+        const codeInput = document.getElementById('htmlCodeInput');
+        codeInput.value = defaultSampleHTML;
+
+        // Auto update preview on input typing
+        let timer;
+        codeInput.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(updatePreview, 500);
+        });
+
+        // Initialize preview on page load
+        window.addEventListener('load', () => {
+            updatePreview();
+        });
+
+        // Update Live Preview Iframe
+        function updatePreview() {
+            const iframe = document.getElementById('livePreviewFrame');
+            const code = codeInput.value;
+            const blob = new Blob([code], { type: 'text/html' });
+            iframe.src = URL.createObjectURL(blob);
+        }
+
+        // Load Preset Template
+        function loadSampleTemplate() {
+            codeInput.value = defaultSampleHTML;
+            updatePreview();
+            showToast('Đã nạp mẫu HTML Demo!', 'success');
+        }
+
+        // Handle Uploading .html file
+        document.getElementById('htmlFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                codeInput.value = evt.target.result;
+                updatePreview();
+                showToast(`Đã đọc thành công file "${file.name}"`, 'success');
+            };
+            reader.readAsText(file);
+        });
+
+        // GENERATE AND DOWNLOAD ZIP BUNDLE
+        async function generateAndDownloadZIP() {
+            const userHTML = codeInput.value.trim();
+            if (!userHTML) {
+                showToast('Vui lòng nhập hoặc nạp mã HTML trước khi xuất ZIP!', 'error');
+                return;
+            }
+
+            const appName = document.getElementById('appName').value.trim() || 'LongNeyy APK';
+            const appPackage = document.getElementById('appPackage').value.trim() || 'com.longneyy.html2apk';
+            const appVersion = document.getElementById('appVersion').value.trim() || '1.0.0';
+            const appOrientation = document.getElementById('appOrientation').value;
+
+            showToast('Đang tạo và nén bộ cấu trúc .ZIP...', 'info');
+
+            try {
+                const zip = new JSZip();
+
+                // 1. WWW Directory -> index.html
+                const wwwFolder = zip.folder("www");
+                wwwFolder.file("index.html", userHTML);
+
+                // Root index.html fallback
+                zip.file("index.html", userHTML);
+
+                // 2. Cordova / PhoneGap Config.xml
+                const configXmlContent = `<?xml version='1.0' encoding='utf-8'?>
+<widget id="${appPackage}" version="${appVersion}" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>${appName}</name>
+    <description>
+        Created with HTML to APK Converter Studio (LongNeyy Tools)
+    </description>
+    <author email="support@longneyy.tools" href="https://longneyy.tools">
+        LongNeyy Tools
+    </author>
+    <content src="www/index.html" />
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <preference name="Orientation" value="${appOrientation}" />
+    <preference name="Fullscreen" value="false" />
+    <preference name="KeepRunning" value="true" />
+</widget>`;
+                zip.file("config.xml", configXmlContent);
+
+                // 3. Native AndroidManifest.xml
+                const manifestContent = `<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="${appPackage}"
+    android:versionCode="1"
+    android:versionName="${appVersion}">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:label="${appName}"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:screenOrientation="${appOrientation}"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>`;
+                zip.file("AndroidManifest.xml", manifestContent);
+
+                // 4. Native MainActivity.java Code Structure
+                const mainActivityContent = `package ${appPackage};
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
+public class MainActivity extends Activity {
+    private WebView mWebView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        mWebView = new WebView(this);
+        WebSettings webSettings = mWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setDatabaseEnabled(true);
+        
+        mWebView.setWebViewClient(new WebViewClient());
+        mWebView.loadUrl("file:///android_asset/www/index.html");
+        
+        setContentView(mWebView);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mWebView.canGoBack()) {
+            mWebView.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+}`;
+                zip.file("MainActivity.java", mainActivityContent);
+
+                // 5. Instruction Manual README.txt
+                const readmeContent = `========================================================================
+   HƯỚNG DẪN BUILD APK TỪ FILE .ZIP BỞI LONGNEYY TOOLS
+========================================================================
+
+Tên ứng dụng : ${appName}
+Package ID   : ${appPackage}
+Phiên bản    : ${appVersion}
+Ngày tạo     : ${new Date().toLocaleString('vi-VN')}
+
+CÁC BƯỚC CHUYỂN BỘ .ZIP NÀY THÀNH FILE .APK LÊN ĐIỆN THOẠI:
+
+------------------------------------------------------------------------
+CÁCH 1: NẠP VÀO WEB INTO APP (KHUYÊN DÙNG - KHÔNG CẦN CÀI PHẦN MỀM)
+------------------------------------------------------------------------
+1. Truy cập https://www.webintoapp.com
+2. Chọn "Create App" -> Chọn "HTML / JS / CSS File"
+3. Tải trực tiếp file .ZIP này lên.
+4. Nhập tên ứng dụng "${appName}" và chọn Icon mong muốn.
+5. Bấm "Make App" và tải file .APK về điện thoại để cài đặt!
+
+------------------------------------------------------------------------
+CÁCH 2: DÙNG SPCK EDITOR / PHONEGAP / CORDOVA TRÊN ĐIỆN THOẠI
+------------------------------------------------------------------------
+1. Tải Spck Editor trên Google Play Store.
+2. Nạp/Giải nén file .zip này vào Spck Editor.
+3. Chọn tùy chọn "Export / Build APK".
+
+Cảm ơn bạn đã sử dụng HTML to APK Converter Studio - LongNeyy Tools!
+========================================================================`;
+                zip.file("README_HUONG_DAN_BUILD_APK.txt", readmeContent);
+
+                // Generate and download zip file
+                const zipBlob = await zip.generateAsync({ type: "blob" });
+                const sanitizedFileName = appName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                saveAs(zipBlob, `${sanitizedFileName}_apk_project.zip`);
+
+                showToast('Tạo file .ZIP thành công! Đã bắt đầu tải xuống.', 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi trong quá trình nén file .ZIP: ' + err.message, 'error');
+            }
+        }
+
+        // Modal Helpers
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Custom Toast Notifications
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+
+            let bgClass = 'bg-gray-800 border-gray-700 text-white';
+            let icon = 'fa-circle-info text-cyan-400';
+
+            if (type === 'success') {
+                bgClass = 'bg-emerald-950/90 border-emerald-700 text-emerald-200';
+                icon = 'fa-circle-check text-emerald-400';
+            } else if (type === 'error') {
+                bgClass = 'bg-rose-950/90 border-rose-700 text-rose-200';
+                icon = 'fa-circle-exclamation text-rose-400';
+            }
+
+            toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl border text-xs font-medium shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ${bgClass}`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
+
+            container.appendChild(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            // Animate out and remove
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
