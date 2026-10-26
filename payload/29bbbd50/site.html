@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dead Station: Last Signal</title>
+<style>
+  :root{color-scheme:dark;--green:#9dffcb;--red:#ff5b67;--panel:#101820}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#172a35,#05080c 70%);color:#e8f3f5;font:16px/1.55 system-ui,Arial,sans-serif}
+  main{width:min(760px,94vw);margin:0 auto;padding:24px 0 42px}
+  .top{text-align:center;border:1px solid #35515d;background:#081117dd;padding:22px;border-radius:14px;box-shadow:0 0 30px #0008}
+  .eyebrow{letter-spacing:.28em;font-size:.72rem;color:var(--green)}
+  h1{font-size:clamp(2rem,8vw,3.5rem);line-height:1.02;margin:10px 0;text-shadow:0 0 18px #63e5c466}
+  .subtitle{color:#9cb2bd}
+  .screen{margin-top:16px;padding:20px;border:1px solid #2d434e;border-radius:14px;background:#091117eF}
+  .status{display:flex;gap:10px;flex-wrap:wrap;color:#a8c1ca;font-size:.82rem}
+  .pill{padding:5px 10px;border:1px solid #2b4753;border-radius:99px}
+  .scene{min-height:190px;margin:18px 0;padding:18px;border-radius:10px;background:linear-gradient(130deg,#15232c,#080d12);border-left:3px solid var(--green)}
+  .scene h2{margin:0 0 8px;color:var(--green)}
+  .scene p{margin:.55em 0}
+  .choices{display:grid;gap:10px}
+  button{font:inherit;text-align:left;padding:13px 15px;border-radius:9px;border:1px solid #42606b;background:#14232c;color:#edf9fc;cursor:pointer;transition:.15s}
+  button:hover,button:focus-visible{outline:2px solid var(--green);background:#1d3540}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .utility{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .utility button{font-size:.9rem;background:#0d171d}
+  .note{font-size:.82rem;color:#8ea6b0;margin-top:18px}
+  .log{color:#b7cbd2;font-size:.9rem;white-space:pre-line}
+  .glow{color:var(--red)}
+  footer{text-align:center;color:#617a84;font-size:.8rem;margin-top:16px}
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div class="eyebrow">SURVIVAL • MYSTERY • TEXT ADVENTURE</div>
+    <h1>DEAD STATION<br><span style="color:var(--green)">LAST SIGNAL</span></h1>
+    <div class="subtitle">Sinyal terakhir. Satu stasiun. Pilihanmu menentukan akhir cerita.</div>
+  </header>
+
+  <section class="screen" aria-live="polite">
+    <div class="status">
+      <span class="pill">LOKASI: <b id="location">Docking Bay</b></span>
+      <span class="pill">DAYA SENTER: <b id="battery">3</b></span>
+      <span class="pill">ITEM: <b id="item">Tidak ada</b></span>
+    </div>
+    <article class="scene">
+      <h2 id="sceneTitle">Sinyal Masuk</h2>
+      <div id="story">
+        <p>27 Oktober. Kapalmu merapat ke stasiun riset Erebos yang telah hilang kontak selama 19 hari.</p>
+        <p>Radio berdesis: <em>“...jangan jawab sinyal kedua...”</em> Pintu dok terbuka. Lorong di depan gelap.</p>
+      </div>
+    </article>
+    <div class="choices" id="choices">
+      <button onclick="choose('hall')">1. Masuk ke lorong utama</button>
+      <button onclick="choose('radio')">2. Periksa radio darurat</button>
+      <button onclick="choose('leave')">3. Batalkan misi dan kembali ke kapal</button>
+    </div>
+    <div class="utility">
+      <button onclick="restart()">↻ Mulai ulang</button>
+      <button onclick="toggleLog()">▤ Catatan misi</button>
+    </div>
+    <div class="log" id="log" hidden></div>
+    <p class="note">Tips: Baca petunjuk dengan teliti. Ini adalah game cerita mini offline—semua berjalan di browser.</p>
+  </section>
+  <footer>DEAD STATION: LAST SIGNAL · Fan-made mini text game</footer>
+</main>
+<script>
+const initial = {
+  location:"Docking Bay", battery:3, key:false, backup:false, heard:false,
+  scene:"start", log:["Misi dimulai. Sinyal tak dikenal terdeteksi."]
+};
+let s={...initial,log:[...initial.log]};
+const $=id=>document.getElementById(id);
+function update(){
+  $("location").textContent=s.location;
+  $("battery").textContent=s.battery;
+  $("item").textContent=s.key?"Kartu akses":s.backup?"Rekaman radio":"Tidak ada";
+}
+function show(title,html,buttons){
+  $("sceneTitle").textContent=title;
+  $("story").innerHTML=html;
+  $("choices").innerHTML="";
+  buttons.forEach(([label,fn])=>{
+    const b=document.createElement("button"); b.textContent=label;b.onclick=fn;$("choices").appendChild(b);
+  });
+  update();
+}
+function note(t){s.log.push(t)}
+function choose(action){
+ if(action==="leave"){
+  s.location="Kapal";s.scene="safe";note("Kamu memilih pergi.");
+  show("Misi Dibatalkan","<p>Kamu kembali ke kapal. Dari balik kaca, satu jendela stasiun menyala.</p><p class='glow'>Sebuah pesan muncul di layar: “KAMI TAHU KAU DI LUAR.”</p><p><b>AKHIR: Sinyal Mengikutimu</b></p>",[["Main lagi",restart]]);
+ }else if(action==="radio"){
+  s.location="Ruang Komunikasi";s.heard=true;s.backup=true;note("Radio menyimpan rekaman darurat.");
+  show("Rekaman Darurat","<p>Suara teknisi bergetar: “Sinyal kedua meniru suara manusia. Jangan buka pintu lab.”</p><p>Kamu menyimpan rekaman radio. Dari lorong terdengar bunyi logam bergeser.</p>",[["Menuju lorong utama",()=>hall()],["Kembali ke dok",()=>dock()]]);
+ }else if(action==="hall") hall();
+ else if(action==="lab") lab();
+ else if(action==="power") power();
+ else if(action==="door") door();
+ else if(action==="open") ending(true);
+ else if(action==="retreat") ending(false);
+}
+function dock(){
+ s.location="Docking Bay";
+ show("Docking Bay","<p>Kapal masih menunggu. Lorong utama terbuka di sebelah kanan.</p>",[["Masuk ke lorong",()=>hall()],["Pergi dari stasiun",()=>choose("leave")]]);
+}
+function hall(){
+ s.location="Lorong Utama";s.battery=Math.max(0,s.battery-1);note("Menjelajahi lorong utama.");
+ show("Lorong Utama","<p>Lampu merah darurat menyapu dinding. Di lantai ada kartu akses. Pintu Lab 03 berkedip di ujung lorong.</p>"+(s.battery===0?"<p class='glow'>Senter padam.</p>":"<p>Kamu masih punya daya senter.</p>"),[
+  ["Ambil kartu akses",()=>{s.key=true;note("Kartu akses ditemukan.");show("Kartu Akses","<p>Kartu ini membuka panel Lab 03. Dari speaker terdengar bisikan statis.</p>",[["Periksa Lab 03",()=>lab()],["Kembali ke dok",()=>dock()]])}],
+  ["Periksa panel listrik",()=>power()],
+  ["Periksa pintu Lab 03",()=>door()],
+  ["Kembali ke dok",()=>dock()]
+ ]);
+}
+function power(){
+ s.location="Ruang Generator";note("Memeriksa generator.");
+ show("Ruang Generator","<p>Generator masih hidup, tapi panel meminta cadangan daya. Kamu mengalihkan daya darurat ke sistem komunikasi.</p><p>Di monitor muncul koordinat sumber sinyal: <b>Lab 03</b>.</p>",[["Kembali ke lorong",()=>hall()],["Periksa pintu Lab 03",()=>door()]]);
+}
+function door(){
+ s.location="Pintu Lab 03";
+ if(!s.key){
+  show("Akses Ditolak","<p>Panel pintu menyala merah. <b>KARTU AKSES DIPERLUKAN.</b> Ada bunyi ketukan dari sisi dalam.</p>",[["Cari kartu di lorong",()=>hall()],["Kembali ke dok",()=>dock()]]);
+ }else{
+  show("Pintu Lab 03","<p>Kartu akses diterima. Dari balik pintu, radio mengulang suaramu sendiri—padahal kamu belum berbicara.</p>",[
+   ["Buka pintu",()=>choose("open")],
+   ["Jangan ambil risiko",()=>choose("retreat")]
+  ]);
+ }
+}
+function lab(){
+ if(!s.key){door();return}
+ s.location="Lab 03";
+ show("Lab 03","<p>Di dalam lab, pemancar berdenyut biru. Log terakhir menyatakan sinyal itu berasal dari bawah stasiun—bukan dari luar angkasa.</p>",[["Lihat pemancar",()=>ending(true)],["Tutup pintu dan mundur",()=>ending(false)]]);
+}
+function ending(brave){
+ s.location="Lab 03";note(brave?"Mendekati sumber sinyal.":"Memilih mundur.");
+ if(brave){
+  show("AKHIR: Sinyal Terjawab","<p>Kamu mematikan pemancar. Keheningan menyelimuti stasiun.</p><p>Radio menyala sekali lagi: <em>“Terima kasih… sekarang giliranmu mengirim.”</em></p><p class='glow'><b>TRANSMISI BARU TERDETEKSI.</b></p><p><b>AKHIR: Pesan Berikutnya</b></p>",[["Main lagi",restart]]);
+ }else{
+  show("AKHIR: Protokol Karantina","<p>Kamu mengunci Lab 03 dan mengirim peringatan ke orbit. Stasiun kembali gelap.</p><p>Rekaman radio berakhir dengan tiga ketukan pelan.</p><p><b>AKHIR: Jangan Buka Pintu</b></p>",[["Main lagi",restart]]);
+ }
+}
+function restart(){
+ s={...initial,log:[...initial.log]};
+ show("Sinyal Masuk","<p>27 Oktober. Kapalmu merapat ke stasiun riset Erebos yang telah hilang kontak selama 19 hari.</p><p>Radio berdesis: <em>“...jangan jawab sinyal kedua...”</em> Pintu dok terbuka. Lorong di depan gelap.</p>",[
+ ["Masuk ke lorong utama",()=>hall()],
+ ["Periksa radio darurat",()=>choose("radio")],
+ ["Batalkan misi dan kembali ke kapal",()=>choose("leave")]
+ ]);
+}
+function toggleLog(){
+ const el=$("log");el.hidden=!el.hidden;
+ el.textContent=s.log.map((x,i)=>(i+1)+". "+x).join("\n");
+}
+update();
+</script>
+</body>
+</html>
