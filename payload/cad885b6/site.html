@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Status Wi-Fi / Koneksi</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        h2 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 20px;
+        }
+        #status {
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .online {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .offline {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Status Koneksi Anda</h2>
+        <div id="status">Mengecek...</div>
+    </div>
+
+    <script>
+        const statusDisplay = document.getElementById("status");
+
+        function updateStatus() {
+            if (navigator.onLine) {
+                statusDisplay.textContent = "Online";
+                statusDisplay.className = "online";
+            } else {
+                statusDisplay.textContent = "Offline";
+                statusDisplay.className = "offline";
+            }
+        }
+
+        // Cek status saat halaman pertama kali dimuat
+        updateStatus();
+
+        // Event listener saat koneksi terputus
+        window.addEventListener("offline", () => {
+            updateStatus();
+        });
+
+        // Event listener saat koneksi tersambung kembali
+        window.addEventListener("online", () => {
+            updateStatus();
+        });
+    </script>
+
+</body>
+</html>
