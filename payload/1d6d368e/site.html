@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05090d">
+<title>BOURNIUS BLACKHAT AI</title>
+<style>
+:root{--bg:#05090d;--panel:#0b151d;--line:#123849;--cyan:#00e5ff;--green:#54ff9f;--muted:#8ba4b2}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0,#092331 0,transparent 35%),var(--bg);color:#e7faff;font:15px system-ui,Arial}
+header{padding:22px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-weight:900;letter-spacing:2px;color:var(--cyan);font-size:20px;text-shadow:0 0 14px #00d9ff66}
+.badge{border:1px solid #1d6247;color:var(--green);padding:6px 10px;border-radius:20px;font-size:11px}
+main{max-width:1050px;margin:22px auto;padding:0 14px;display:grid;grid-template-columns:1fr 300px;gap:16px}
+.card{background:linear-gradient(145deg,#0c1821,#071017);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 35px #0008}
+.card h2{font-size:14px;letter-spacing:1px;color:var(--cyan);margin:0;padding:16px;border-bottom:1px solid var(--line)}
+.chat{height:430px;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:88%;padding:11px 13px;border-radius:12px;line-height:1.45;white-space:pre-wrap}
+.bot{background:#102630;border:1px solid #17465a;align-self:flex-start}
+.user{background:#073c39;border:1px solid #14705e;align-self:flex-end}
+.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+input{min-width:0;flex:1;background:#050c12;color:white;border:1px solid #1a4050;border-radius:9px;padding:12px;outline:none}
+button{background:#00cfe8;color:#001116;border:0;border-radius:9px;padding:11px 15px;font-weight:800;cursor:pointer}
+button:hover{filter:brightness(1.12)}.side{padding:15px}.stat{padding:13px;margin:9px 0;background:#08131a;border:1px solid #123849;border-radius:10px}
+.stat small{display:block;color:var(--muted);margin-bottom:5px}.stat strong{color:var(--green);font-size:18px}
+label{display:block;color:var(--muted);font-size:12px;margin:14px 0 6px}
+input.full{width:100%}.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:14px}
+.status{color:var(--green);font-size:12px}
+footer{text-align:center;color:#6f8996;font-size:11px;padding:20px}
+@media(max-width:760px){main{grid-template-columns:1fr}.chat{height:52vh}header{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">𖤍 BOURNIUS // BLACKHAT AI</div>
+  <div class="badge">● LOCAL DEMO MODE</div>
+</header>
+<main>
+<section class="card">
+  <h2>🤖 AI CONVERSATION TERMINAL</h2>
+  <div class="chat" id="chat" aria-live="polite">
+    <div class="msg bot">BOURNIUS AI siap.\n\nIni adalah demo chatbot lokal. Ketik pesan untuk mencoba balasan otomatis. Integrasi WhatsApp belum aktif sampai backend dan WhatsApp Cloud API dikonfigurasi.</div>
+  </div>
+  <form class="composer" id="form">
+    <input id="message" autocomplete="off" placeholder="Ketik pesan..." aria-label="Pesan">
+    <button type="submit">KIRIM ➤</button>
+  </form>
+</section>
+<aside class="card">
+  <h2>📡 SYSTEM MONITOR</h2>
+  <div class="side">
+    <div class="stat"><small>Chat interface</small><strong>ONLINE</strong></div>
+    <div class="stat"><small>Mode koneksi</small><strong>LOCAL DEMO</strong></div>
+    <div class="stat"><small>WhatsApp API</small><strong style="color:#ffc56b">NOT CONNECTED</strong></div>
+    <label for="wa">Nomor WhatsApp Business (format internasional)</label>
+    <input class="full" id="wa" placeholder="Contoh: 62812xxxxxxx" inputmode="tel">
+    <p class="note">Nomor ini hanya disimpan sementara di halaman demo dan belum menghubungkan WhatsApp. Jangan masukkan token API atau kata sandi di halaman HTML.</p>
+    <p class="status">● Antarmuka berjalan di perangkat ini</p>
+  </div>
+</aside>
+</main>
+<footer>BOURNIUS BLACKHAT AI · Demo aman · Tidak mengakses perangkat atau jaringan tanpa izin</footer>
+<script>
+const chat=document.getElementById('chat');
+const form=document.getElementById('form');
+const input=document.getElementById('message');
+function add(text,kind){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;chat.appendChild(el);chat.scrollTop=chat.scrollHeight}
+function reply(text){
+ const t=text.toLowerCase();
+ if(t.includes('whatsapp')) return 'Integrasi WhatsApp memerlukan backend HTTPS, Meta WhatsApp Cloud API, access token yang disimpan aman di server, dan webhook untuk pesan masuk.';
+ if(t.includes('server')||t.includes('jaringan')) return 'Panel ini belum terhubung ke server. Untuk monitoring server milik Anda, siapkan backend dengan autentikasi, izin akses, dan endpoint status yang aman.';
+ if(t.includes('bantuan')||t.includes('help')) return 'Saya dapat membantu menjawab pertanyaan, menyusun FAQ, dan menyiapkan rancangan integrasi chatbot yang sah.';
+ return 'Pesan diterima. Ini balasan otomatis demo BOURNIUS AI. Hubungkan model AI melalui backend untuk menghasilkan jawaban dinamis.';
+}
+form.addEventListener('submit',e=>{e.preventDefault();const value=input.value.trim();if(!value)return;add(value,'user');input.value='';setTimeout(()=>add(reply(value),'bot'),350)});
+</script>
+</body>
+</html>
